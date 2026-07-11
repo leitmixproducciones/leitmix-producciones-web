@@ -7,17 +7,18 @@
 
 body{
     background:#080808;
-    color:#fff;
+    color:white;
 }
 
 header{
     position:sticky;
     top:0;
+    width:100%;
     display:flex;
     justify-content:space-between;
     align-items:center;
     padding:15px 30px;
-    background:rgba(0,0,0,.95);
+    background:#000;
     border-bottom:2px solid #f5b400;
     z-index:999;
 }
@@ -25,7 +26,6 @@ header{
 .logo{
     font-size:28px;
     font-weight:800;
-    color:#fff;
 }
 
 .logo span{
@@ -38,10 +38,9 @@ nav{
 }
 
 nav a{
-    color:#fff;
+    color:white;
     text-decoration:none;
     font-weight:600;
-    transition:.3s;
 }
 
 nav a:hover{
@@ -58,27 +57,25 @@ nav a:hover{
     align-items:center;
     text-align:center;
     background:
-    linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.85)),
+    linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.85)),
     url("assets/img/leitmix-hero.png");
-    background-size:contain;
-    background-repeat:no-repeat;
+
+    background-size:cover;
     background-position:center;
-    background-color:#080808;
+    background-repeat:no-repeat;
 }
 
 .hero-content{
-    max-width:700px;
-    padding:30px;
-    background:rgba(0,0,0,.45);
+    max-width:750px;
+    padding:35px;
+    background:rgba(0,0,0,.55);
     border-radius:25px;
-    box-shadow:0 0 30px rgba(245,180,0,.25);
 }
 
 .hero h1{
     font-size:48px;
     font-weight:800;
     margin-bottom:20px;
-    text-shadow:0 0 15px #000;
 }
 
 .hero p{
@@ -96,11 +93,6 @@ nav a:hover{
     border-radius:40px;
     text-decoration:none;
     font-weight:bold;
-    transition:.3s;
-}
-
-.boton:hover{
-    transform:scale(1.05);
 }
 
 
@@ -112,148 +104,4 @@ section{
 
 h2{
     text-align:center;
-    color:#f5b400;
-    font-size:32px;
-    margin-bottom:40px;
-}
-
-
-/* TARJETAS */
-
-.cards{
-    display:flex;
-    justify-content:center;
-    gap:25px;
-    flex-wrap:wrap;
-}
-
-.card{
-    width:300px;
-    background:#141414;
-    border:1px solid #222;
-    border-radius:20px;
-    padding:25px;
-    text-align:center;
-    transition:.3s;
-}
-
-.card:hover{
-    transform:translateY(-8px);
-    border-color:#f5b400;
-}
-
-
-/* GALERIA */
-
-.galeria{
-    display:flex;
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:20px;
-}
-
-.galeria img{
-    width:300px;
-    border-radius:15px;
-    transition:.3s;
-}
-
-.galeria img:hover{
-    transform:scale(1.05);
-}
-
-
-/* VIDEO */
-
-video{
-    width:90%;
-    max-width:700px;
-    height:auto;
-    display:block;
-    margin:40px auto;
-    border-radius:20px;
-}
-
-
-/* WHATSAPP */
-
-.whatsapp{
-    position:fixed;
-    right:20px;
-    bottom:20px;
-    background:#25D366;
-    color:white;
-    padding:15px 22px;
-    border-radius:50px;
-    text-decoration:none;
-    font-weight:bold;
-    font-size:16px;
-    z-index:1000;
-    box-shadow:0 5px 15px rgba(0,0,0,.4);
-    transition:.3s;
-}
-
-.whatsapp:hover{
-    transform:scale(1.1);
-}
-
-
-/* FOOTER */
-
-footer{
-    background:#000;
-    text-align:center;
-    padding:30px;
-}
-
-
-/* CELULAR */
-
-@media(max-width:768px){
-
-header{
-    flex-direction:column;
-    gap:10px;
-    padding:15px;
-}
-
-.logo{
-    font-size:26px;
-}
-
-nav{
-    gap:12px;
-    overflow-x:auto;
-    width:100%;
-}
-
-nav a{
-    white-space:nowrap;
-    font-size:15px;
-}
-
-.hero{
-    min-height:80vh;
-}
-
-.hero h1{
-    font-size:34px;
-}
-
-.hero p{
-    font-size:18px;
-}
-
-.hero-content{
-    padding:20px;
-}
-
-.galeria img{
-    width:90%;
-}
-
-.card{
-    width:90%;
-}
-
-}
+    color:#
