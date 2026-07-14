@@ -1,0 +1,14 @@
+media: assets/img
+
+content:
+  - name: galeria
+    label: Galería
+    type: collection
+    path: assets/img
+    fields:
+      - name: title
+        label: Título
+        type: string
+      - name: image
+        label: Imagen
+        type: image
