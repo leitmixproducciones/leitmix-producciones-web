@@ -1,7 +1,6 @@
-
 media:
   input: assets/img
-  output: /assets/img:
+  output: /assets/img
   
   - name: galeria
     label: Galería
