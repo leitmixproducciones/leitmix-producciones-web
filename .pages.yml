@@ -1,8 +1,8 @@
-media:
-  input: assets
-  output: /assets
 
-content:
+media:
+  input: assets/img
+  output: /assets/img:
+  
   - name: galeria
     label: Galería
     type: collection
