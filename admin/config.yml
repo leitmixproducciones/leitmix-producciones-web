@@ -1,0 +1,16 @@
+backend:
+  name: github
+  repo: leitmixproducciones/leitmix-producciones-web
+  branch: master
+
+media_folder: "assets/img"
+public_folder: "/assets/img"
+
+collections:
+  - name: "galeria"
+    label: "Galería"
+    folder: "assets/img"
+    create: true
+    fields:
+      - {label: "Imagen", name: "image", widget: "image"}
+      - {label: "Título", name: "title", widget: "string"}
