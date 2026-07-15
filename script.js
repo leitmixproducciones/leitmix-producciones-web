@@ -2,43 +2,36 @@ console.log("Leitmix Producciones cargado");
 
 async function cargarGaleria(){
 
-const galeria = document.getElementById("galeria-dinamica");
+    const galeria = document.getElementById("galeria-dinamica");
 
-if(!galeria) return;
+    if(!galeria) return;
 
-try{
+    try {
 
-const respuesta = await fetch("content/galeria.json");
+        const respuesta = await fetch("./content/galeria.json");
 
-if(!respuesta.ok){
-throw new Error("No se encontró galeria.json");
-}
+        const imagenes = await respuesta.json();
 
-const imagenes = await respuesta.json();
+        galeria.innerHTML = "";
 
-galeria.innerHTML="";
+        imagenes.forEach(item => {
 
+            galeria.innerHTML += `
+                <div class="foto-galeria">
+                    <img src="${item.image}" alt="${item.title}">
+                    <p>${item.title}</p>
+                </div>
+            `;
 
-imagenes.forEach(imagen=>{
+        });
 
-galeria.innerHTML += `
+    } catch(error){
 
-<img src="${imagen.image}" alt="${imagen.title}">
+        console.log(error);
 
-`;
+        galeria.innerHTML = "Error cargando galería";
 
-});
-
-
-}catch(error){
-
-console.log(error);
-
-galeria.innerHTML = `
-<p>No se pudieron cargar las imágenes.</p>
-`;
-
-}
+    }
 
 }
 
