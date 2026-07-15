@@ -6,7 +6,7 @@ content:
   - name: galeria
     label: Galería
     type: collection
-    path: assets/img
+    path: content/galeria
     fields:
       - name: title
         label: Título
@@ -18,7 +18,7 @@ content:
   - name: videos
     label: Videos
     type: collection
-    path: assets/video
+    path: content/videos
     fields:
       - name: title
         label: Título
