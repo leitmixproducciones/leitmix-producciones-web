@@ -1,53 +1,29 @@
 console.log("Leitmix Producciones web cargada");
 
-async function cargarGaleria(){
+fetch("content/galeria.json")
+.then(res => res.json())
+.then(data => {
 
-const contenedor = document.getElementById("galeria-dinamica");
+const galeria = document.getElementById("galeria-dinamica");
 
-if(!contenedor) return;
+if(!galeria) return;
 
-try{
+galeria.innerHTML = "";
 
-const respuesta = await fetch(
-"https://api.github.com/repos/leitmixproducciones/leitmix-producciones-web/contents/content/galeria"
-);
+data.forEach(item => {
 
-const archivos = await respuesta.json();
-
-contenedor.innerHTML = "";
-
-for (const archivo of archivos){
-
-if(archivo.name.endsWith(".md")){
-
-const md = await fetch(archivo.download_url);
-const texto = await md.text();
-
-const titulo = texto.match(/title:\s*(.*)/);
-const imagen = texto.match(/image:\s*(.*)/);
-
-if(imagen){
-
-contenedor.innerHTML += `
-
-<img src="${imagen[1].trim()}" 
-alt="${titulo ? titulo[1] : 'Evento Leitmix'}">
-
+galeria.innerHTML += `
+<img src="${item.image}" alt="${item.title}">
 `;
 
-}
+});
 
-}
-
-}
-
-}catch(error){
+})
+.catch(error => {
 
 console.log(error);
-contenedor.innerHTML="<p>Error cargando galería</p>";
 
-}
+document.getElementById("galeria-dinamica").innerHTML =
+"Error cargando galería";
 
-}
-
-cargarGaleria();
+});
