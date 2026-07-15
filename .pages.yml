@@ -3,17 +3,17 @@ media:
   output: /assets/img
 
 content:
-  - name: galeria
-    label: Galería
-    type: collection
-    path: content/galeria
-    fields:
-      - name: title
-        label: Título
-        type: string
-      - name: image
-        label: Imagen
-        type: image
+ - name: galeria
+  label: Galería
+  type: collection
+  path: content/galeria
+  fields:
+    - name: title
+      label: Título
+      type: string
+    - name: image
+      label: Imagen
+      type: file 
 
   - name: videos
     label: Videos
