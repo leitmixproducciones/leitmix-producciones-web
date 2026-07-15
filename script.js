@@ -2,29 +2,31 @@ async function cargarGaleria(){
 
     const galeria = document.getElementById("galeria-dinamica");
 
-    if(!galeria) return;
+    if (!galeria) return;
+
+    galeria.innerHTML = "";
 
     try {
 
-        const respuesta = await fetch("./content/galeria.json");
-        const imagenes = await respuesta.json();
+        const respuesta = await fetch("./content/galeria.json?v=2");
 
-        galeria.innerHTML = "";
+        const imagenes = await respuesta.json();
 
         imagenes.forEach(item => {
 
-            galeria.innerHTML += `
-                <div class="foto-galeria">
-                    <img src="${item.image}" alt="${item.title}">
-                    <p>${item.title}</p>
-                </div>
-            `;
+            const img = document.createElement("img");
+            img.src = item.image;
+            img.alt = item.title;
+
+            galeria.appendChild(img);
 
         });
 
     } catch(error){
 
-        galeria.innerHTML = "<p>Error cargando galería</p>";
+        galeria.innerHTML = "Error cargando galería";
+
+        console.log(error);
 
     }
 
