@@ -1,5 +1,3 @@
-console.log("Leitmix Producciones cargado");
-
 async function cargarGaleria(){
 
     const galeria = document.getElementById("galeria-dinamica");
@@ -9,7 +7,6 @@ async function cargarGaleria(){
     try {
 
         const respuesta = await fetch("./content/galeria.json");
-
         const imagenes = await respuesta.json();
 
         galeria.innerHTML = "";
@@ -27,13 +24,10 @@ async function cargarGaleria(){
 
     } catch(error){
 
-        console.log(error);
-
-        galeria.innerHTML = "Error cargando galería";
+        galeria.innerHTML = "<p>Error cargando galería</p>";
 
     }
 
 }
-
 
 cargarGaleria();
