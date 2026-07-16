@@ -147,3 +147,25 @@ h2{
   }
 
     }
+
+* {
+  max-width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+section {
+  width: 100%;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+.cards {
+  width: 100%;
+}
