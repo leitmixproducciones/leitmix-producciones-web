@@ -105,3 +105,17 @@ section{
 h2{
     text-align:center;
     color:#
+
+    #videos-dinamicos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+}
+
+#videos-dinamicos video {
+  width: 90%;
+  max-width: 800px;
+  height: auto;
+  border-radius: 15px;
+}
