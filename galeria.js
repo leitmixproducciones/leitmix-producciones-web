@@ -1,10 +1,4 @@
-import { db } from "./firebase.js";
-
-import {
-collection,
-getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+import { supabase } from "./firebase.js";
 
 async function cargarGaleria(){
 
@@ -14,24 +8,29 @@ if(!galeria) return;
 
 galeria.innerHTML = "";
 
+const { data, error } = await supabase
+.from("galeria")
+.select("*")
+.order("created_at", { ascending: false });
 
-const fotos = await getDocs(collection(db,"galeria"));
+
+if(error){
+console.log(error);
+return;
+}
 
 
-fotos.forEach((foto)=>{
-
-const datos = foto.data();
+data.forEach((foto)=>{
 
 const img = document.createElement("img");
 
-img.src = datos.url;
+img.src = foto.imagen;
 
-img.alt = datos.titulo || "Leitmix Producciones";
+img.alt = foto.titulo || "Leitmix Producciones";
 
 galeria.appendChild(img);
 
 });
-
 
 }
 
