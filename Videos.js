@@ -1,7 +1,6 @@
-
+import { supabase } from "./firebase.js";
 
 async function cargarVideos() {
-
 
   const contenedor = document.getElementById("videos-dinamicos");
 
@@ -9,17 +8,19 @@ async function cargarVideos() {
 
   contenedor.innerHTML = "";
 
-const videos = [
-  {
-    titulo: "Leitmix Video",
-    url: "assets/video/leitmix-video.mp4"
-  },
-  {
-    titulo: "Fiesta Marcos Ungaro",
-    url: "assets/video/Fiesta.mp4"
+  const { data, error } = await supabase
+    .from("videos")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+
+  if(error){
+    console.log(error);
+    return;
   }
-];
-  videos.forEach((video) => {
+
+
+  data.forEach((video) => {
 
     const elemento = document.createElement("video");
 
