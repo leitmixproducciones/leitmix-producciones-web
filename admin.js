@@ -9,6 +9,7 @@ getDoc
 
 const titulo = document.getElementById("titulo");
 const texto = document.getElementById("texto");
+const descripcion = document.getElementById("descripcion");
 const boton = document.getElementById("guardar");
 
 
@@ -25,6 +26,10 @@ if(datos.exists()){
 titulo.value = datos.data().titulo || "";
 
 texto.value = datos.data().texto || "";
+
+if(descripcion){
+descripcion.value = datos.data().descripcion || "";
+}
 
 }
 
@@ -46,7 +51,8 @@ await setDoc(
 doc(db,"web","contenido"),
 {
 titulo: titulo.value,
-texto: texto.value
+texto: texto.value,
+descripcion: descripcion.value
 }
 );
 
