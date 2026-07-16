@@ -1,4 +1,0 @@
----
-title: Evento la mas grande de todas las fiestas
-image: /assets/img/file_00000000187871f59b48d2b249142bfb.png
----
