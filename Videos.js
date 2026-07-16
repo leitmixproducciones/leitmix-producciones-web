@@ -12,11 +12,10 @@ const videos = [
     url: "assets/video/leitmix-video.mp4"
   },
   {
-  
-{
-  titulo: "Fiesta Marcos Ungaro",
-  url: "assets/video/Fiesta.mp4"
-}
+    titulo: "Fiesta Marcos Ungaro",
+    url: "assets/video/Fiesta.mp4"
+  }
+];
   videos.forEach((video) => {
 
     const elemento = document.createElement("video");
