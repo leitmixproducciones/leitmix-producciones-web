@@ -169,3 +169,32 @@ video {
 .cards {
   width: 100%;
 }
+
+body {
+  font-size: 18px;
+}
+
+p {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+h1 {
+  font-size: 42px;
+}
+
+h2 {
+  font-size: 32px;
+}
+
+h3 {
+  font-size: 24px;
+}
+
+nav a {
+  font-size: 18px;
+}
+
+.boton {
+  font-size: 18px;
+}
