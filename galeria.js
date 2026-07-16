@@ -6,19 +6,48 @@ getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-async function cargarGaleriaFirebase(){
+async function cargarGaleria(){
 
 const galeria = document.getElementById("galeria-dinamica");
 
 if(!galeria) return;
 
-galeria.innerHTML="";
+galeria.innerHTML = "";
 
 
-const consulta = await getDocs(collection(db,"galeria"));
+// Cargar galería antigua
+try {
+
+const respuesta = await fetch("./content/galeria.json?v=3");
+
+const imagenes = await respuesta.json();
+
+imagenes.forEach(item => {
+
+const img = document.createElement("img");
+
+img.src = item.image;
+
+img.alt = item.title || "Leitmix Producciones";
+
+galeria.appendChild(img);
+
+});
+
+}catch(error){
+
+console.log("Error galeria antigua",error);
+
+}
 
 
-consulta.forEach((foto)=>{
+
+// Cargar galería Firebase
+try {
+
+const fotos = await getDocs(collection(db,"galeria"));
+
+fotos.forEach((foto)=>{
 
 const datos = foto.data();
 
@@ -33,7 +62,14 @@ galeria.appendChild(img);
 });
 
 
+}catch(error){
+
+console.log("Error Firebase",error);
+
 }
 
 
-cargarGaleriaFirebase();
+}
+
+
+cargarGaleria();
