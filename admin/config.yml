@@ -20,3 +20,16 @@ collections:
       - name: image
         label: Imagen
         widget: image
+
+  - name: videos
+    label: Videos
+    folder: "content/videos"
+    create: true
+    fields:
+      - name: title
+        label: Título
+        widget: string
+
+      - name: video
+        label: Video
+        widget: file
