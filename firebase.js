@@ -1,24 +1,10 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+const supabaseUrl = "https://fevvtbbyzxvnanzeedzp.supabase.co";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAYTGDwg7CFXWxEqFQvBm065nzXdFS4GOc",
-  authDomain: "leitmix-producciones.firebaseapp.com",
-  projectId: "leitmix-producciones",
-  storageBucket: "leitmix-producciones.firebasestorage.app",
-  messagingSenderId: "623603784847",
-  appId: "1:623603784847:web:f0281de4260939981324fa",
-  measurementId: "G-067Z7ZTZ7R"
-};
+const supabaseKey = "sb_publishable_l8Hb4ydFb7uGcjODFG8sBg_jY-jEFrF";
 
-
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
-
-const storage = getStorage(app);
-
-
-export { db, storage };
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseKey
+);
