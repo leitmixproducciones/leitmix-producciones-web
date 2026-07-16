@@ -14,60 +14,65 @@ if(!galeria) return;
 
 galeria.innerHTML = "";
 
+let imagenesMostradas = new Set();
 
-// Cargar galería antigua
-try {
+function agregarImagen(url, titulo){
 
-const respuesta = await fetch("./content/galeria.json?v=3");
+if(imagenesMostradas.has(url)) return;
+
+imagenesMostradas.add(url);
+
+const img = document.createElement("img");
+
+img.src = url;
+
+img.alt = titulo || "Leitmix Producciones";
+
+galeria.appendChild(img);
+
+}
+
+
+// Galería antigua
+
+try{
+
+const respuesta = await fetch("./content/galeria.json?v=4");
 
 const imagenes = await respuesta.json();
 
-imagenes.forEach(item => {
+imagenes.forEach(item=>{
 
-const img = document.createElement("img");
-
-img.src = item.image;
-
-img.alt = item.title || "Leitmix Producciones";
-
-galeria.appendChild(img);
+agregarImagen(item.image,item.title);
 
 });
 
 }catch(error){
 
-console.log("Error galeria antigua",error);
+console.log(error);
 
 }
 
 
+// Firebase
 
-// Cargar galería Firebase
-try {
+try{
 
 const fotos = await getDocs(collection(db,"galeria"));
 
-fotos.forEach((foto)=>{
+fotos.forEach(foto=>{
 
 const datos = foto.data();
 
-const img = document.createElement("img");
-
-img.src = datos.url;
-
-img.alt = datos.titulo || "Leitmix Producciones";
-
-galeria.appendChild(img);
+agregarImagen(datos.url,datos.titulo);
 
 });
 
-
 }catch(error){
 
-console.log("Error Firebase",error);
+console.log(error);
 
 }
-
 
 }
 
