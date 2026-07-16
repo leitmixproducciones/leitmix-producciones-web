@@ -16,7 +16,7 @@ color:white;
 padding:20px;
 }
 
-h1{
+h1,h2{
 color:#f5b400;
 }
 
@@ -43,6 +43,7 @@ cursor:pointer;
 background:#151515;
 padding:20px;
 border-radius:10px;
+margin-bottom:20px;
 }
 
 </style>
@@ -57,27 +58,38 @@ border-radius:10px;
 
 <h1>Panel Leitmix Producciones</h1>
 
-
 <input id="titulo" placeholder="Título">
-
 
 <textarea id="texto" placeholder="Texto"></textarea>
 
-
 <textarea id="descripcion" placeholder="Descripción"></textarea>
-
 
 <button id="guardar">
 Guardar cambios
 </button>
 
+</div>
+
+
+
+<div class="card">
+
+<h2>Agregar imagen a Galería</h2>
+
+<input id="imagenUrl" placeholder="Ruta de imagen">
+
+<input id="imagenTitulo" placeholder="Título de imagen">
+
+<button id="guardarImagen">
+Guardar imagen
+</button>
 
 </div>
+
 
 
 <script type="module" src="admin.js"></script>
 
 
 </body>
-
 </html>
