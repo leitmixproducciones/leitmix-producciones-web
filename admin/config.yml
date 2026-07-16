@@ -1,3 +1,5 @@
+site_url: https://leitmixproducciones.github.io/leitmix-producciones-web/
+display_url: https://leitmixproducciones.github.io/leitmix-producciones-web/
 backend:
   name: github
   repo: leitmixproducciones/leitmix-producciones-web
