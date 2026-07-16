@@ -1,4 +1,7 @@
+alert("VIDEOS CARGANDO");
+
 async function cargarVideos() {
+
 
   const contenedor = document.getElementById("videos-dinamicos");
 
