@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Admin | Leitmix Producciones</title>
 
 <style>
+
 body{
 font-family:Arial,sans-serif;
 background:#080808;
@@ -24,6 +26,11 @@ padding:12px;
 margin:8px 0;
 border-radius:8px;
 border:none;
+box-sizing:border-box;
+}
+
+textarea{
+min-height:100px;
 }
 
 button{
@@ -37,27 +44,40 @@ background:#151515;
 padding:20px;
 border-radius:10px;
 }
+
 </style>
 
 </head>
 
+
 <body>
+
 
 <div class="card">
 
 <h1>Panel Leitmix Producciones</h1>
 
+
 <input id="titulo" placeholder="Título">
 
-<textarea id="texto" placeholder="Descripción"></textarea>
+
+<textarea id="texto" placeholder="Texto"></textarea>
+
+
+<textarea id="descripcion" placeholder="Descripción"></textarea>
+
 
 <button id="guardar">
 Guardar cambios
 </button>
 
+
 </div>
+
 
 <script type="module" src="admin.js"></script>
 
+
 </body>
+
 </html>
