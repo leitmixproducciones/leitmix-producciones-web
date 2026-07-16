@@ -1,10 +1,3 @@
-import { db } from "./firebase.js";
-
-import {
-  collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 async function cargarVideos() {
 
   const contenedor = document.getElementById("videos-dinamicos");
@@ -13,11 +6,18 @@ async function cargarVideos() {
 
   contenedor.innerHTML = "";
 
-  const videos = await getDocs(collection(db, "videos"));
+  const videos = [
+    {
+      titulo: "Leitmix Producciones",
+      url: "assets/video/leitmix-video.mp4"
+    },
+    {
+      titulo: "Intro Leitmix",
+      url: "assets/video/intro.mp4"
+    }
+  ];
 
   videos.forEach((video) => {
-
-    const datos = video.data();
 
     const elemento = document.createElement("video");
 
@@ -25,7 +25,7 @@ async function cargarVideos() {
     elemento.width = 800;
 
     elemento.innerHTML = `
-      <source src="${datos.url}" type="video/mp4">
+      <source src="${video.url}" type="video/mp4">
       Tu navegador no soporta este video.
     `;
 
