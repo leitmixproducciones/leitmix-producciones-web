@@ -6,16 +6,16 @@ async function cargarVideos() {
 
   contenedor.innerHTML = "";
 
- const videos = [
+const videos = [
   {
-    titulo: "Leitx Video",
-    url: "assets/video/Leitx-video.mp4"
+    titulo: "Leitmix Video",
+    url: "assets/video/leitmix-video.mp4"
   },
   {
     titulo: "Fiesta Marcos Ungaro",
-    url: "assets/video/Fiesta marcos ungaro.mp4"
+    url: "assets/video/Fiesta-marcos-ungaro.mp4"
   }
-]; 
+];
   videos.forEach((video) => {
 
     const elemento = document.createElement("video");
