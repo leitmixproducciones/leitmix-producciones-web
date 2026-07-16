@@ -14,6 +14,8 @@ const boton = document.getElementById("guardar");
 
 async function cargar(){
 
+try {
+
 const ref = doc(db,"web","contenido");
 
 const datos = await getDoc(ref);
@@ -26,10 +28,19 @@ texto.value = datos.data().texto || "";
 
 }
 
+} catch(error){
+
+console.log("Error cargando:", error);
+
+}
+
 }
 
 
-boton.addEventListener("click", async()=>{
+
+boton.onclick = async function(){
+
+try {
 
 await setDoc(
 doc(db,"web","contenido"),
@@ -41,7 +52,15 @@ texto: texto.value
 
 alert("Guardado correctamente");
 
-});
+} catch(error){
+
+alert("Error: " + error.message);
+
+console.log(error);
+
+}
+
+};
 
 
 cargar();
