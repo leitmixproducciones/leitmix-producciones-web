@@ -11,8 +11,7 @@ contenedor.innerHTML = "";
 
 const { data, error } = await supabase
 .from("videos")
-.select("id,Titulo,URL");
-
+.select("*");
 
 if(error){
 
