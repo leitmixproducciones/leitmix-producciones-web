@@ -1,41 +1,63 @@
 import { supabase } from "./firebase.js";
 
-async function cargarVideos() {
+async function cargarVideos(){
 
-  const contenedor = document.getElementById("videos-dinamicos");
+const contenedor = document.getElementById("videos-dinamicos");
 
-  if (!contenedor) return;
+if(!contenedor) return;
 
-  contenedor.innerHTML = "";
-
-  const { data, error } = await supabase
-    .from("videos")
-    .select("*")
-    .order("created_at", { ascending: false });
+contenedor.innerHTML = "";
 
 
-  if(error){
-    console.log(error);
-    return;
-  }
+const { data, error } = await supabase
+.from("videos")
+.select("Titulo, URL");
 
 
-  data.forEach((video) => {
+if(error){
 
-    const elemento = document.createElement("video");
-
-    elemento.controls = true;
-    elemento.width = 800;
-
-    elemento.innerHTML = `
-      <source src="${video.url}" type="video/mp4">
-      Tu navegador no soporta este video.
-    `;
-
-    contenedor.appendChild(elemento);
-
-  });
+contenedor.innerHTML = "Error: " + error.message;
+console.log(error);
+return;
 
 }
+
+
+if(!data || data.length === 0){
+
+contenedor.innerHTML = "No hay videos cargados";
+
+return;
+
+}
+
+
+data.forEach((video)=>{
+
+const titulo = document.createElement("h3");
+
+titulo.textContent = video.Titulo;
+
+
+const elemento = document.createElement("video");
+
+elemento.controls = true;
+elemento.width = 500;
+
+
+elemento.innerHTML = `
+<source src="${video.URL}" type="video/mp4">
+Tu navegador no soporta este video.
+`;
+
+
+contenedor.appendChild(titulo);
+
+contenedor.appendChild(elemento);
+
+});
+
+}
+
 
 cargarVideos();
