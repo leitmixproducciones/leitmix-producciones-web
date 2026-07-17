@@ -37,10 +37,15 @@ data.forEach((item)=>{
 
 const video = document.createElement("video");
 
-video.src = item.Url;
+const source = document.createElement("source");
+
+source.src = item.Url;
+source.type = "video/mp4";
+
+
+video.appendChild(source);
 
 video.controls = true;
-
 video.preload = "metadata";
 
 video.style.width = "100%";
