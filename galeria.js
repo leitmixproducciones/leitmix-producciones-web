@@ -1,3 +1,5 @@
+ import { supabase } from "./firebase.js";
+
 async function cargarGaleria(){
 
 const galeria = document.getElementById("galeria-dinamica");
@@ -6,16 +8,35 @@ if(!galeria) return;
 
 galeria.innerHTML = "";
 
+
+const { data, error } = await supabase
+.from("galeria")
+.select("Titulo, Imagen");
+
+
+if(error){
+
+galeria.innerHTML = error.message;
+return;
+
+}
+
+
+data.forEach((foto)=>{
+
 const img = document.createElement("img");
 
-img.src = "https://leitmixproducciones.github.io/leitmix-producciones-web/assets/img/leitmix-logo.jpeg";
+img.src = foto.Imagen;
 
-img.alt = "Leitmix Producciones";
+img.alt = foto.Titulo;
 
 img.style.width = "300px";
 
 galeria.appendChild(img);
 
+});
+
 }
+
 
 cargarGaleria();
