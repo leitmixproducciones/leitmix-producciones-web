@@ -19,6 +19,7 @@ alert("Elegí una imagen");
 return;
 }
 
+
 const nombreArchivo = Date.now() + "-" + archivo.name;
 
 
@@ -39,7 +40,7 @@ const { data } = supabase.storage
 
 
 
-await supabase
+const { error: errorDB } = await supabase
 .from("galeria")
 .insert([
 {
@@ -49,7 +50,14 @@ Titulo:tituloImagen.value
 ]);
 
 
+if(errorDB){
+alert(errorDB.message);
+return;
+}
+
+
 alert("Imagen subida correctamente");
+
 
 archivoImagen.value="";
 tituloImagen.value="";
@@ -100,7 +108,7 @@ const { data } = supabase.storage
 
 
 
-await supabase
+const { error: errorDB } = await supabase
 .from("videos")
 .insert([
 {
@@ -110,10 +118,18 @@ Url:data.publicUrl
 ]);
 
 
+if(errorDB){
+alert(errorDB.message);
+return;
+}
+
+
 alert("Video subido correctamente");
+
 
 archivoVideo.value="";
 tituloVideo.value="";
+
 
 cargarVideos();
 
@@ -166,12 +182,14 @@ Borrar
 
 });
 
+
 }
 
 
 
 
 window.borrarImagen = async function(id){
+
 
 if(!confirm("¿Borrar imagen?")) return;
 
@@ -188,6 +206,8 @@ return;
 }
 
 
+alert("Imagen borrada");
+
 cargarImagenes();
 
 };
@@ -201,6 +221,7 @@ cargarImagenes();
 
 async function cargarVideos(){
 
+
 const { data, error } = await supabase
 .from("videos")
 .select("*")
@@ -208,69 +229,4 @@ const { data, error } = await supabase
 
 
 if(error){
-console.log(error);
-return;
-}
-
-
-const lista=document.getElementById("listaVideos");
-
-lista.innerHTML="";
-
-
-data.forEach(video=>{
-
-
-lista.innerHTML += `
-
-<div class="item">
-
-<p>${video.Titulo}</p>
-
-<video controls>
-<source src="${video.Url}">
-</video>
-
-<button class="borrar" onclick="borrarVideo(${video.id})">
-Borrar
-</button>
-
-</div>
-
-`;
-
-});
-
-}
-
-
-
-
-window.borrarVideo = async function(id){
-
-if(!confirm("¿Borrar video?")) return;
-
-
-const { error } = await supabase
-.from("videos")
-.delete()
-.eq("id",id);
-
-
-if(error){
-alert(error.message);
-return;
-}
-
-
-cargarVideos();
-
-};
-
-
-
-
-// INICIAR
-
-cargarImagenes();
-cargarVideos();
+console.log(error
