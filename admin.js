@@ -1,4 +1,5 @@
-import { supabase } from "./supabase.js";
+import { supabase 
+       } from "./supabase.js";
 
 
 // GUARDAR IMAGEN
@@ -56,7 +57,7 @@ const { error } = await supabase
 .insert([
 {
 
-{
+
 Titulo: videoTitulo.value,
 Url: videoUrl.value
 }
