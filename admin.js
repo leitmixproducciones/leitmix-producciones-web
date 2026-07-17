@@ -1,38 +1,65 @@
  import { supabase } from "./supabase.js";
 
 
-// GUARDAR IMAGEN
+// SUBIR IMAGEN
 
-const imagenUrl = document.getElementById("imagenUrl");
-const imagenTitulo = document.getElementById("imagenTitulo");
+const archivoImagen = document.getElementById("imagenArchivo");
+const tituloImagen = document.getElementById("imagenTitulo");
 const botonImagen = document.getElementById("guardarImagen");
 
 
 botonImagen.onclick = async function(){
 
+const archivo = archivoImagen.files[0];
+
+if(!archivo){
+alert("Elegí una imagen");
+return;
+}
+
+
+const nombreArchivo = Date.now() + "-" + archivo.name;
+
+
+const { error: errorSubida } = await supabase
+.storage
+.from("media")
+.upload("imagenes/" + nombreArchivo, archivo);
+
+
+if(errorSubida){
+alert(errorSubida.message);
+return;
+}
+
+
+const { data } = supabase
+.storage
+.from("media")
+.getPublicUrl("imagenes/" + nombreArchivo);
+
+
+
 const { error } = await supabase
 .from("galeria")
 .insert([
 {
-Imagen: imagenUrl.value,
-Titulo: imagenTitulo.value
+Imagen:data.publicUrl,
+Titulo:tituloImagen.value
 }
 ]);
 
 
 if(error){
-
 alert(error.message);
 return;
-
 }
 
 
-alert("Imagen guardada correctamente");
+alert("Imagen subida correctamente");
 
-
-imagenUrl.value="";
-imagenTitulo.value="";
+archivoImagen.value="";
+tituloImagen.value="";
 
 
 };
@@ -40,41 +67,76 @@ imagenTitulo.value="";
 
 
 
-// GUARDAR VIDEO
+// SUBIR VIDEO
 
-const videoUrl = document.getElementById("videoUrl");
-const videoTitulo = document.getElementById("videoTitulo");
+
+const archivoVideo = document.getElementById("videoArchivo");
+const tituloVideo = document.getElementById("videoTitulo");
 const botonVideo = document.getElementById("guardarVideo");
 
 
 botonVideo.onclick = async function(){
 
-alert("Botón video funciona");
+
+const archivo = archivoVideo.files[0];
+
+
+if(!archivo){
+alert("Elegí un video");
+return;
+}
+
+
+
+const nombreArchivo = Date.now() + "-" + archivo.name;
+
+
+
+const { error: errorSubida } = await supabase
+.storage
+.from("media")
+.upload("videos/" + nombreArchivo, archivo);
+
+
+
+if(errorSubida){
+alert(errorSubida.message);
+return;
+}
+
+
+
+const { data } = supabase
+.storage
+.from("media")
+.getPublicUrl("videos/" + nombreArchivo);
+
+
 
 
 const { error } = await supabase
 .from("videos")
 .insert([
 {
-Titulo: videoTitulo.value,
-Url: videoUrl.value
+Titulo:tituloVideo.value,
+Url:data.publicUrl
 }
 ]);
 
 
-if(error){
 
+if(error){
 alert(error.message);
 return;
-
 }
 
 
-alert("Video guardado correctamente");
+
+alert("Video subido correctamente");
 
 
-videoUrl.value="";
-videoTitulo.value="";
+archivoVideo.value="";
+tituloVideo.value="";
 
 
 };
