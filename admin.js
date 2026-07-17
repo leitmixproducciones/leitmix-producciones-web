@@ -1,4 +1,4 @@
- import { supabase } from "./supabase.js";
+import { supabase } from "./supabase.js";
 
 
 // SUBIR IMAGEN
@@ -23,7 +23,7 @@ const nombreArchivo = Date.now() + "-" + archivo.name;
 
 const { error: errorSubida } = await supabase
 .storage
-.from("media")
+.from("Media")
 .upload("imagenes/" + nombreArchivo, archivo);
 
 
@@ -35,7 +35,7 @@ return;
 
 const { data } = supabase
 .storage
-.from("media")
+.from("Media")
 .getPublicUrl("imagenes/" + nombreArchivo);
 
 
@@ -84,59 +84,3 @@ const archivo = archivoVideo.files[0];
 if(!archivo){
 alert("Elegí un video");
 return;
-}
-
-
-
-const nombreArchivo = Date.now() + "-" + archivo.name;
-
-
-
-const { error: errorSubida } = await supabase
-.storage
-.from("media")
-.upload("videos/" + nombreArchivo, archivo);
-
-
-
-if(errorSubida){
-alert(errorSubida.message);
-return;
-}
-
-
-
-const { data } = supabase
-.storage
-.from("media")
-.getPublicUrl("videos/" + nombreArchivo);
-
-
-
-
-const { error } = await supabase
-.from("videos")
-.insert([
-{
-Titulo:tituloVideo.value,
-Url:data.publicUrl
-}
-]);
-
-
-
-if(error){
-alert(error.message);
-return;
-}
-
-
-
-alert("Video subido correctamente");
-
-
-archivoVideo.value="";
-tituloVideo.value="";
-
-
-};
