@@ -1,5 +1,5 @@
- import { supabase } from "./firebase.js";
 
+import { supabase } from "./supabase.js";
 async function cargarGaleria(){
 
 const galeria = document.getElementById("galeria-dinamica");
