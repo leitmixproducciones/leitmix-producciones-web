@@ -1,4 +1,3 @@
-alert("Galeria.js cargado");
 import { supabase } from "./firebase.js";
 
 async function cargarGaleria(){
@@ -9,23 +8,19 @@ if(!galeria) return;
 
 galeria.innerHTML = "";
 
-
 const { data, error } = await supabase
 .from("galeria")
-.select("*")
-.order("id", { ascending: false });
+.select("*");
 
 
 if(error){
-
-alert(error.message);
-
+console.log(error);
+galeria.innerHTML = "Error: " + error.message;
 return;
-
 }
 
 
-alert(JSON.stringify(data));
+galeria.innerHTML = "Cantidad de fotos: " + data.length;
 
 
 data.forEach((foto)=>{
@@ -41,6 +36,5 @@ galeria.appendChild(img);
 });
 
 }
-
 
 cargarGaleria();
