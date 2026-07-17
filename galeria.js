@@ -23,7 +23,13 @@ return;
 }
 
 
-galeria.innerHTML = "Fotos encontradas: " + data.length;
+if(!data || data.length === 0){
+
+galeria.innerHTML = "No hay imágenes cargadas";
+
+return;
+
+}
 
 
 data.forEach((foto)=>{
@@ -35,6 +41,8 @@ img.src = foto.Imagen;
 img.alt = foto.Titulo || "Leitmix Producciones";
 
 img.style.width = "300px";
+img.style.height = "auto";
+img.style.margin = "10px";
 
 galeria.appendChild(img);
 
