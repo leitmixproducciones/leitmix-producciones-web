@@ -29,10 +29,6 @@ border:none;
 box-sizing:border-box;
 }
 
-textarea{
-min-height:100px;
-}
-
 button{
 background:#f5b400;
 font-weight:bold;
@@ -58,16 +54,6 @@ margin-bottom:20px;
 
 <h1>Panel Leitmix Producciones</h1>
 
-<input id="titulo" placeholder="Título">
-
-<textarea id="texto" placeholder="Texto"></textarea>
-
-<textarea id="descripcion" placeholder="Descripción"></textarea>
-
-<button id="guardar">
-Guardar cambios
-</button>
-
 </div>
 
 
@@ -76,7 +62,7 @@ Guardar cambios
 
 <h2>Agregar imagen a Galería</h2>
 
-<input id="imagenUrl" placeholder="Ruta de imagen">
+<input id="imagenArchivo" type="file" accept="image/*">
 
 <input id="imagenTitulo" placeholder="Título de imagen">
 
@@ -92,7 +78,7 @@ Guardar imagen
 
 <h2>Agregar video</h2>
 
-<input id="videoUrl" placeholder="URL del video">
+<input id="videoArchivo" type="file" accept="video/*">
 
 <input id="videoTitulo" placeholder="Título del video">
 
