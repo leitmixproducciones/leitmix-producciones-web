@@ -18,6 +18,9 @@ return;
 }
 
 
+alert("Subiendo imagen...");
+
+
 const nombreArchivo = Date.now() + "-" + archivo.name;
 
 
@@ -28,9 +31,13 @@ const { error: errorSubida } = await supabase
 
 
 if(errorSubida){
-alert(errorSubida.message);
+console.log(errorSubida);
+alert("Error subida: " + errorSubida.message);
 return;
 }
+
+
+alert("Archivo subido al Storage");
 
 
 const { data } = supabase
@@ -51,7 +58,8 @@ Titulo:tituloImagen.value
 
 
 if(error){
-alert(error.message);
+console.log(error);
+alert("Error guardando galería: " + error.message);
 return;
 }
 
@@ -84,3 +92,67 @@ const archivo = archivoVideo.files[0];
 if(!archivo){
 alert("Elegí un video");
 return;
+}
+
+
+alert("Subiendo video...");
+
+
+const nombreArchivo = Date.now() + "-" + archivo.name;
+
+
+
+const { error: errorSubida } = await supabase
+.storage
+.from("Media")
+.upload("videos/" + nombreArchivo, archivo);
+
+
+
+if(errorSubida){
+console.log(errorSubida);
+alert("Error subida video: " + errorSubida.message);
+return;
+}
+
+
+
+alert("Video subido al Storage");
+
+
+
+const { data } = supabase
+.storage
+.from("Media")
+.getPublicUrl("videos/" + nombreArchivo);
+
+
+
+
+const { error } = await supabase
+.from("videos")
+.insert([
+{
+Titulo:tituloVideo.value,
+Url:data.publicUrl
+}
+]);
+
+
+
+if(error){
+console.log(error);
+alert("Error guardando video: " + error.message);
+return;
+}
+
+
+
+alert("Video subido correctamente");
+
+
+archivoVideo.value="";
+tituloVideo.value="";
+
+
+};
