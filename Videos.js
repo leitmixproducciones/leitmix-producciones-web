@@ -15,6 +15,9 @@ const { data, error } = await supabase
 .select("*");
 
 
+alert(JSON.stringify(data));
+
+
 if(error){
 
 contenedor.innerHTML = "Error: " + error.message;
