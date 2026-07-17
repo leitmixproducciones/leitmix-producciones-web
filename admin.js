@@ -55,8 +55,10 @@ const { error } = await supabase
 .from("videos")
 .insert([
 {
+
+{
 Titulo: videoTitulo.value,
-URL: videoUrl.value
+Url: videoUrl.value
 }
 ]);
 
