@@ -1,9 +1,9 @@
 import { supabase } from "./supabase.js";
 
-alert("Admin JS cargado");
 
-
+// ======================
 // SUBIR IMAGEN
+// ======================
 
 const archivoImagen = document.getElementById("imagenArchivo");
 const tituloImagen = document.getElementById("imagenTitulo");
@@ -20,9 +20,6 @@ return;
 }
 
 
-alert("Subiendo imagen...");
-
-
 const nombreArchivo = Date.now() + "-" + archivo.name;
 
 
@@ -33,13 +30,9 @@ const { error: errorSubida } = await supabase
 
 
 if(errorSubida){
-console.log(errorSubida);
-alert("Error subida: " + errorSubida.message);
+alert(errorSubida.message);
 return;
 }
-
-
-alert("Archivo subido al Storage");
 
 
 const { data } = supabase
@@ -60,24 +53,28 @@ Titulo:tituloImagen.value
 
 
 if(error){
-console.log(error);
-alert("Error guardando galería: " + error.message);
+alert(error.message);
 return;
 }
 
 
 alert("Imagen subida correctamente");
 
+
 archivoImagen.value="";
 tituloImagen.value="";
 
+
+cargarImagenes();
 
 };
 
 
 
 
+// ======================
 // SUBIR VIDEO
+// ======================
 
 
 const archivoVideo = document.getElementById("videoArchivo");
@@ -97,9 +94,6 @@ return;
 }
 
 
-alert("Subiendo video...");
-
-
 const nombreArchivo = Date.now() + "-" + archivo.name;
 
 
@@ -112,14 +106,9 @@ const { error: errorSubida } = await supabase
 
 
 if(errorSubida){
-console.log(errorSubida);
-alert("Error subida video: " + errorSubida.message);
+alert(errorSubida.message);
 return;
 }
-
-
-
-alert("Video subido al Storage");
 
 
 
@@ -133,28 +122,4 @@ const { data } = supabase
 
 const { error } = await supabase
 .from("videos")
-.insert([
-{
-Titulo:tituloVideo.value,
-Url:data.publicUrl
-}
-]);
-
-
-
-if(error){
-console.log(error);
-alert("Error guardando video: " + error.message);
-return;
-}
-
-
-
-alert("Video subido correctamente");
-
-
-archivoVideo.value="";
-tituloVideo.value="";
-
-
-};
+.insert
