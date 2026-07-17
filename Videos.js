@@ -1,4 +1,5 @@
 import { supabase } from "./supabase.js";
+
 async function cargarVideos(){
 
 const contenedor = document.getElementById("videos-dinamicos");
@@ -10,7 +11,7 @@ contenedor.innerHTML = "";
 
 const { data, error } = await supabase
 .from("videos")
-.select("Titulo, URL");
+.select("id,Titulo,URL");
 
 
 if(error){
@@ -25,7 +26,6 @@ return;
 if(!data || data.length === 0){
 
 contenedor.innerHTML = "No hay videos cargados";
-
 return;
 
 }
@@ -34,25 +34,17 @@ return;
 data.forEach((video)=>{
 
 const titulo = document.createElement("h3");
-
 titulo.textContent = video.Titulo;
 
 
-const elemento = document.createElement("video");
-
-elemento.controls = true;
-elemento.width = 500;
-
-
-elemento.innerHTML = `
-<source src="${video.URL}" type="video/mp4">
-Tu navegador no soporta este video.
-`;
+const enlace = document.createElement("a");
+enlace.href = video.URL;
+enlace.textContent = "Ver video";
+enlace.target = "_blank";
 
 
 contenedor.appendChild(titulo);
-
-contenedor.appendChild(elemento);
+contenedor.appendChild(enlace);
 
 });
 
