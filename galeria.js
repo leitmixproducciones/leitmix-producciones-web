@@ -17,11 +17,14 @@ const { data, error } = await supabase
 
 if(error){
 
-console.log(error);
+alert(error.message);
 
 return;
 
 }
+
+
+alert(JSON.stringify(data));
 
 
 data.forEach((foto)=>{
