@@ -32,6 +32,9 @@ return;
 }
 
 
+alert(JSON.stringify(data));
+
+
 data.forEach((foto)=>{
 
 const img = document.createElement("img");
