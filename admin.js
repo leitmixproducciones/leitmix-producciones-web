@@ -1,4 +1,4 @@
-import { supabase } from "./firebase.js";
+import { supabase } from "./supabase.js";
 
 
 const imagenUrl = document.getElementById("imagenUrl");
@@ -8,32 +8,30 @@ const botonImagen = document.getElementById("guardarImagen");
 
 botonImagen.onclick = async function(){
 
-try{
 
 const { error } = await supabase
 .from("galeria")
 .insert([
 {
-titulo: imagenTitulo.value,
-imagen: imagenUrl.value
+Imagen: imagenUrl.value,
+Titulo: imagenTitulo.value
 }
 ]);
 
 
-if(error) throw error;
+if(error){
+
+alert(error.message);
+return;
+
+}
 
 
-alert("Imagen guardada");
+alert("Imagen guardada correctamente");
 
 
 imagenUrl.value="";
 imagenTitulo.value="";
 
-
-}catch(error){
-
-alert(error.message);
-
-}
 
 };
