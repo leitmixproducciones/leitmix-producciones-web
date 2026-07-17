@@ -1,8 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin | Leitmix Producciones</title>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#080808;
+color:white;
+padding:20px;
+}
+
+h1,h2{
+color:#f5b400;
+}
+
+input,button{
+width:100%;
+padding:12px;
+margin:8px 0;
+border-radius:8px;
+border:none;
+box-sizing:border-box;
+}
+
+button{
+background:#f5b400;
+font-weight:bold;
+cursor:pointer;
+}
+
+.card{
+background:#151515;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+}
+
+.item{
+background:#222;
+padding:15px;
+border-radius:10px;
+margin-top:15px;
+}
+
+.item img{
+width:120px;
+border-radius:10px;
+}
+
+.item video{
+width:100%;
+max-width:300px;
+border-radius:10px;
+}
+
+.borrar{
+background:#d40000;
+color:white;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="card">
+
+<h1>Panel Leitmix Producciones</h1>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>Agregar imagen a Galería</h2>
+
+<input id="imagenArchivo" type="file" accept="image/*">
+
+<input id="imagenTitulo" placeholder="Título de imagen">
+
+<button id="guardarImagen">
+Guardar imagen
+</button>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>Agregar video</h2>
+
+<input id="videoArchivo" type="file" accept="video/*">
+
+<input id="videoTitulo" placeholder="Título del video">
+
+<button id="guardarVideo">
+Guardar video
+</button>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>Imágenes subidas</h2>
+
+<div id="listaImagenes">
+
+</div>
+
+</div>
+
+
+
 <div class="card">
 
 <h2>Videos subidos</h2>
 
-<div id="listaVideos"></div>
+<div id="listaVideos">
+
+</div>
 
 </div>
 
