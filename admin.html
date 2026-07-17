@@ -20,7 +20,7 @@ h1,h2{
 color:#f5b400;
 }
 
-input,button,textarea{
+input,button{
 width:100%;
 padding:12px;
 margin:8px 0;
@@ -40,6 +40,23 @@ background:#151515;
 padding:20px;
 border-radius:10px;
 margin-bottom:20px;
+}
+
+.item{
+background:#222;
+padding:15px;
+border-radius:10px;
+margin-top:15px;
+}
+
+.item img{
+width:120px;
+border-radius:10px;
+}
+
+.borrar{
+background:#d40000;
+color:white;
 }
 
 </style>
@@ -90,8 +107,16 @@ Guardar video
 
 
 
-<script type="module" src="admin.js"></script>
+<div class="card">
+
+<h2>Imágenes subidas</h2>
+
+<div id="listaImagenes"></div>
+
+</div>
 
 
-</body>
-</html>
+
+<div class="card">
+
+<h
