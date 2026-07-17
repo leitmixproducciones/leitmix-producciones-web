@@ -1,5 +1,7 @@
 import { supabase } from "./supabase.js";
 
+alert("Admin JS cargado");
+
 
 // SUBIR IMAGEN
 
