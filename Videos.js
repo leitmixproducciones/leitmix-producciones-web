@@ -1,5 +1,4 @@
-import { supabase } from "./firebase.js";
-
+import { supabase } from "./supabase.js";
 async function cargarVideos(){
 
 const contenedor = document.getElementById("videos-dinamicos");
