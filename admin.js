@@ -19,7 +19,6 @@ alert("Elegí una imagen");
 return;
 }
 
-
 const nombreArchivo = Date.now() + "-" + archivo.name;
 
 
@@ -52,10 +51,8 @@ Titulo:tituloImagen.value
 
 alert("Imagen subida correctamente");
 
-
 archivoImagen.value="";
 tituloImagen.value="";
-
 
 cargarImagenes();
 
@@ -75,7 +72,6 @@ const botonVideo = document.getElementById("guardarVideo");
 
 botonVideo.onclick = async () => {
 
-
 const archivo = archivoVideo.files[0];
 
 if(!archivo){
@@ -92,12 +88,10 @@ const { error } = await supabase.storage
 .upload("videos/" + nombreArchivo, archivo);
 
 
-
 if(error){
 alert(error.message);
 return;
 }
-
 
 
 const { data } = supabase.storage
@@ -118,10 +112,8 @@ Url:data.publicUrl
 
 alert("Video subido correctamente");
 
-
 archivoVideo.value="";
 tituloVideo.value="";
-
 
 cargarVideos();
 
@@ -148,8 +140,7 @@ return;
 }
 
 
-const lista = document.getElementById("listaImagenes");
-
+const lista=document.getElementById("listaImagenes");
 
 lista.innerHTML="";
 
@@ -175,7 +166,6 @@ Borrar
 
 });
 
-
 }
 
 
@@ -183,14 +173,19 @@ Borrar
 
 window.borrarImagen = async function(id){
 
-
 if(!confirm("¿Borrar imagen?")) return;
 
 
-await supabase
+const { error } = await supabase
 .from("galeria")
 .delete()
 .eq("id",id);
+
+
+if(error){
+alert(error.message);
+return;
+}
 
 
 cargarImagenes();
@@ -200,13 +195,11 @@ cargarImagenes();
 
 
 
-
 // ======================
 // MOSTRAR VIDEOS
 // ======================
 
 async function cargarVideos(){
-
 
 const { data, error } = await supabase
 .from("videos")
@@ -220,9 +213,7 @@ return;
 }
 
 
-
-const lista = document.getElementById("listaVideos");
-
+const lista=document.getElementById("listaVideos");
 
 lista.innerHTML="";
 
@@ -237,23 +228,18 @@ lista.innerHTML += `
 <p>${video.Titulo}</p>
 
 <video controls>
-
 <source src="${video.Url}">
-
 </video>
-
 
 <button class="borrar" onclick="borrarVideo(${video.id})">
 Borrar
 </button>
-
 
 </div>
 
 `;
 
 });
-
 
 }
 
@@ -262,14 +248,19 @@ Borrar
 
 window.borrarVideo = async function(id){
 
-
 if(!confirm("¿Borrar video?")) return;
 
 
-await supabase
+const { error } = await supabase
 .from("videos")
 .delete()
 .eq("id",id);
+
+
+if(error){
+alert(error.message);
+return;
+}
 
 
 cargarVideos();
@@ -279,7 +270,7 @@ cargarVideos();
 
 
 
-// CARGAR AL ABRIR
+// INICIAR
 
 cargarImagenes();
 cargarVideos();
