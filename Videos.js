@@ -15,9 +15,6 @@ const { data, error } = await supabase
 .select("*");
 
 
-alert(JSON.stringify(data));
-
-
 if(error){
 
 contenedor.innerHTML = "Error: " + error.message;
@@ -44,9 +41,18 @@ video.src = item.Url;
 
 video.controls = true;
 
+video.preload = "metadata";
+
 video.style.width = "100%";
 video.style.maxWidth = "500px";
 video.style.margin = "10px";
+
+
+video.onerror = function(){
+
+console.log("Error cargando video:", item.Url);
+
+};
 
 
 contenedor.appendChild(video);
