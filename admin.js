@@ -40,7 +40,7 @@ const { data } = supabase.storage
 
 
 
-const { error: errorDB } = await supabase
+await supabase
 .from("galeria")
 .insert([
 {
@@ -50,17 +50,12 @@ Titulo:tituloImagen.value
 ]);
 
 
-if(errorDB){
-alert(errorDB.message);
-return;
-}
-
-
 alert("Imagen subida correctamente");
 
 
 archivoImagen.value="";
 tituloImagen.value="";
+
 
 cargarImagenes();
 
@@ -80,6 +75,7 @@ const botonVideo = document.getElementById("guardarVideo");
 
 botonVideo.onclick = async () => {
 
+
 const archivo = archivoVideo.files[0];
 
 if(!archivo){
@@ -96,10 +92,12 @@ const { error } = await supabase.storage
 .upload("videos/" + nombreArchivo, archivo);
 
 
+
 if(error){
 alert(error.message);
 return;
 }
+
 
 
 const { data } = supabase.storage
@@ -108,7 +106,7 @@ const { data } = supabase.storage
 
 
 
-const { error: errorDB } = await supabase
+await supabase
 .from("videos")
 .insert([
 {
@@ -116,12 +114,6 @@ Titulo:tituloVideo.value,
 Url:data.publicUrl
 }
 ]);
-
-
-if(errorDB){
-alert(errorDB.message);
-return;
-}
 
 
 alert("Video subido correctamente");
@@ -156,7 +148,8 @@ return;
 }
 
 
-const lista=document.getElementById("listaImagenes");
+const lista = document.getElementById("listaImagenes");
+
 
 lista.innerHTML="";
 
@@ -194,23 +187,16 @@ window.borrarImagen = async function(id){
 if(!confirm("¿Borrar imagen?")) return;
 
 
-const { error } = await supabase
+await supabase
 .from("galeria")
 .delete()
 .eq("id",id);
 
 
-if(error){
-alert(error.message);
-return;
-}
-
-
-alert("Imagen borrada");
-
 cargarImagenes();
 
 };
+
 
 
 
@@ -229,4 +215,71 @@ const { data, error } = await supabase
 
 
 if(error){
-console.log(error
+console.log(error);
+return;
+}
+
+
+
+const lista = document.getElementById("listaVideos");
+
+
+lista.innerHTML="";
+
+
+data.forEach(video=>{
+
+
+lista.innerHTML += `
+
+<div class="item">
+
+<p>${video.Titulo}</p>
+
+<video controls>
+
+<source src="${video.Url}">
+
+</video>
+
+
+<button class="borrar" onclick="borrarVideo(${video.id})">
+Borrar
+</button>
+
+
+</div>
+
+`;
+
+});
+
+
+}
+
+
+
+
+window.borrarVideo = async function(id){
+
+
+if(!confirm("¿Borrar video?")) return;
+
+
+await supabase
+.from("videos")
+.delete()
+.eq("id",id);
+
+
+cargarVideos();
+
+};
+
+
+
+
+// CARGAR AL ABRIR
+
+cargarImagenes();
+cargarVideos();
