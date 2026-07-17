@@ -1,6 +1,4 @@
-import { supabase } from "./supabase.js";
-
-async function cargarVideos(){
+function cargarVideos(){
 
 const contenedor = document.getElementById("videos-dinamicos");
 
@@ -9,41 +7,24 @@ if(!contenedor) return;
 contenedor.innerHTML = "";
 
 
-const { data, error } = await supabase
-.from("videos")
-.select("*");
-
-if(error){
-
-contenedor.innerHTML = "Error: " + error.message;
-console.log(error);
-return;
-
-}
+const videos = [
+"assets/video/leitmix-video.mp4",
+"assets/video/Fiesta.mp4"
+];
 
 
-if(!data || data.length === 0){
+videos.forEach((ruta)=>{
 
-contenedor.innerHTML = "No hay videos cargados";
-return;
+const video = document.createElement("video");
 
-}
-
-
-data.forEach((video)=>{
-
-const titulo = document.createElement("h3");
-titulo.textContent = video.Titulo;
+video.src = ruta;
+video.controls = true;
+video.style.width = "100%";
+video.style.maxWidth = "500px";
+video.style.margin = "10px";
 
 
-const enlace = document.createElement("a");
-enlace.href = video.URL;
-enlace.textContent = "Ver video";
-enlace.target = "_blank";
-
-
-contenedor.appendChild(titulo);
-contenedor.appendChild(enlace);
+contenedor.appendChild(video);
 
 });
 
