@@ -1,3 +1,4 @@
+alert("Galeria.js cargado");
 import { supabase } from "./firebase.js";
 
 async function cargarGaleria(){
