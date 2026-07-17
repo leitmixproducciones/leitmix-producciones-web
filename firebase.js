@@ -1,10 +1,44 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { supabase } from "./firebase.js";
 
-const supabaseUrl = "https://fevvtbbyzxvnanzeedzp.supabase.co";
+async function cargarGaleria(){
 
-const supabaseKey = "sb_publishable_l8Hb4ydFb7uGcjODFG8sBg_jY-jEFrF";
+const galeria = document.getElementById("galeria-dinamica");
 
-export const supabase = createClient(
-  supabaseUrl,
-  supabaseKey
-);
+if(!galeria) return;
+
+galeria.innerHTML = "";
+
+
+const { data, error } = await supabase
+.from("galeria")
+.select("*");
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+alert("Registros encontrados: " + data.length);
+
+
+data.forEach((foto)=>{
+
+const img = document.createElement("img");
+
+img.src = foto.Imagen;
+
+img.alt = foto.Titulo || "Leitmix Producciones";
+
+galeria.appendChild(img);
+
+});
+
+}
+
+
+cargarGaleria();
