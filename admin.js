@@ -10,7 +10,6 @@ const botonImagen = document.getElementById("guardarImagen");
 
 botonImagen.onclick = async function(){
 
-
 const { error } = await supabase
 .from("galeria")
 .insert([
@@ -50,13 +49,13 @@ const botonVideo = document.getElementById("guardarVideo");
 
 botonVideo.onclick = async function(){
 
+alert("Botón video funciona");
+
 
 const { error } = await supabase
 .from("videos")
 .insert([
 {
-
-
 Titulo: videoTitulo.value,
 Url: videoUrl.value
 }
