@@ -9,17 +9,22 @@ async function cargarTestimonios(){
 
 const contenedor = document.getElementById("testimonios-dinamicos");
 
-if(!contenedor) return;
+if(!contenedor){
+console.log("No existe contenedor de testimonios");
+return;
+}
 
 
 const { data, error } = await supabase
 .from("testimonios")
-.select("*");
+.select("nombre, evento, comentario");
 
 
 if(error){
-console.log("Error cargando testimonios:", error);
+
+console.log("Error leyendo testimonios:", error);
 return;
+
 }
 
 
@@ -72,18 +77,17 @@ const { error } = await supabase
 .from("testimonios")
 .insert([
 {
-nombre: nombre,
-evento: evento,
-comentario: comentario
+nombre:nombre,
+evento:evento,
+comentario:comentario
 }
 ]);
 
 
-
 if(error){
 
+alert("ERROR: " + error.message);
 console.log(error);
-alert("Error: " + error.message);
 return;
 
 }
