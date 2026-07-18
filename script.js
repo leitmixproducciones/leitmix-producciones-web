@@ -73,7 +73,5 @@ ${comentarios}`;
 
 const url = "https://wa.me/5491150480339?text=" + encodeURIComponent(mensaje);
 
-
-window.open(url, "_blank");
-
+window.location.href = url;
 }
