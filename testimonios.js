@@ -1,3 +1,4 @@
+alert("TESTIMONIOS CARGADO");
 import { supabase } from "./firebase.js";
 
 const boton = document.getElementById("enviar-testimonio");
