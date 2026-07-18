@@ -231,3 +231,57 @@ h2{
 }
 
 }
+/* AJUSTE HERO SIN CONTENEDOR */
+
+.hero{
+    flex-direction:column;
+    padding:30px;
+}
+
+.hero h1,
+.hero h2,
+.hero p,
+.hero .boton{
+    position:relative;
+    z-index:2;
+}
+
+.hero h2{
+    margin-top:10px;
+    color:#f5b400;
+}
+
+.hero p{
+    max-width:600px;
+    text-align:center;
+}
+
+.boton{
+    margin-top:20px;
+    white-space:nowrap;
+}
+
+
+/* EVITA TEXTOS AMARILLOS CORTADOS */
+
+h2,
+.card h3{
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+}
+
+@media(max-width:768px){
+
+.hero h1{
+    font-size:26px;
+}
+
+.hero h2{
+    font-size:24px;
+}
+
+.boton{
+    padding:12px 25px;
+}
+
+}
