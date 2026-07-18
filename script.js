@@ -1,6 +1,6 @@
 // GALERIA SUPABASE
 // (La galería queda en galeria.js)
-
+alert("SCRIPT CARGADO");
 
 cargarGaleria();
 
