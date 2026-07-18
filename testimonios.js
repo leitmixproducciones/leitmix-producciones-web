@@ -1,37 +1,51 @@
-import { supabase } from "./supabase.js";
+ import { supabase } from "./supabase.js";
+
 
 document.addEventListener("DOMContentLoaded", () => {
+
 
 const boton = document.getElementById("enviar-testimonio");
 
 
+
 async function cargarTestimonios(){
+
 
 const contenedor = document.getElementById("testimonios-dinamicos");
 
+
 if(!contenedor){
-console.log("No existe contenedor de testimonios");
+console.log("No existe contenedor testimonios");
 return;
 }
+
 
 
 const { data, error } = await supabase
 .from("testimonios")
-.select("nombre, evento, comentario");
+.select("*");
+
 
 
 if(error){
 
-console.log("Error leyendo testimonios:", error);
+console.log("ERROR LEYENDO TESTIMONIOS:", error);
 return;
 
 }
+
+
+
+console.log("TESTIMONIOS RECIBIDOS:", data);
+
 
 
 contenedor.innerHTML = "";
 
 
+
 data.forEach(item => {
+
 
 contenedor.innerHTML += `
 
@@ -47,6 +61,7 @@ contenedor.innerHTML += `
 
 `;
 
+
 });
 
 
@@ -54,14 +69,19 @@ contenedor.innerHTML += `
 
 
 
+
+
 if(boton){
 
+
 boton.addEventListener("click", async () => {
+
 
 
 const nombre = document.getElementById("nombre-testimonio").value;
 const evento = document.getElementById("evento-testimonio").value;
 const comentario = document.getElementById("comentario-testimonio").value;
+
 
 
 if(nombre === "" || comentario === ""){
@@ -73,15 +93,20 @@ return;
 
 
 
+
 const { error } = await supabase
 .from("testimonios")
 .insert([
+
 {
 nombre:nombre,
 evento:evento,
 comentario:comentario
 }
+
 ]);
+
+
 
 
 if(error){
@@ -94,7 +119,9 @@ return;
 
 
 
+
 alert("TESTIMONIO GUARDADO");
+
 
 
 document.getElementById("nombre-testimonio").value="";
@@ -102,7 +129,9 @@ document.getElementById("evento-testimonio").value="";
 document.getElementById("comentario-testimonio").value="";
 
 
+
 cargarTestimonios();
+
 
 
 });
@@ -112,7 +141,10 @@ cargarTestimonios();
 
 
 
+
+
 cargarTestimonios();
+
 
 
 });
