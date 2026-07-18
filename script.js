@@ -46,7 +46,7 @@ cargarGaleria();
 
 
 // FORMULARIO WHATSAPP
-
+alert("FORMULARIO CARGADO");
 const formulario = document.getElementById("formulario-presupuesto");
 
 
