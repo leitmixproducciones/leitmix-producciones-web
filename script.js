@@ -1,30 +1,5 @@
-// GALERIA SUPABASE
-// (La galería queda en galeria.js)
-alert("SCRIPT CARGADO");
-
-document.addEventListener("DOMContentLoaded", function(){
-
-const boton = document.getElementById("boton-whatsapp");
-
-if(boton){
-
-alert("BOTON ENCONTRADO");
-
-boton.addEventListener("click", function(){
-
-alert("BOTON FUNCIONA");
-
-});
-
-}else{
-
-alert("NO ENCUENTRO EL BOTON");
-
-}
-
-});
-
-cargarGaleria();
+// LEITMIX PRODUCCIONES
+// SCRIPT PRINCIPAL
 
 
 // WHATSAPP PRESUPUESTO
@@ -40,7 +15,7 @@ const localidad = document.getElementById("localidad").value;
 const comentarios = document.getElementById("comentarios").value;
 
 
-const mensaje = 
+const mensaje =
 `Hola Leitmix Producciones, quiero solicitar un presupuesto.
 
 Nombre: ${nombre}
@@ -57,7 +32,7 @@ ${comentarios}`;
 const url = "https://wa.me/5491150480339?text=" + encodeURIComponent(mensaje);
 
 
-window.open(url, "_blank");
+window.location.href = url;
 
 }
 
