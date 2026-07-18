@@ -45,11 +45,11 @@ comentario: comentario
 
 
 
-if(error){
-
-console.log(error);
-alert("ERROR: " + error.message);
-return;
+if (error) {
+  console.log(error);
+  alert(error.message);
+  return;
+}
 
 }
 
