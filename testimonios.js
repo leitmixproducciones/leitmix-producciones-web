@@ -1,5 +1,3 @@
-alert("TESTIMONIOS CARGADO");
-
 import { supabase } from "./supabase.js";
 
 
