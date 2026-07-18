@@ -1,7 +1,8 @@
 import { supabase } from "./firebase.js";
 
 
-// MOSTRAR TESTIMONIOS
+document.addEventListener("DOMContentLoaded", function(){
+
 
 async function cargarTestimonios(){
 
@@ -17,10 +18,8 @@ const { data, error } = await supabase
 
 
 if(error){
-
 console.log(error);
 return;
-
 }
 
 
@@ -34,19 +33,14 @@ const div = document.createElement("div");
 div.className = "card";
 
 div.innerHTML = `
-
 <h3>${item.nombre}</h3>
-
 <p>${item.evento || ""}</p>
-
 <p>${item.comentario}</p>
-
 `;
 
 contenedor.appendChild(div);
 
 });
-
 
 }
 
@@ -54,8 +48,6 @@ contenedor.appendChild(div);
 cargarTestimonios();
 
 
-
-// GUARDAR TESTIMONIO
 
 const formulario = document.getElementById("formulario-testimonio");
 
@@ -75,15 +67,11 @@ const comentario = document.getElementById("comentario-testimonio").value;
 const { error } = await supabase
 .from("testimonios")
 .insert([
-
 {
-
-nombre: nombre,
-evento: evento,
-comentario: comentario
-
+nombre,
+evento,
+comentario
 }
-
 ]);
 
 
@@ -91,17 +79,14 @@ if(error){
 
 console.log(error);
 alert("Error al enviar comentario");
-
 return;
 
 }
 
 
-alert("Gracias por dejar tu comentario");
-
+alert("Comentario enviado correctamente");
 
 formulario.reset();
-
 
 cargarTestimonios();
 
@@ -110,3 +95,6 @@ cargarTestimonios();
 
 
 }
+
+
+});
