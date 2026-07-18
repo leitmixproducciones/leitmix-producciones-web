@@ -77,3 +77,17 @@ window.location.href = url;
 }
 
 window.enviarWhatsApp = enviarWhatsApp;
+
+const formulario = document.getElementById("formulario-presupuesto");
+
+if(formulario){
+
+formulario.addEventListener("submit", function(e){
+
+e.preventDefault();
+
+enviarWhatsApp();
+
+});
+
+}
