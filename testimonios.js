@@ -1,63 +1,16 @@
-console.log("TESTIMONIOS FUNCIONA");
 import { supabase } from "./firebase.js";
 
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", () => {
 
 
-async function cargarTestimonios(){
-
-const contenedor = document.getElementById("testimonios-dinamicos");
-
-if(!contenedor) return;
+const boton = document.querySelector("#formulario-testimonio button");
 
 
-const { data, error } = await supabase
-.from("testimonios")
-.select("*")
-.order("created_at", { ascending: false });
+if(!boton) return;
 
 
-if(error){
-console.log(error);
-return;
-}
-
-
-contenedor.innerHTML = "";
-
-
-data.forEach(item => {
-
-const div = document.createElement("div");
-
-div.className = "card";
-
-div.innerHTML = `
-<h3>${item.nombre}</h3>
-<p>${item.evento || ""}</p>
-<p>${item.comentario}</p>
-`;
-
-contenedor.appendChild(div);
-
-});
-
-}
-
-
-cargarTestimonios();
-
-
-
-const formulario = document.getElementById("formulario-testimonio");
-
-
-if(formulario){
-
-formulario.addEventListener("submit", async function(e){
-
-e.preventDefault();
+boton.addEventListener("click", async () => {
 
 
 const nombre = document.getElementById("nombre-testimonio").value;
@@ -65,13 +18,21 @@ const evento = document.getElementById("evento-testimonio").value;
 const comentario = document.getElementById("comentario-testimonio").value;
 
 
+if(!nombre || !comentario){
+
+alert("Completá nombre y comentario");
+return;
+
+}
+
+
 const { error } = await supabase
 .from("testimonios")
 .insert([
 {
-nombre,
-evento,
-comentario
+nombre: nombre,
+evento: evento,
+comentario: comentario
 }
 ]);
 
@@ -79,7 +40,7 @@ comentario
 if(error){
 
 console.log(error);
-alert("Error al enviar comentario");
+alert("Error al guardar comentario");
 return;
 
 }
@@ -87,7 +48,11 @@ return;
 
 alert("Comentario enviado correctamente");
 
-formulario.reset();
+
+document.getElementById("nombre-testimonio").value="";
+document.getElementById("evento-testimonio").value="";
+document.getElementById("comentario-testimonio").value="";
+
 
 cargarTestimonios();
 
@@ -95,7 +60,55 @@ cargarTestimonios();
 });
 
 
+async function cargarTestimonios(){
+
+
+const contenedor = document.getElementById("testimonios-dinamicos");
+
+
+if(!contenedor) return;
+
+
+const {data,error}=await supabase
+.from("testimonios")
+.select("*")
+.order("created_at",{ascending:false});
+
+
+if(error){
+console.log(error);
+return;
 }
+
+
+contenedor.innerHTML="";
+
+
+data.forEach(item=>{
+
+
+contenedor.innerHTML += `
+
+<div class="card">
+
+<h3>${item.nombre}</h3>
+
+<p>${item.evento || ""}</p>
+
+<p>${item.comentario}</p>
+
+</div>
+
+`;
+
+
+});
+
+
+}
+
+
+cargarTestimonios();
 
 
 });
