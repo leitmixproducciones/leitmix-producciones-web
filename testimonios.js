@@ -1,71 +1,11 @@
 import { supabase } from "./firebase.js";
 
 
-document.addEventListener("DOMContentLoaded", () => {
-
-
-const boton = document.getElementById("enviar-testimonio");
-
-
-if(!boton) return;
-
-
-boton.addEventListener("click", async () => {
-
-
-const nombre = document.getElementById("nombre-testimonio").value;
-const evento = document.getElementById("evento-testimonio").value;
-const comentario = document.getElementById("comentario-testimonio").value;
-
-
-if(!nombre || !comentario){
-
-alert("Completá nombre y comentario");
-return;
-
-}
-
-
-const { error } = await supabase
-.from("testimonios")
-.insert([
-{
-nombre: nombre,
-evento: evento,
-comentario: comentario
-}
-]);
-
-
-if(error){
-
-console.log(error);
-alert("Error al guardar comentario");
-return;
-
-}
-
-
-alert("Comentario enviado correctamente");
-
-
-document.getElementById("nombre-testimonio").value = "";
-document.getElementById("evento-testimonio").value = "";
-document.getElementById("comentario-testimonio").value = "";
-
-
-cargarTestimonios();
-
-
-});
-
-
+// CARGAR TESTIMONIOS
 
 async function cargarTestimonios(){
 
-
 const contenedor = document.getElementById("testimonios-dinamicos");
-
 
 if(!contenedor) return;
 
@@ -78,7 +18,7 @@ const { data, error } = await supabase
 
 if(error){
 
-console.log(error);
+console.log("ERROR CARGANDO:", error);
 return;
 
 }
@@ -88,7 +28,6 @@ contenedor.innerHTML = "";
 
 
 data.forEach(item => {
-
 
 contenedor.innerHTML += `
 
@@ -108,6 +47,97 @@ contenedor.innerHTML += `
 
 
 }
+
+
+// GUARDAR TESTIMONIO
+
+document.addEventListener("DOMContentLoaded", () => {
+
+
+const boton = document.getElementById("enviar-testimonio");
+
+
+if(!boton){
+
+console.log("NO ENCUENTRO BOTON TESTIMONIO");
+return;
+
+}
+
+
+boton.addEventListener("click", async () => {
+
+
+const nombre = document.getElementById("nombre-testimonio").value.trim();
+
+const evento = document.getElementById("evento-testimonio").value.trim();
+
+const comentario = document.getElementById("comentario-testimonio").value.trim();
+
+
+
+if(nombre === "" || comentario === ""){
+
+alert("Completá nombre y comentario");
+return;
+
+}
+
+
+
+const { data, error } = await supabase
+
+.from("testimonios")
+
+.insert([
+
+{
+
+nombre: nombre,
+
+evento: evento,
+
+comentario: comentario
+
+}
+
+])
+
+.select();
+
+
+
+console.log("SUPABASE RESPUESTA:", data, error);
+
+
+
+if(error){
+
+alert("Error al guardar comentario");
+
+return;
+
+}
+
+
+
+alert("Comentario enviado correctamente");
+
+
+
+document.getElementById("nombre-testimonio").value = "";
+
+document.getElementById("evento-testimonio").value = "";
+
+document.getElementById("comentario-testimonio").value = "";
+
+
+
+cargarTestimonios();
+
+
+
+});
 
 
 cargarTestimonios();
