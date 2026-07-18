@@ -89,3 +89,14 @@ window.location.href = url;
 });
 
 }
+const botonWhatsApp = document.getElementById("boton-whatsapp");
+
+if(botonWhatsApp){
+
+botonWhatsApp.addEventListener("click", function(){
+
+enviarWhatsApp();
+
+});
+
+}
