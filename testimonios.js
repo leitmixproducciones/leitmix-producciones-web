@@ -1,4 +1,3 @@
-
 import { supabase } from "./supabase.js";
 
 
@@ -24,7 +23,8 @@ return;
 
 const { data, error } = await supabase
 .from("testimonios")
-.select("*");
+.select("*")
+.eq("aprobado", true);
 
 
 
@@ -37,7 +37,7 @@ return;
 
 
 
-console.log("TESTIMONIOS RECIBIDOS:", data);
+console.log("TESTIMONIOS APROBADOS:", data);
 
 
 
@@ -100,7 +100,8 @@ const { data, error } = await supabase
 {
 nombre:nombre,
 evento:evento,
-comentario:comentario
+comentario:comentario,
+aprobado:false
 }
 ])
 .select();
@@ -122,17 +123,13 @@ return;
 
 
 
-alert("TESTIMONIO GUARDADO");
+alert("Comentario enviado. Será revisado antes de publicarse.");
 
 
 
 document.getElementById("nombre-testimonio").value="";
 document.getElementById("evento-testimonio").value="";
 document.getElementById("comentario-testimonio").value="";
-
-
-
-cargarTestimonios();
 
 
 
