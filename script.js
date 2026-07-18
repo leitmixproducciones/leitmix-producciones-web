@@ -47,7 +47,7 @@ cargarGaleria();
 // FORMULARIO PRESUPUESTO WHATSAPP
 
 function enviarWhatsApp(){
-alert("La función funciona");
+alert("SCRIPT OK");
 const nombre = document.getElementById("nombre").value;
 const telefono = document.getElementById("telefono").value;
 const evento = document.getElementById("evento").value;
