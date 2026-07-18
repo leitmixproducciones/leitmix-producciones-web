@@ -45,17 +45,9 @@ galeria.appendChild(img);
 cargarGaleria();
 
 
-// FORMULARIO WHATSAPP
-alert("FORMULARIO CARGADO");
-const formulario = document.getElementById("formulario-presupuesto");
+// WHATSAPP PRESUPUESTO
 
-
-if(formulario){
-
-formulario.addEventListener("submit", function(e){
-
-e.preventDefault();
-
+function enviarWhatsApp(){
 
 const nombre = document.getElementById("nombre").value;
 const telefono = document.getElementById("telefono").value;
@@ -83,20 +75,22 @@ ${comentarios}`;
 const url = "https://wa.me/5491150480339?text=" + encodeURIComponent(mensaje);
 
 
-window.location.href = url;
-
-
-});
+window.open(url, "_blank");
 
 }
-const botonWhatsApp = document.getElementById("boton-whatsapp");
 
-if(botonWhatsApp){
 
-botonWhatsApp.addEventListener("click", function(){
+// BOTON WHATSAPP
 
-enviarWhatsApp();
+document.addEventListener("DOMContentLoaded", function(){
 
-});
+const boton = document.getElementById("boton-whatsapp");
+
+
+if(boton){
+
+boton.addEventListener("click", enviarWhatsApp);
 
 }
+
+});
