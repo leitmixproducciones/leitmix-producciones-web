@@ -1,4 +1,5 @@
- import { supabase } from "./supabase.js";
+
+import { supabase } from "./supabase.js";
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -61,7 +62,6 @@ contenedor.innerHTML += `
 
 `;
 
-
 });
 
 
@@ -94,17 +94,20 @@ return;
 
 
 
-const { error } = await supabase
+const { data, error } = await supabase
 .from("testimonios")
 .insert([
-
 {
 nombre:nombre,
 evento:evento,
 comentario:comentario
 }
+])
+.select();
 
-]);
+
+
+console.log("RESULTADO INSERT:", data, error);
 
 
 
@@ -112,7 +115,6 @@ comentario:comentario
 if(error){
 
 alert("ERROR: " + error.message);
-console.log(error);
 return;
 
 }
