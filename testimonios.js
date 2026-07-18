@@ -1,6 +1,6 @@
 alert("TESTIMONIOS CARGADO");
-import { supabase } from "./firebase.js";
 
+import { supabase } from "./config.js";
 const boton = document.getElementById("enviar-testimonio");
 
 boton.addEventListener("click", guardarTestimonio);
