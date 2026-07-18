@@ -2,6 +2,28 @@
 // (La galería queda en galeria.js)
 alert("SCRIPT CARGADO");
 
+document.addEventListener("DOMContentLoaded", function(){
+
+const boton = document.getElementById("boton-whatsapp");
+
+if(boton){
+
+alert("BOTON ENCONTRADO");
+
+boton.addEventListener("click", function(){
+
+alert("BOTON FUNCIONA");
+
+});
+
+}else{
+
+alert("NO ENCUENTRO EL BOTON");
+
+}
+
+});
+
 cargarGaleria();
 
 
