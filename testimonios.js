@@ -1,4 +1,4 @@
-alert("TESTIMONIOS CARGADO");
+console.log("TESTIMONIOS FUNCIONA");
 import { supabase } from "./firebase.js";
 
 
