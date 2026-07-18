@@ -75,3 +75,5 @@ const url = "https://wa.me/5491150480339?text=" + encodeURIComponent(mensaje);
 
 window.location.href = url;
 }
+
+window.enviarWhatsApp = enviarWhatsApp;
