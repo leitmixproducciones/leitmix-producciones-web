@@ -144,11 +144,49 @@ DJ profesional, sonido, iluminación y efectos especiales para casamientos, cump
 </p>
 
 <p>
-Solicitá tu presupuesto y armamos la propuesta ideal.
+Completá los datos y recibí tu presupuesto personalizado.
 </p>
 
-</section>
 
+<form onsubmit="enviarWhatsApp(); return false;" class="formulario">
+
+
+<input type="text" id="nombre" placeholder="Nombre y apellido" required>
+
+
+<input type="tel" id="telefono" placeholder="Teléfono" required>
+
+
+<select id="evento" required>
+<option value="">Tipo de evento</option>
+<option>Casamiento</option>
+<option>Fiesta de 15</option>
+<option>Cumpleaños</option>
+<option>Evento corporativo</option>
+<option>Fiesta privada</option>
+</select>
+
+
+<input type="date" id="fecha" required>
+
+
+<input type="number" id="invitados" placeholder="Cantidad de invitados">
+
+
+<input type="text" id="localidad" placeholder="Localidad">
+
+
+<textarea id="comentarios" placeholder="Contanos qué necesitás para tu evento"></textarea>
+
+
+<button type="submit" class="boton">
+Solicitar presupuesto
+</button>
+
+
+</form>
+
+</section>
 
 
 <a class="whatsapp" href="https://api.whatsapp.com/send?phone=5491150480339" target="_blank">
