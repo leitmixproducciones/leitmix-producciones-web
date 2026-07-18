@@ -4,7 +4,7 @@ import { supabase } from "./firebase.js";
 document.addEventListener("DOMContentLoaded", () => {
 
 
-const boton = document.querySelector("#formulario-testimonio button");
+const boton = document.getElementById("enviar-testimonio");
 
 
 if(!boton) return;
@@ -49,15 +49,16 @@ return;
 alert("Comentario enviado correctamente");
 
 
-document.getElementById("nombre-testimonio").value="";
-document.getElementById("evento-testimonio").value="";
-document.getElementById("comentario-testimonio").value="";
+document.getElementById("nombre-testimonio").value = "";
+document.getElementById("evento-testimonio").value = "";
+document.getElementById("comentario-testimonio").value = "";
 
 
 cargarTestimonios();
 
 
 });
+
 
 
 async function cargarTestimonios(){
@@ -69,22 +70,24 @@ const contenedor = document.getElementById("testimonios-dinamicos");
 if(!contenedor) return;
 
 
-const {data,error}=await supabase
+const { data, error } = await supabase
 .from("testimonios")
 .select("*")
-.order("created_at",{ascending:false});
+.order("created_at", { ascending:false });
 
 
 if(error){
+
 console.log(error);
 return;
+
 }
 
 
-contenedor.innerHTML="";
+contenedor.innerHTML = "";
 
 
-data.forEach(item=>{
+data.forEach(item => {
 
 
 contenedor.innerHTML += `
@@ -100,7 +103,6 @@ contenedor.innerHTML += `
 </div>
 
 `;
-
 
 });
 
