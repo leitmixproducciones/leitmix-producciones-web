@@ -13,8 +13,11 @@ body{
     background:#080808;
     color:white;
     overflow-x:hidden;
-    font-size:16px;
+    width:100%;
 }
+
+
+/* HEADER */
 
 header{
     position:sticky;
@@ -57,44 +60,50 @@ nav a:hover{
 }
 
 
-/* PORTADA */
+/* HERO */
 
 .hero{
     min-height:90vh;
     display:flex;
+    flex-direction:column;
     justify-content:center;
     align-items:center;
     text-align:center;
+    padding:30px 20px;
 
     background:
-    linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.85)),
+    linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.75)),
     url("assets/img/leitmix-hero.png");
 
-    background-size:cover;
+    background-size:contain;
     background-position:center;
     background-repeat:no-repeat;
+    background-color:#000;
 }
 
-.hero-content{
-    width:90%;
-    max-width:750px;
-    padding:25px;
-    background:rgba(0,0,0,.55);
-    border-radius:25px;
-}
 
 .hero h1{
     font-size:32px;
     font-weight:800;
-    margin-bottom:20px;
+    color:white;
+    text-shadow:0 3px 8px #000;
 }
+
+.hero h2{
+    color:#f5b400;
+    margin:15px 0;
+    text-shadow:0 3px 8px #000;
+}
+
 
 .hero p{
     color:#f5b400;
     font-size:18px;
     font-weight:600;
-    margin-bottom:30px;
+    margin-bottom:25px;
+    max-width:600px;
 }
+
 
 .boton{
     display:inline-block;
@@ -104,6 +113,7 @@ nav a:hover{
     border-radius:40px;
     text-decoration:none;
     font-weight:bold;
+    margin-top:10px;
 }
 
 
@@ -118,6 +128,7 @@ h2{
     color:#f5b400;
     font-size:26px;
     margin-bottom:30px;
+    overflow-wrap:break-word;
 }
 
 
@@ -140,6 +151,7 @@ h2{
     color:#f5b400;
     margin-bottom:15px;
     font-size:20px;
+    overflow-wrap:break-word;
 }
 
 
@@ -210,67 +222,10 @@ nav{
     gap:10px;
 }
 
-.hero h1{
-    font-size:28px;
-}
-
-.hero p{
-    font-size:16px;
-}
-
-section{
-    padding:40px 15px;
-}
-
-h2{
-    font-size:24px;
-}
-
-.card{
-    padding:20px;
-}
-
-}
-/* AJUSTE HERO SIN CONTENEDOR */
-
 .hero{
-    flex-direction:column;
-    padding:30px;
+    min-height:80vh;
+    background-size:contain;
 }
-
-.hero h1,
-.hero h2,
-.hero p,
-.hero .boton{
-    position:relative;
-    z-index:2;
-}
-
-.hero h2{
-    margin-top:10px;
-    color:#f5b400;
-}
-
-.hero p{
-    max-width:600px;
-    text-align:center;
-}
-
-.boton{
-    margin-top:20px;
-    white-space:nowrap;
-}
-
-
-/* EVITA TEXTOS AMARILLOS CORTADOS */
-
-h2,
-.card h3{
-    word-wrap:break-word;
-    overflow-wrap:break-word;
-}
-
-@media(max-width:768px){
 
 .hero h1{
     font-size:26px;
@@ -280,8 +235,16 @@ h2,
     font-size:24px;
 }
 
+.hero p{
+    font-size:16px;
+}
+
 .boton{
     padding:12px 25px;
+}
+
+section{
+    padding:40px 15px;
 }
 
 }
