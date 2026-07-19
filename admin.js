@@ -203,6 +203,7 @@ cargarImagenes();
 
 
 
+
 // ======================
 // VIDEOS
 // ======================
@@ -256,7 +257,10 @@ Borrar
 });
 
 
-                                               }
+}
+
+
+
 window.borrarVideo = async function(id){
 
 if(!confirm("¿Borrar video?")) return;
@@ -318,4 +322,101 @@ lista.innerHTML += `
 
 
 <p>
-${testimonio.aprobado ?
+${testimonio.aprobado ? "🟢 Publicado" : "🟡 Pendiente"}
+</p>
+
+
+${
+testimonio.aprobado
+
+?
+
+`<button onclick="ocultarTestimonio(${testimonio.id})">
+Ocultar
+</button>`
+
+:
+
+`<button onclick="aprobarTestimonio(${testimonio.id})">
+Aprobar
+</button>`
+
+}
+
+
+<button class="borrar" onclick="borrarTestimonio(${testimonio.id})">
+Borrar
+</button>
+
+
+</div>
+
+`;
+
+});
+
+
+}
+
+
+
+
+window.aprobarTestimonio = async function(id){
+
+await supabase
+.from("testimonios")
+.update({
+aprobado:true
+})
+.eq("id",id);
+
+
+cargarTestimonios();
+
+};
+
+
+
+window.ocultarTestimonio = async function(id){
+
+await supabase
+.from("testimonios")
+.update({
+aprobado:false
+})
+.eq("id",id);
+
+
+cargarTestimonios();
+
+};
+
+
+
+window.borrarTestimonio = async function(id){
+
+if(!confirm("¿Borrar testimonio?")) return;
+
+
+await supabase
+.from("testimonios")
+.delete()
+.eq("id",id);
+
+
+cargarTestimonios();
+
+};
+
+
+
+
+// ======================
+// INICIO
+// ======================
+
+cargarImagenes();
+
+cargarVideos();
+
+cargarTestimonios();
