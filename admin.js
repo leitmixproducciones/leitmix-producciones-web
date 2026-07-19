@@ -21,6 +21,7 @@ alert("Elegí una imagen");
 return;
 }
 
+
 const nombreArchivo = Date.now() + "-" + archivo.name;
 
 
@@ -96,12 +97,10 @@ const { error } = await supabase.storage
 .upload("videos/" + nombreArchivo, archivo);
 
 
-
 if(error){
 alert(error.message);
 return;
 }
-
 
 
 const { data } = supabase.storage
@@ -136,7 +135,7 @@ cargarVideos();
 
 
 // ======================
-// MOSTRAR IMAGENES
+// IMAGENES
 // ======================
 
 async function cargarImagenes(){
@@ -187,9 +186,7 @@ Borrar
 
 
 
-
 window.borrarImagen = async function(id){
-
 
 if(!confirm("¿Borrar imagen?")) return;
 
@@ -206,12 +203,12 @@ cargarImagenes();
 
 
 
+
 // ======================
-// MOSTRAR VIDEOS
+// VIDEOS
 // ======================
 
 async function cargarVideos(){
-
 
 const lista = document.getElementById("listaVideos");
 
@@ -228,7 +225,6 @@ if(error){
 console.log(error);
 return;
 }
-
 
 
 lista.innerHTML="";
@@ -254,7 +250,6 @@ lista.innerHTML += `
 Borrar
 </button>
 
-
 </div>
 
 `;
@@ -266,9 +261,7 @@ Borrar
 
 
 
-
 window.borrarVideo = async function(id){
-
 
 if(!confirm("¿Borrar video?")) return;
 
@@ -282,3 +275,148 @@ await supabase
 cargarVideos();
 
 };
+
+
+
+
+// ======================
+// TESTIMONIOS
+// ======================
+
+async function cargarTestimonios(){
+
+const lista = document.getElementById("listaTestimonios");
+
+if(!lista) return;
+
+
+const { data, error } = await supabase
+.from("testimonios")
+.select("*")
+.order("id",{ascending:false});
+
+
+if(error){
+console.log(error);
+return;
+}
+
+
+lista.innerHTML="";
+
+
+data.forEach(testimonio=>{
+
+
+lista.innerHTML += `
+
+<div class="item">
+
+<h3>${testimonio.nombre}</h3>
+
+<p>${testimonio.evento || ""}</p>
+
+<p>${testimonio.comentario}</p>
+
+<p>⭐ ${testimonio.estrellas}</p>
+
+
+<p>
+${testimonio.aprobado ? "🟢 Publicado" : "🟡 Pendiente"}
+</p>
+
+
+${
+testimonio.aprobado
+
+?
+
+`<button onclick="ocultarTestimonio(${testimonio.id})">
+Ocultar
+</button>`
+
+:
+
+`<button onclick="aprobarTestimonio(${testimonio.id})">
+Aprobar
+</button>`
+
+}
+
+
+<button class="borrar" onclick="borrarTestimonio(${testimonio.id})">
+Borrar
+</button>
+
+
+</div>
+
+`;
+
+});
+
+
+}
+
+
+
+
+window.aprobarTestimonio = async function(id){
+
+await supabase
+.from("testimonios")
+.update({
+aprobado:true
+})
+.eq("id",id);
+
+
+cargarTestimonios();
+
+};
+
+
+
+window.ocultarTestimonio = async function(id){
+
+await supabase
+.from("testimonios")
+.update({
+aprobado:false
+})
+.eq("id",id);
+
+
+cargarTestimonios();
+
+};
+
+
+
+window.borrarTestimonio = async function(id){
+
+if(!confirm("¿Borrar testimonio?")) return;
+
+
+await supabase
+.from("testimonios")
+.delete()
+.eq("id",id);
+
+
+cargarTestimonios();
+
+};
+
+
+
+
+// ======================
+// INICIO
+// ======================
+
+cargarImagenes();
+
+cargarVideos();
+
+cargarTestimonios();
