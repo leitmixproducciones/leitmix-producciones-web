@@ -1,11 +1,12 @@
 import { supabase } from "./supabase.js";
+
 // LEITMIX PRODUCCIONES
 // SCRIPT PRINCIPAL
 
 
 // WHATSAPP PRESUPUESTO
 
-function enviarWhatsApp(){
+async function enviarWhatsApp(){
 
 const nombre = document.getElementById("nombre").value;
 const telefono = document.getElementById("telefono").value;
@@ -14,6 +15,35 @@ const fecha = document.getElementById("fecha").value;
 const invitados = document.getElementById("invitados").value;
 const localidad = document.getElementById("localidad").value;
 const comentarios = document.getElementById("comentarios").value;
+
+
+// GUARDAR RESERVA EN SUPABASE
+
+const { error } = await supabase
+.from("reservas")
+.insert([
+{
+nombre: nombre,
+telefono: telefono,
+evento: evento,
+fecha: fecha,
+invitados: invitados,
+localidad: localidad,
+comentarios: comentarios,
+estado: "Pendiente"
+}
+]);
+
+
+if(error){
+
+console.log(error);
+alert("Error guardando la consulta");
+
+return;
+
+}
+
 
 
 const mensaje =
