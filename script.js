@@ -19,7 +19,7 @@ const comentarios = document.getElementById("comentarios").value;
 
 // GUARDAR RESERVA EN SUPABASE
 
-const { error } = await supabase
+const { data, error } = await supabase
 .from("reservas")
 .insert([
 {
@@ -32,18 +32,24 @@ localidad: localidad,
 comentarios: comentarios,
 estado: "Pendiente"
 }
-]);
+])
+.select();
+
+
+console.log("Reserva enviada:", data);
+console.log("Error:", error);
 
 
 if(error){
 
-console.log(error);
-alert("Error guardando la consulta");
+alert(error.message);
 
 return;
 
 }
 
+
+alert("Reserva guardada correctamente");
 
 
 const mensaje =
