@@ -24,7 +24,8 @@ return;
 const { data, error } = await supabase
 .from("testimonios")
 .select("*")
-.eq("aprobado", true);
+.eq("aprobado", true)
+.order("id", { ascending: false });
 
 
 
@@ -56,7 +57,7 @@ contenedor.innerHTML += `
 
 <div class="card">
 
-<div>${estrellas}</div>
+<div class="estrellas">${estrellas}</div>
 
 <h3>${item.nombre}</h3>
 
@@ -84,7 +85,92 @@ boton.addEventListener("click", async () => {
 
 
 
-const nombre = document.getElementById("nombre-testimonio").value;
-const evento = document.getElementById("evento-testimonio").value;
-const comentario = document.getElementById("comentario-testimonio").value;
-const estrellas = document.getElementById("estrellas-testimonio").
+const nombre = document.getElementById("nombre-testimonio").value.trim();
+
+const evento = document.getElementById("evento-testimonio").value.trim();
+
+const comentario = document.getElementById("comentario-testimonio").value.trim();
+
+const estrellas = document.getElementById("estrellas-testimonio").value;
+
+
+
+if(!nombre || !comentario){
+
+alert("Completá nombre y comentario");
+
+return;
+
+}
+
+
+
+
+const { error } = await supabase
+
+.from("testimonios")
+
+.insert([
+
+{
+
+nombre: nombre,
+
+evento: evento,
+
+comentario: comentario,
+
+estrellas: Number(estrellas),
+
+aprobado: false
+
+}
+
+]);
+
+
+
+
+
+if(error){
+
+console.log("ERROR GUARDANDO TESTIMONIO:", error);
+
+alert("No se pudo enviar el testimonio");
+
+return;
+
+}
+
+
+
+
+
+alert("Testimonio enviado correctamente. Será publicado luego de su aprobación.");
+
+
+
+document.getElementById("nombre-testimonio").value = "";
+
+document.getElementById("evento-testimonio").value = "";
+
+document.getElementById("comentario-testimonio").value = "";
+
+document.getElementById("estrellas-testimonio").value = "5";
+
+
+
+});
+
+
+}
+
+
+
+
+
+cargarTestimonios();
+
+
+
+});
