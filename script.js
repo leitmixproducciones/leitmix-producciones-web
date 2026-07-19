@@ -11,7 +11,11 @@ async function enviarWhatsApp(){
 const nombre = document.getElementById("nombre").value;
 const telefono = document.getElementById("telefono").value;
 const evento = document.getElementById("evento").value;
+
 const fecha = document.getElementById("fecha").value;
+
+console.log("FECHA QUE ENVIA:", fecha);
+
 const invitados = document.getElementById("invitados").value;
 const localidad = document.getElementById("localidad").value;
 const comentarios = document.getElementById("comentarios").value;
