@@ -397,17 +397,23 @@ window.borrarTestimonio = async function(id){
 
 if(!confirm("¿Borrar testimonio?")) return;
 
-
-await supabase
+const { error } = await supabase
 .from("testimonios")
 .delete()
-.eq("id",id);
+.eq("id", id)
+.select();
 
+if(error){
+alert(error.message);
+console.log(error);
+return;
+}
+
+alert("Testimonio borrado");
 
 cargarTestimonios();
 
 };
-
 
 
 
