@@ -12,9 +12,21 @@ const nombre = document.getElementById("nombre").value;
 const telefono = document.getElementById("telefono").value;
 const evento = document.getElementById("evento").value;
 
-const fecha = document.getElementById("fecha").value;
+let fecha = document.getElementById("fecha").value;
 
 console.log("FECHA QUE ENVIA:", fecha);
+
+
+// Verificar fecha
+
+if(!fecha){
+
+alert("Elegí una fecha para el evento");
+
+return;
+
+}
+
 
 const invitados = document.getElementById("invitados").value;
 const localidad = document.getElementById("localidad").value;
