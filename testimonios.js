@@ -37,10 +37,6 @@ return;
 
 
 
-console.log("TESTIMONIOS APROBADOS:", data);
-
-
-
 contenedor.innerHTML = "";
 
 
@@ -48,9 +44,19 @@ contenedor.innerHTML = "";
 data.forEach(item => {
 
 
+let estrellas = "";
+
+for(let i = 0; i < item.estrellas; i++){
+estrellas += "⭐";
+}
+
+
+
 contenedor.innerHTML += `
 
 <div class="card">
+
+<div>${estrellas}</div>
 
 <h3>${item.nombre}</h3>
 
@@ -81,69 +87,4 @@ boton.addEventListener("click", async () => {
 const nombre = document.getElementById("nombre-testimonio").value;
 const evento = document.getElementById("evento-testimonio").value;
 const comentario = document.getElementById("comentario-testimonio").value;
-
-
-
-if(nombre === "" || comentario === ""){
-
-alert("Completá nombre y comentario");
-return;
-
-}
-
-
-
-
-const { data, error } = await supabase
-.from("testimonios")
-.insert([
-{
-nombre:nombre,
-evento:evento,
-comentario:comentario,
-aprobado:false
-}
-])
-.select();
-
-
-
-console.log("RESULTADO INSERT:", data, error);
-
-
-
-
-if(error){
-
-alert("ERROR: " + error.message);
-return;
-
-}
-
-
-
-
-alert("Comentario enviado. Será revisado antes de publicarse.");
-
-
-
-document.getElementById("nombre-testimonio").value="";
-document.getElementById("evento-testimonio").value="";
-document.getElementById("comentario-testimonio").value="";
-
-
-
-});
-
-
-}
-
-
-
-
-
-cargarTestimonios();
-
-
-
-});
+const estrellas = document.getElementById("estrellas-testimonio").
