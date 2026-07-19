@@ -1,4 +1,3 @@
-
 import { supabase } from "./supabase.js";
 
 
@@ -10,6 +9,8 @@ const archivoImagen = document.getElementById("imagenArchivo");
 const tituloImagen = document.getElementById("imagenTitulo");
 const botonImagen = document.getElementById("guardarImagen");
 
+
+if(botonImagen){
 
 botonImagen.onclick = async () => {
 
@@ -61,6 +62,7 @@ cargarImagenes();
 
 };
 
+}
 
 
 
@@ -72,6 +74,8 @@ const archivoVideo = document.getElementById("videoArchivo");
 const tituloVideo = document.getElementById("videoTitulo");
 const botonVideo = document.getElementById("guardarVideo");
 
+
+if(botonVideo){
 
 botonVideo.onclick = async () => {
 
@@ -127,6 +131,7 @@ cargarVideos();
 
 };
 
+}
 
 
 
@@ -135,6 +140,11 @@ cargarVideos();
 // ======================
 
 async function cargarImagenes(){
+
+const lista = document.getElementById("listaImagenes");
+
+if(!lista) return;
+
 
 const { data, error } = await supabase
 .from("galeria")
@@ -146,9 +156,6 @@ if(error){
 console.log(error);
 return;
 }
-
-
-const lista = document.getElementById("listaImagenes");
 
 
 lista.innerHTML="";
@@ -199,13 +206,16 @@ cargarImagenes();
 
 
 
-
-
 // ======================
 // MOSTRAR VIDEOS
 // ======================
 
 async function cargarVideos(){
+
+
+const lista = document.getElementById("listaVideos");
+
+if(!lista) return;
 
 
 const { data, error } = await supabase
@@ -219,9 +229,6 @@ console.log(error);
 return;
 }
 
-
-
-const lista = document.getElementById("listaVideos");
 
 
 lista.innerHTML="";
@@ -275,124 +282,3 @@ await supabase
 cargarVideos();
 
 };
-
-
-
-
-// ======================
-// TESTIMONIOS
-// ======================
-
-async function cargarTestimonios(){
-
-
-const lista = document.getElementById("listaTestimonios");
-
-
-if(!lista) return;
-
-
-
-const { data, error } = await supabase
-.from("testimonios")
-.select("*")
-.eq("aprobado", false)
-.order("id",{ascending:false});
-
-
-
-if(error){
-console.log(error);
-return;
-}
-
-
-
-lista.innerHTML="";
-
-
-
-data.forEach(testimonio=>{
-
-
-lista.innerHTML += `
-
-<div class="item">
-
-<h3>${testimonio.nombre}</h3>
-
-<p>${testimonio.evento || ""}</p>
-
-<p>${testimonio.comentario}</p>
-
-<p>⭐ ${testimonio.estrellas}</p>
-
-
-<button onclick="aprobarTestimonio(${testimonio.id})">
-Aprobar
-</button>
-
-
-<button class="borrar" onclick="borrarTestimonio(${testimonio.id})">
-Borrar
-</button>
-
-
-</div>
-
-`;
-
-});
-
-
-}
-
-
-
-
-window.aprobarTestimonio = async function(id){
-
-
-await supabase
-.from("testimonios")
-.update({
-aprobado:true
-})
-.eq("id",id);
-
-
-cargarTestimonios();
-
-};
-
-
-
-
-window.borrarTestimonio = async function(id){
-
-
-if(!confirm("¿Borrar testimonio?")) return;
-
-
-await supabase
-.from("testimonios")
-.delete()
-.eq("id",id);
-
-
-cargarTestimonios();
-
-};
-
-
-
-
-// ======================
-// CARGAR AL ABRIR
-// ======================
-
-cargarImagenes();
-
-cargarVideos();
-
-cargarTestimonios();
