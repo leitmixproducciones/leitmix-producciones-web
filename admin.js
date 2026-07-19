@@ -494,13 +494,21 @@ Borrar
 
 window.confirmarReserva = async function(id){
 
-await supabase
+const { error } = await supabase
 .from("reservas")
 .update({
 estado:"Confirmada"
 })
 .eq("id",id);
 
+
+if(error){
+alert(error.message);
+return;
+}
+
+
+alert("Reserva confirmada");
 
 cargarReservas();
 
@@ -513,19 +521,20 @@ window.borrarReserva = async function(id){
 if(!confirm("¿Borrar reserva?")) return;
 
 
-await supabase
+const { error } = await supabase
 .from("reservas")
 .delete()
 .eq("id",id);
 
 
+if(error){
+alert(error.message);
+return;
+}
+
+
+alert("Reserva borrada");
+
 cargarReservas();
 
 };
-
-
-
-// CARGAR RESERVAS
-
-cargarReservas();
-
