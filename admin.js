@@ -420,3 +420,112 @@ cargarImagenes();
 cargarVideos();
 
 cargarTestimonios();
+
+// ======================
+// RESERVAS
+// ======================
+
+async function cargarReservas(){
+
+const lista = document.getElementById("listaReservas");
+
+if(!lista) return;
+
+
+const { data, error } = await supabase
+.from("reservas")
+.select("*")
+.order("id",{ascending:false});
+
+
+if(error){
+console.log(error);
+return;
+}
+
+
+lista.innerHTML="";
+
+
+data.forEach(reserva=>{
+
+
+lista.innerHTML += `
+
+<div class="item">
+
+<h3>${reserva.nombre}</h3>
+
+<p>📞 ${reserva.telefono}</p>
+
+<p>📍 ${reserva.localidad}</p>
+
+<p>🎉 Evento: ${reserva.evento}</p>
+
+<p>📅 Fecha: ${reserva.fecha}</p>
+
+<p>📝 ${reserva.comentarios || ""}</p>
+
+<p>Estado: ${reserva.estado || "Pendiente"}</p>
+
+
+<button onclick="confirmarReserva(${reserva.id})">
+Confirmar
+</button>
+
+
+<button class="borrar" onclick="borrarReserva(${reserva.id})">
+Borrar
+</button>
+
+
+</div>
+
+`;
+
+});
+
+}
+
+
+// ======================
+// ACCIONES RESERVAS
+// ======================
+
+window.confirmarReserva = async function(id){
+
+await supabase
+.from("reservas")
+.update({
+estado:"Confirmada"
+})
+.eq("id",id);
+
+
+cargarReservas();
+
+};
+
+
+
+window.borrarReserva = async function(id){
+
+if(!confirm("¿Borrar reserva?")) return;
+
+
+await supabase
+.from("reservas")
+.delete()
+.eq("id",id);
+
+
+cargarReservas();
+
+};
+
+
+
+// CARGAR RESERVAS
+
+cargarReservas();
+
