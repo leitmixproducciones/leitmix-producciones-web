@@ -538,3 +538,6 @@ alert("Reserva borrada");
 cargarReservas();
 
 };
+
+// INICIAR RESERVAS
+cargarReservas();
