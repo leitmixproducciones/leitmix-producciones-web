@@ -203,7 +203,6 @@ cargarImagenes();
 
 
 
-
 // ======================
 // VIDEOS
 // ======================
@@ -257,10 +256,7 @@ Borrar
 });
 
 
-}
-
-
-
+                                               }
 window.borrarVideo = async function(id){
 
 if(!confirm("¿Borrar video?")) return;
@@ -322,107 +318,4 @@ lista.innerHTML += `
 
 
 <p>
-${testimonio.aprobado ? "🟢 Publicado" : "🟡 Pendiente"}
-</p>
-
-
-${
-testimonio.aprobado
-
-?
-
-`<button onclick="ocultarTestimonio(${testimonio.id})">
-Ocultar
-</button>`
-
-:
-
-`<button onclick="aprobarTestimonio(${testimonio.id})">
-Aprobar
-</button>`
-
-}
-
-
-<button class="borrar" onclick="borrarTestimonio(${testimonio.id})">
-Borrar
-</button>
-
-
-</div>
-
-`;
-
-});
-
-
-}
-
-
-
-
-window.aprobarTestimonio = async function(id){
-
-await supabase
-.from("testimonios")
-.update({
-aprobado:true
-})
-.eq("id",id);
-
-
-cargarTestimonios();
-
-};
-
-
-
-window.ocultarTestimonio = async function(id){
-
-await supabase
-.from("testimonios")
-.update({
-aprobado:false
-})
-.eq("id",id);
-
-
-cargarTestimonios();
-
-};
-
-
-
-window.borrarTestimonio = async function(id){
-
-if(!confirm("¿Borrar testimonio?")) return;
-
-const { error } = await supabase
-.from("testimonios")
-.delete()
-.eq("id", id)
-.select();
-
-if(error){
-alert(error.message);
-console.log(error);
-return;
-}
-
-alert("Testimonio borrado");
-
-cargarTestimonios();
-
-};
-
-
-
-// ======================
-// INICIO
-// ======================
-
-cargarImagenes();
-
-cargarVideos();
-
-cargarTestimonios();
+${testimonio.aprobado ?
