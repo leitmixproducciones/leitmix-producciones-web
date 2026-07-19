@@ -1,3 +1,4 @@
+import { supabase } from "./supabase.js";
 // LEITMIX PRODUCCIONES
 // SCRIPT PRINCIPAL
 
