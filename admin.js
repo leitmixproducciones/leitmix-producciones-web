@@ -663,10 +663,6 @@ lista.innerHTML+=`
 
 <div class="item">
 
-<h3>🧾 ${recibo.numero_recibo}</h3>
-
-<p>👤 ${recibo.nombre}</p>
-
 <p>🎉 ${recibo.evento}</p>
 
 <p>💰 $${Number(recibo.importe).toLocaleString("es-AR")}</p>
@@ -680,6 +676,8 @@ lista.innerHTML+=`
 </p>
 
 </div>
+
+`;
 
 });
 
