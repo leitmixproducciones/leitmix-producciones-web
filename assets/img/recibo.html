@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Recibo - Leitmix Producciones</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins,sans-serif;
+}
+
+body{
+
+background:#080808;
+
+padding:30px;
+
+color:#fff;
+
+}
+
+.recibo{
+
+max-width:900px;
+
+margin:auto;
+
+background:#151515;
+
+border-radius:20px;
+
+padding:40px;
+
+border:3px solid #f5b400;
+
+box-shadow:0 0 25px rgba(245,180,0,.35);
+
+}
+
+.encabezado{
+
+text-align:center;
+
+margin-bottom:30px;
+
+}
+
+.encabezado img{
+
+width:130px;
+
+margin-bottom:15px;
+
+}
+
+.encabezado h1{
+
+color:#f5b400;
+
+font-size:34px;
+
+}
+
+.encabezado h2{
+
+font-size:18px;
+
+font-weight:400;
+
+margin-top:8px;
+
+}
+
+.numero{
+
+margin-top:20px;
+
+font-size:20px;
+
+font-weight:bold;
+
+color:#f5b400;
+
+}
+
+.seccion{
+
+margin-top:30px;
+
+}
+
+.seccion h3{
+
+color:#f5b400;
+
+margin-bottom:15px;
+
+border-bottom:2px solid #333;
+
+padding-bottom:8px;
+
+}
+
+.dato{
+
+display:flex;
+
+justify-content:space-between;
+
+margin:12px 0;
+
+font-size:17px;
+
+}
+
+.total{
+
+margin-top:35px;
+
+background:#f5b400;
+
+color:#000;
+
+padding:20px;
+
+border-radius:12px;
+
+text-align:center;
+
+font-size:34px;
+
+font-weight:bold;
+
+}
+
+.botones{
+
+margin-top:35px;
+
+display:flex;
+
+gap:20px;
+
+}
+
+.botones button{
+
+flex:1;
+
+padding:16px;
+
+border:none;
+
+border-radius:10px;
+
+font-size:18px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+}
+
+.imprimir{
+
+background:#f5b400;
+
+color:#000;
+
+}
+
+.pdf{
+
+background:#222;
+
+color:#fff;
+
+}
+
+.footer{
+
+margin
+
+  <div class="seccion">
+
+<h3>Datos del Cliente</h3>
+
+<div class="dato">
+<strong>Nombre:</strong>
+<span id="nombre"></span>
+</div>
+
+<div class="dato">
+<strong>Teléfono:</strong>
+<span id="telefono"></span>
+</div>
+
+<div class="dato">
+<strong>Evento:</strong>
+<span id="evento"></span>
+</div>
+
+<div class="dato">
+<strong>Fecha del Evento:</strong>
+<span id="fechaEvento"></span>
+</div>
+
+</div>
+
+<div class="seccion">
+
+<h3>Detalle del Pago</h3>
+
+<div class="dato">
+<strong>Concepto:</strong>
+<span id="concepto"></span>
+</div>
+
+<div class="dato">
+<strong>Forma de Pago:</strong>
+<span id="formaPago"></span>
+</div>
+
+<div class="dato">
+<strong>Saldo Pendiente:</strong>
+<span id="saldoPendiente"></span>
+</div>
+
+<div class="dato">
+<strong>Observaciones:</strong>
+<span id="observaciones"></span>
+</div>
+
+</div>
+
+<div class="total">
+
+$ <span id="importe"></span>
+
+</div>
+
+<div class="botones">
+
+<button class="imprimir" onclick="window.print()">
+🖨️ Imprimir
+</button>
+
+<button class="pdf" id="descargarPDF">
+📄 Descargar PDF
+</button>
+
+</div>
+
+<div class="footer">
+
+<strong>Leitmix Producciones</strong><br>
+
+DJ • Sonido • Iluminación • Eventos Sociales<br>
+
+WhatsApp | Instagram | Buenos Aires
+
+</div>
+
+</div>
+
+<script type="module" src="recibo.js"></script>
+
+</body>
+
+</html>
