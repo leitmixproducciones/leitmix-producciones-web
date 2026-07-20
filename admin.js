@@ -673,11 +673,15 @@ lista.innerHTML+=`
 
 <p>📅 ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
 
+<p>
+<a href="recibo.html?id=${recibo.id}" target="_blank">
+📄 Ver recibo
+</a>
+</p>
+
 </div>
 
 `;
-
-});
 // ======================
 // INICIO
 // ======================
