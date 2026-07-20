@@ -72,32 +72,31 @@ data.forma_pago;
 
 
 
-// NUEVO: TOTAL DEL EVENTO
+// TOTAL DEL EVENTO
 
 document.getElementById("total").textContent =
 "$ " + Number(data.total || 0).toLocaleString("es-AR");
 
 
 
-// NUEVO: IMPORTE RECIBIDO
+// IMPORTE RECIBIDO
 
-document.getElementById ("importe").textContent =
+document.getElementById("importe").textContent =
 "$ " + Number(data.importe || 0).toLocaleString("es-AR");
 
 
+
+// SALDO PENDIENTE
 
 document.getElementById("saldoPendiente").textContent =
 "$ " + Number(data.saldo_pendiente || 0).toLocaleString("es-AR");
 
 
 
+// OBSERVACIONES
+
 document.getElementById("observaciones").textContent =
 data.observaciones || "-";
-
-
-
-document.getElementById("importe").textContent =
-Number(data.importe || 0).toLocaleString("es-AR");
 
 
 
