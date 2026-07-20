@@ -291,7 +291,6 @@ lista.innerHTML="";
 
 data.forEach(testimonio=>{
 
-
 lista.innerHTML+=`
 
 <div class="item">
@@ -380,89 +379,8 @@ if(!confirm("¿Borrar testimonio?"))return;
 
 
 await supabase
-.from("testimonios")
-.delete()
-.eq("id",id);
 
-
-cargarTestimonios();
-
-};
-
-
-
-
-// ======================
-// RESERVAS
-// ======================
-
-async function cargarReservas(){
-
-const lista=document.getElementById("listaReservas");
-
-if(!lista)return;
-
-
-const {data,error}=await supabase
-.from("reservas")
-.select("*")
-.order("id",{ascending:false});
-
-
-if(error){
-console.log(error);
-return;
-}
-
-
-lista.innerHTML="";
-
-
-data.forEach(reserva=>{
-
-
-lista.innerHTML+=`
-
-<div class="item">
-
-<h3>${reserva.nombre}</h3>
-
-<p>📞 ${reserva.telefono}</p>
-
-<p>📍 ${reserva.localidad}</p>
-
-<p>🎉 Evento: ${reserva.evento}</p>
-
-<p>📅 Fecha: ${reserva.fecha}</p>
-
-<p>📝 ${reserva.comentarios || ""}</p>
-
-<p>Estado: ${reserva.estado || "Pendiente"}</p>
-
-
-<button onclick="confirmarReserva(${reserva.id})">
-Confirmar
-</button>
-
-
-<button onclick="emitirRecibo(${reserva.id})">
-🧾 Emitir recibo
-</button>
-
-
-<button class="borrar" onclick="borrarReserva(${reserva.id})">
-Borrar
-</button>
-
-
-</div>
-
-`;
-
-});
-
-}
-window.borrarImagen=async function(id){
+  window.borrarImagen=async function(id){
 
 if(!confirm("¿Borrar imagen?"))return;
 
@@ -482,6 +400,7 @@ return;
 cargarImagenes();
 
 };
+
 
 // ======================
 // ACCIONES RESERVAS
@@ -536,13 +455,8 @@ cargarReservas();
 
 
 
-
 // ======================
-// RECIBOS
-// ======================
-
-// ======================
-// CREAR RECIBO DESDE PANEL
+// RECIBOS DESDE PANEL
 // ======================
 
 let reservaSeleccionada = null;
@@ -558,8 +472,10 @@ const {data,error}=await supabase
 
 
 if(error){
+
 alert(error.message);
 return;
+
 }
 
 
@@ -567,6 +483,7 @@ reservaSeleccionada=data;
 
 
 alert("Reserva seleccionada: " + data.nombre);
+
 
 };
 
@@ -582,7 +499,7 @@ botonCrearRecibo.onclick=async()=>{
 
 if(!reservaSeleccionada){
 
-alert("Primero seleccioná una reserva con Emitir recibo");
+alert("Primero seleccioná una reserva");
 
 return;
 
@@ -600,7 +517,6 @@ document.getElementById("reciboImporte").value
 
 
 const saldo_pendiente=total-importe;
-
 
 
 const numero=
@@ -647,7 +563,6 @@ fecha_pago:new Date()
 if(error){
 
 alert(error.message);
-
 return;
 
 }
@@ -656,7 +571,9 @@ return;
 alert("Recibo creado: " + numero);
 
 
-document.querySelectorAll("#reciboTotal,#reciboImporte,#reciboConcepto,#reciboFormaPago,#reciboObservaciones")
+document.querySelectorAll(
+"#reciboTotal,#reciboImporte,#reciboConcepto,#reciboFormaPago,#reciboObservaciones"
+)
 .forEach(e=>e.value="");
 
 
@@ -666,109 +583,6 @@ cargarRecibos();
 };
 
 }
-
-const {data,error}=await supabase
-.from("reservas")
-.select("*")
-.eq("id",id)
-.single();
-
-
-if(error){
-alert(error.message);
-return;
-}
-
-
-// NUEVO: CALCULO AUTOMATICO
-
-const total = Number(prompt("Importe total del evento:"));
-
-if(!total)return;
-
-
-const importe = Number(prompt("Importe recibido:"));
-
-if(!importe)return;
-
-
-const saldo_pendiente = total - importe;
-
-
-
-const concepto=prompt(
-"Concepto: Seña / Pago parcial / Pago total"
-);
-
-
-const forma_pago=prompt(
-"Forma de pago:"
-);
-
-
-const observaciones=prompt(
-"Observaciones:"
-);
-
-
-
-const numero=
-"REC-" +
-new Date().getFullYear() +
-"-" +
-String(Date.now()).slice(-6);
-
-
-
-const {error:errorRecibo}=await supabase
-.from("recibos")
-.insert([{
-
-numero_recibo:numero,
-
-reserva_id:data.id,
-
-nombre:data.nombre,
-
-telefono:data.telefono,
-
-evento:data.evento,
-
-fecha_evento:data.fecha,
-
-total:total,
-
-importe:importe,
-
-concepto:concepto,
-
-forma_pago:forma_pago,
-
-saldo_pendiente:saldo_pendiente,
-
-observaciones:observaciones,
-
-fecha_pago:new Date()
-
-}]);
-
-
-
-if(errorRecibo){
-
-alert(errorRecibo.message);
-return;
-
-}
-
-
-
-alert(
-"Recibo creado: " + numero
-);
-
-
-};
 
 
 
@@ -790,8 +604,10 @@ const {data,error}=await supabase
 
 
 if(error){
+
 console.log(error);
 return;
+
 }
 
 
@@ -799,6 +615,7 @@ lista.innerHTML="";
 
 
 data.forEach(recibo=>{
+
 
 lista.innerHTML+=`
 
@@ -812,12 +629,10 @@ lista.innerHTML+=`
 
 <p>📌 Saldo: $${Number(recibo.saldo_pendiente).toLocaleString("es-AR")}</p>
 
-<p>📅 ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
-
-<p>
-📄<a href="../recibo.html?id=${recibo.id}" target="_blank">
+<p>📄 
+<a href="../recibo.html?id=${recibo.id}" target="_blank">
 Ver recibo
-</a>📄
+</a>
 </p>
 
 </div>
@@ -826,9 +641,14 @@ Ver recibo
 
 });
 
+
 }
 
 
+
+// ======================
+// CARGAR TODO
+// ======================
 
 cargarImagenes();
 
