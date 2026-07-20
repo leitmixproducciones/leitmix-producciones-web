@@ -36,6 +36,10 @@ throw error;
 }
 
 
+// PRUEBA
+alert("Importe recibido: " + data.importe);
+
+
 
 document.getElementById("numeroRecibo").textContent =
 "RECIBO N.º " + data.numero_recibo;
