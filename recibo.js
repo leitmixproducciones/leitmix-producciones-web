@@ -81,7 +81,7 @@ document.getElementById("total").textContent =
 
 // NUEVO: IMPORTE RECIBIDO
 
-document.getElementById("importeRecibido").textContent =
+document.getElementById ("importe").textContent =
 "$ " + Number(data.importe || 0).toLocaleString("es-AR");
 
 
