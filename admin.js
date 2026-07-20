@@ -656,7 +656,8 @@ return;
 
 lista.innerHTML="";
 
-data.forEach(recibo=>{
+
+  data.forEach(recibo=>{
 
 lista.innerHTML+=`
 
@@ -677,8 +678,6 @@ lista.innerHTML+=`
 `;
 
 });
-
-}
 // ======================
 // INICIO
 // ======================
