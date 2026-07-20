@@ -671,7 +671,8 @@ lista.innerHTML+=`
 
 <p>
 
-📄<a href="recibo.html?id=${recibo.id}" ../target="_blank"> Ver recibo
+📄<a href="../recibo.html?id=${recibo.id}" target="_blank"> Ver recibo
+</a>📄
 </a>
 </p>
 
