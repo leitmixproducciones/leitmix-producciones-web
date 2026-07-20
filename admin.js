@@ -40,15 +40,12 @@ const { data } = supabase.storage
 .getPublicUrl("imagenes/" + nombreArchivo);
 
 
-
 const { error:errorDB } = await supabase
 .from("galeria")
-.insert([
-{
+.insert([{
 Imagen:data.publicUrl,
 Titulo:tituloImagen.value
-}
-]);
+}]);
 
 
 if(errorDB){
@@ -110,15 +107,12 @@ const { data } = supabase.storage
 .getPublicUrl("videos/" + nombreArchivo);
 
 
-
 const { error:errorDB } = await supabase
 .from("videos")
-.insert([
-{
+.insert([{
 Titulo:tituloVideo.value,
 Url:data.publicUrl
-}
-]);
+}]);
 
 
 if(errorDB){
@@ -186,6 +180,28 @@ Borrar
 });
 
 }
+
+
+window.borrarImagen=async function(id){
+
+if(!confirm("¿Borrar imagen?"))return;
+
+
+const {error}=await supabase
+.from("galeria")
+.delete()
+.eq("id",id);
+
+
+if(error){
+alert(error.message);
+return;
+}
+
+
+cargarImagenes();
+
+};
 
 // ======================
 // VIDEOS
@@ -262,7 +278,6 @@ cargarVideos();
 
 
 
-
 // ======================
 // TESTIMONIOS
 // ======================
@@ -290,6 +305,7 @@ lista.innerHTML="";
 
 
 data.forEach(testimonio=>{
+
 
 lista.innerHTML+=`
 
@@ -343,12 +359,18 @@ Borrar
 
 window.aprobarTestimonio=async function(id){
 
-await supabase
+const {error}=await supabase
 .from("testimonios")
 .update({
 aprobado:true
 })
 .eq("id",id);
+
+
+if(error){
+alert(error.message);
+return;
+}
 
 
 cargarTestimonios();
@@ -359,12 +381,18 @@ cargarTestimonios();
 
 window.ocultarTestimonio=async function(id){
 
-await supabase
+const {error}=await supabase
 .from("testimonios")
 .update({
 aprobado:false
 })
 .eq("id",id);
+
+
+if(error){
+alert(error.message);
+return;
+}
 
 
 cargarTestimonios();
@@ -378,15 +406,8 @@ window.borrarTestimonio=async function(id){
 if(!confirm("¿Borrar testimonio?"))return;
 
 
-await supabase
-
-  window.borrarImagen=async function(id){
-
-if(!confirm("¿Borrar imagen?"))return;
-
-
 const {error}=await supabase
-.from("galeria")
+.from("testimonios")
 .delete()
 .eq("id",id);
 
@@ -397,11 +418,82 @@ return;
 }
 
 
-cargarImagenes();
+cargarTestimonios();
 
 };
 
 
+
+// ======================
+// RESERVAS
+// ======================
+
+async function cargarReservas(){
+
+const lista=document.getElementById("listaReservas");
+
+if(!lista)return;
+
+
+const {data,error}=await supabase
+.from("reservas")
+.select("*")
+.order("id",{ascending:false});
+
+
+if(error){
+console.log(error);
+return;
+}
+
+
+lista.innerHTML="";
+
+
+data.forEach(reserva=>{
+
+
+lista.innerHTML+=`
+
+<div class="item">
+
+<h3>${reserva.nombre}</h3>
+
+<p>📞 ${reserva.telefono}</p>
+
+<p>📍 ${reserva.localidad}</p>
+
+<p>🎉 Evento: ${reserva.evento}</p>
+
+<p>📅 Fecha: ${reserva.fecha}</p>
+
+<p>📝 ${reserva.comentarios || ""}</p>
+
+<p>Estado: ${reserva.estado || "Pendiente"}</p>
+
+
+<button onclick="confirmarReserva(${reserva.id})">
+Confirmar
+</button>
+
+
+<button onclick="emitirRecibo(${reserva.id})">
+🧾 Emitir recibo
+</button>
+
+
+<button class="borrar" onclick="borrarReserva(${reserva.id})">
+Borrar
+</button>
+
+
+</div>
+
+`;
+
+});
+
+}
 // ======================
 // ACCIONES RESERVAS
 // ======================
@@ -459,10 +551,10 @@ cargarReservas();
 // RECIBOS DESDE PANEL
 // ======================
 
-let reservaSeleccionada = null;
+let reservaSeleccionada=null;
 
 
-window.emitirRecibo = async function(id){
+window.emitirRecibo=async function(id){
 
 const {data,error}=await supabase
 .from("reservas")
@@ -482,10 +574,15 @@ return;
 reservaSeleccionada=data;
 
 
-alert("Reserva seleccionada: " + data.nombre);
+document.getElementById("reciboNombre").value=data.nombre || "";
+document.getElementById("reciboEvento").value=data.evento || "";
+document.getElementById("reciboFecha").value=data.fecha || "";
 
+
+alert("Reserva cargada para recibo");
 
 };
+
 
 
 
@@ -493,6 +590,7 @@ const botonCrearRecibo=document.getElementById("crearRecibo");
 
 
 if(botonCrearRecibo){
+
 
 botonCrearRecibo.onclick=async()=>{
 
@@ -516,7 +614,17 @@ document.getElementById("reciboImporte").value
 );
 
 
+if(!total || !importe){
+
+alert("Completá los importes");
+
+return;
+
+}
+
+
 const saldo_pendiente=total-importe;
+
 
 
 const numero=
@@ -547,13 +655,16 @@ total:total,
 
 importe:importe,
 
-concepto:document.getElementById("reciboConcepto").value,
+concepto:
+document.getElementById("reciboConcepto").value,
 
-forma_pago:document.getElementById("reciboFormaPago").value,
+forma_pago:
+document.getElementById("reciboFormaPago").value,
 
 saldo_pendiente:saldo_pendiente,
 
-observaciones:document.getElementById("reciboObservaciones").value,
+observaciones:
+document.getElementById("reciboObservaciones").value,
 
 fecha_pago:new Date()
 
@@ -563,12 +674,14 @@ fecha_pago:new Date()
 if(error){
 
 alert(error.message);
+
 return;
 
 }
 
 
 alert("Recibo creado: " + numero);
+
 
 
 document.querySelectorAll(
@@ -581,6 +694,7 @@ cargarRecibos();
 
 
 };
+
 
 }
 
@@ -603,59 +717,4 @@ const {data,error}=await supabase
 .order("id",{ascending:false});
 
 
-if(error){
-
-console.log(error);
-return;
-
-}
-
-
-lista.innerHTML="";
-
-
-data.forEach(recibo=>{
-
-
-lista.innerHTML+=`
-
-<div class="item">
-
-<p>🎉 ${recibo.evento}</p>
-
-<p>💰 Total: $${Number(recibo.total).toLocaleString("es-AR")}</p>
-
-<p>💵 Recibido: $${Number(recibo.importe).toLocaleString("es-AR")}</p>
-
-<p>📌 Saldo: $${Number(recibo.saldo_pendiente).toLocaleString("es-AR")}</p>
-
-<p>📄 
-<a href="../recibo.html?id=${recibo.id}" target="_blank">
-Ver recibo
-</a>
-</p>
-
-</div>
-
-`;
-
-});
-
-
-}
-
-
-
-// ======================
-// CARGAR TODO
-// ======================
-
-cargarImagenes();
-
-cargarVideos();
-
-cargarTestimonios();
-
-cargarReservas();
-
-cargarRecibos();
+if
