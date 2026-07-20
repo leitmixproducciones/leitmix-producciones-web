@@ -541,8 +541,131 @@ cargarReservas();
 // RECIBOS
 // ======================
 
-window.emitirRecibo=async function(id){
+// ======================
+// CREAR RECIBO DESDE PANEL
+// ======================
 
+let reservaSeleccionada = null;
+
+
+window.emitirRecibo = async function(id){
+
+const {data,error}=await supabase
+.from("reservas")
+.select("*")
+.eq("id",id)
+.single();
+
+
+if(error){
+alert(error.message);
+return;
+}
+
+
+reservaSeleccionada=data;
+
+
+alert("Reserva seleccionada: " + data.nombre);
+
+};
+
+
+
+const botonCrearRecibo=document.getElementById("crearRecibo");
+
+
+if(botonCrearRecibo){
+
+botonCrearRecibo.onclick=async()=>{
+
+
+if(!reservaSeleccionada){
+
+alert("Primero seleccioná una reserva con Emitir recibo");
+
+return;
+
+}
+
+
+const total=Number(
+document.getElementById("reciboTotal").value
+);
+
+
+const importe=Number(
+document.getElementById("reciboImporte").value
+);
+
+
+const saldo_pendiente=total-importe;
+
+
+
+const numero=
+"REC-" +
+new Date().getFullYear() +
+"-" +
+String(Date.now()).slice(-6);
+
+
+
+const {error}=await supabase
+.from("recibos")
+.insert([{
+
+numero_recibo:numero,
+
+reserva_id:reservaSeleccionada.id,
+
+nombre:reservaSeleccionada.nombre,
+
+telefono:reservaSeleccionada.telefono,
+
+evento:reservaSeleccionada.evento,
+
+fecha_evento:reservaSeleccionada.fecha,
+
+total:total,
+
+importe:importe,
+
+concepto:document.getElementById("reciboConcepto").value,
+
+forma_pago:document.getElementById("reciboFormaPago").value,
+
+saldo_pendiente:saldo_pendiente,
+
+observaciones:document.getElementById("reciboObservaciones").value,
+
+fecha_pago:new Date()
+
+}]);
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+alert("Recibo creado: " + numero);
+
+
+document.querySelectorAll("#reciboTotal,#reciboImporte,#reciboConcepto,#reciboFormaPago,#reciboObservaciones")
+.forEach(e=>e.value="");
+
+
+cargarRecibos();
+
+
+};
+
+}
 
 const {data,error}=await supabase
 .from("reservas")
