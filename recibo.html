@@ -10,6 +10,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
+
 <style>
 
 *{
@@ -122,8 +123,68 @@ color:#aaa;
 }
 
 
-</style>
+/* AJUSTE PARA IMPRIMIR EN UNA SOLA HOJA */
 
+@media print {
+
+body{
+background:white;
+padding:0;
+color:black;
+}
+
+.recibo{
+width:100%;
+max-width:none;
+padding:20px;
+margin:0;
+box-shadow:none;
+border-radius:0;
+}
+
+.encabezado img{
+width:90px;
+}
+
+.encabezado h1{
+font-size:24px;
+}
+
+.encabezado h2{
+font-size:16px;
+}
+
+.seccion{
+margin-top:15px;
+}
+
+.dato{
+margin:6px 0;
+font-size:14px;
+}
+
+.total{
+margin-top:20px;
+padding:12px;
+font-size:26px;
+}
+
+.botones{
+display:none;
+}
+
+.footer{
+margin-top:20px;
+font-size:12px;
+}
+
+.recibo{
+page-break-inside:avoid;
+}
+
+}
+
+</style>
 </head>
 
 
