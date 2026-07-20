@@ -1,4 +1,4 @@
-import { supabase } from "./supabase.js";  
+import { supabase } from "./supabase.js";
 
 
 // ======================
@@ -187,27 +187,6 @@ Borrar
 
 }
 
-
-window.borrarImagen=async function(id){
-
-if(!confirm("¿Borrar imagen?"))return;
-
-
-const {error}=await supabase
-.from("galeria")
-.delete()
-.eq("id",id);
-
-
-if(error){
-alert(error.message);
-return;
-}
-
-
-cargarImagenes();
-
-};
 // ======================
 // VIDEOS
 // ======================
@@ -412,6 +391,7 @@ cargarTestimonios();
 
 
 
+
 // ======================
 // RESERVAS
 // ======================
@@ -482,6 +462,27 @@ Borrar
 });
 
 }
+window.borrarImagen=async function(id){
+
+if(!confirm("¿Borrar imagen?"))return;
+
+
+const {error}=await supabase
+.from("galeria")
+.delete()
+.eq("id",id);
+
+
+if(error){
+alert(error.message);
+return;
+}
+
+
+cargarImagenes();
+
+};
+
 // ======================
 // ACCIONES RESERVAS
 // ======================
@@ -556,10 +557,20 @@ return;
 }
 
 
+// NUEVO: CALCULO AUTOMATICO
 
-const importe=prompt("Importe recibido:");
+const total = Number(prompt("Importe total del evento:"));
+
+if(!total)return;
+
+
+const importe = Number(prompt("Importe recibido:"));
 
 if(!importe)return;
+
+
+const saldo_pendiente = total - importe;
+
 
 
 const concepto=prompt(
@@ -602,13 +613,15 @@ evento:data.evento,
 
 fecha_evento:data.fecha,
 
+total:total,
+
 importe:importe,
 
 concepto:concepto,
 
 forma_pago:forma_pago,
 
-saldo_pendiente:null,
+saldo_pendiente:saldo_pendiente,
 
 observaciones:observaciones,
 
@@ -634,6 +647,8 @@ alert(
 
 };
 
+
+
 // ======================
 // RECIBOS EMITIDOS
 // ======================
@@ -644,20 +659,23 @@ const lista=document.getElementById("listaRecibos");
 
 if(!lista)return;
 
+
 const {data,error}=await supabase
 .from("recibos")
 .select("*")
 .order("id",{ascending:false});
+
 
 if(error){
 console.log(error);
 return;
 }
 
+
 lista.innerHTML="";
 
 
-  data.forEach(recibo=>{
+data.forEach(recibo=>{
 
 lista.innerHTML+=`
 
@@ -665,15 +683,18 @@ lista.innerHTML+=`
 
 <p>🎉 ${recibo.evento}</p>
 
-<p>💰 $${Number(recibo.importe).toLocaleString("es-AR")}</p>
+<p>💰 Total: $${Number(recibo.total).toLocaleString("es-AR")}</p>
+
+<p>💵 Recibido: $${Number(recibo.importe).toLocaleString("es-AR")}</p>
+
+<p>📌 Saldo: $${Number(recibo.saldo_pendiente).toLocaleString("es-AR")}</p>
 
 <p>📅 ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
 
 <p>
-
-📄<a href="../recibo.html?id=${recibo.id}" target="_blank"> Ver recibo
+📄<a href="../recibo.html?id=${recibo.id}" target="_blank">
+Ver recibo
 </a>📄
-</a>
 </p>
 
 </div>
@@ -683,6 +704,8 @@ lista.innerHTML+=`
 });
 
 }
+
+
 
 cargarImagenes();
 
