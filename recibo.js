@@ -156,19 +156,25 @@ document.getElementById("total").textContent =
 
 
 
+
 // IMPORTE RECIBIDO
 
+const importe = Number(String(data.importe).replace(/\D/g,"")) || 0;
+
 document.getElementById("importe").textContent =
-"$ " + Number(data.importe || 0).toLocaleString("es-AR");
+"$ " + importe.toLocaleString("es-AR");
+
 
 document.getElementById("importeTotal").textContent =
-Number(data.importe || 0).toLocaleString("es-AR");
+importe.toLocaleString("es-AR");
+
+
 // SALDO PENDIENTE
 
+const saldo = Number(String(data.saldo_pendiente).replace(/\D/g,"")) || 0;
+
 document.getElementById("saldoPendiente").textContent =
-"$ " + Number(data.saldo_pendiente || 0).toLocaleString("es-AR");
-
-
+"$ " + saldo.toLocaleString("es-AR");
 
 // OBSERVACIONES
 
