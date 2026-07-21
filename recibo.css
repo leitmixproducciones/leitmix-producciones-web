@@ -6,7 +6,7 @@
 
     @page {
         size: A4;
-        margin: 8mm;
+        margin: 5mm;
     }
 
     body {
@@ -20,52 +20,57 @@
         width:100%;
         max-width:none;
 
-        padding:10px !important; 
+        padding:5px !important;
         margin:0 !important;
 
         border-radius:0;
         box-shadow:none;
 
         transform:none !important;
+
+        page-break-inside: avoid;
     }
 
 
     #qrWhatsapp {
 
-        width:80px !important;
-        height:80px !important;
+        width:60px !important;
+        height:60px !important;
 
     }
 
-}
 
-@media print{
+    h1, h2, h3 {
+        margin:3px 0 !important;
+    }
 
-footer,
-.pie,
-.footer{
 
-    margin-top:5px !important;
-    padding-top:5px !important;
-    line-height:1.1 !important;
-    font-size:11px !important;
+    p {
+        margin:3px 0 !important;
+        line-height:1.1 !important;
+    }
 
-}
 
-}
+    table {
+        margin:5px 0 !important;
+    }
 
-@media print{
 
-body{
-    color:#000 !important;
-}
+    footer,
+    .pie,
+    .footer {
 
-.recibo{
-    color:#000 !important;
-}
+        margin-top:3px !important;
+        padding-top:3px !important;
+        line-height:1 !important;
+        font-size:10px !important;
 
-.recibo *{
-    color:#000 !important;
-}
+        page-break-inside: avoid;
+    }
+
+
+    * {
+        color:#000 !important;
+    }
 
 }
