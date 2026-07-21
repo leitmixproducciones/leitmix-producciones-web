@@ -809,8 +809,8 @@ lista.innerHTML+=`
 
 <p>
 
-<a href="recibo.html?id=${recibo.id}" target="_blank">
 
+<a href="../recibo.html?id=${recibo.id}" target="_blank">
 📄 Ver recibo
 
 </a>
