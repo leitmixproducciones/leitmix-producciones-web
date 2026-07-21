@@ -7,6 +7,9 @@
 
 <title>Panel Leitmix Producciones</title>
 
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#f5b400">
+
 <style>
 
 *{
@@ -234,7 +237,7 @@ padding-bottom:10px;
 
 </div>
 
-<div class="card">
+  <div class="card">
 
 <h2>🚀 Sistema de Gestión</h2>
 
@@ -382,7 +385,8 @@ Crear recibo
 
 </div>  
 
-  <div class="card">
+
+<div class="card">
 
 <h2>🧾 Crear Recibo Manual</h2>
 
@@ -414,7 +418,6 @@ Crear recibo
 <input id="manualObservaciones" placeholder="Observaciones">
 
 
-
 <button id="crearReciboManual">
 
 Crear recibo manual
@@ -424,9 +427,7 @@ Crear recibo manual
 
 </div>
 
-
-
-<div class="card">
+  <div class="card">
 
 <h2>🧾 Recibos emitidos</h2>
 
@@ -439,5 +440,21 @@ Crear recibo manual
 <script type="module" src="../admin.js"></script>
 
 
+<script>
+
+if ("serviceWorker" in navigator) {
+
+window.addEventListener("load", () => {
+
+navigator.serviceWorker.register("../service-worker.js");
+
+});
+
+}
+
+</script>
+
+
 </body>
 </html>
+  
