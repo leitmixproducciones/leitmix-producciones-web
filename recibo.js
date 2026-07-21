@@ -91,9 +91,10 @@ instagram.textContent=config.instagram || "";
 }
 
 // Mostrar nombre del negocio debajo del QR
+
 const nombreQR = document.getElementById("nombreNegocioQR");
 
-if(nombreQR){
+if(nombreQR && config){
     nombreQR.textContent = config.nombre_negocio || "";
 }
 
