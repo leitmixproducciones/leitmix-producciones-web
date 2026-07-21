@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ingreso - Leitmix Panel</title>
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#050505;
+    font-family:Arial,sans-serif;
+    color:white;
+}
+
+.login{
+    width:90%;
+    max-width:350px;
+    background:#111;
+    padding:25px;
+    border-radius:15px;
+    border:1px solid #f5b400;
+}
+
+h2{
+    text-align:center;
+    color:#f5b400;
+}
+
+input,button{
+    width:100%;
+    padding:12px;
+    margin-top:12px;
+    border-radius:8px;
+    box-sizing:border-box;
+}
+
+input{
+    background:#222;
+    border:1px solid #444;
+    color:white;
+}
+
+button{
+    background:#f5b400;
+    border:0;
+    font-weight:bold;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login">
+
+<h2>Leitmix Panel</h2>
+
+<input id="email" type="email" placeholder="Email">
+
+<input id="password" type="password" placeholder="Contraseña">
+
+<button id="entrar">Ingresar</button>
+
+<p id="mensaje"></p>
+
+</div>
+
+
+<script type="module">
+
+import { supabase } from "./supabase.js";
+
+
+document.getElementById("entrar").onclick = async ()=>{
+
+
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
+
+
+const {data,error}=await supabase.auth.signInWithPassword({
+
+email,
+password
+
+});
+
+
+if(error){
+
+document.getElementById("mensaje").textContent=error.message;
+
+return;
+
+}
+
+
+window.location.href="panel.html";
+
+
+};
+
+
+</script>
+
+
+</body>
+</html>
