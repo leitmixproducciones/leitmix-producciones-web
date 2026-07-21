@@ -377,10 +377,19 @@ lista.innerHTML+=`
 
 <p>${testimonio.comentario}</p>
 
+
+</div>
+
+`;
+
+});
+
+}
+
+
 // ======================
 // RESERVAS
 // ======================
-
 
 async function cargarReservas(){
 
