@@ -34,7 +34,61 @@ alert(error.message);
 throw error;
 
 }
+// ======================
+// CARGAR DATOS DEL NEGOCIO
+// ======================
 
+const {data:config,error:configError}=await supabase
+.from("configuracion")
+.select("*")
+.limit(1)
+.single();
+
+
+if(!configError && config){
+
+const logo=document.getElementById("logoNegocio");
+const nombreNegocio=document.getElementById("nombreNegocio");
+const whatsapp=document.getElementById("whatsappNegocio");
+const alias=document.getElementById("aliasPago");
+const instagram=document.getElementById("instagramNegocio");
+
+
+if(logo && config.logo){
+
+logo.src=config.logo;
+
+}
+
+
+if(nombreNegocio){
+
+nombreNegocio.textContent=config.nombre_negocio || "";
+
+}
+
+
+if(whatsapp){
+
+whatsapp.textContent=config.whatsapp || "";
+
+}
+
+
+if(alias){
+
+alias.textContent=config.alias_pago || "";
+
+}
+
+
+if(instagram){
+
+instagram.textContent=config.instagram || "";
+
+}
+
+}
 
 // PRUEBA
 alert("Importe recibido: " + data.importe);
