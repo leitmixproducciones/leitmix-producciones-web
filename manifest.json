@@ -7,10 +7,9 @@
   "theme_color": "#f5b400",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "assets/img/leitmix-logo.jpeg",
-      "sizes": "512x512",
-      "type": "image/jpeg"
-    }
-  ]
-}
+  {
+    "src": "assets/img/leitmix-promo.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }
+]
