@@ -114,7 +114,42 @@ alert("Configuración guardada correctamente");
 }
 
 cargarConfiguracion();
+// ======================
+// CARGAR LOGO GUARDADO
+// ======================
 
+async function cargarLogo(){
+
+const {data,error}=await supabase
+.from("configuracion")
+.select("logo")
+.limit(1)
+.single();
+
+
+if(error){
+console.log(error);
+return;
+}
+
+
+if(data && data.logo){
+
+const logo=document.getElementById("logoNegocio");
+
+
+if(logo){
+
+logo.src=data.logo;
+
+}
+
+}
+
+}
+
+
+cargarLogo();
 
 // ======================
 // SUBIR LOGO DEL NEGOCIO
