@@ -90,6 +90,24 @@ instagram.textContent=config.instagram || "";
 
 }
 
+// Mostrar nombre del negocio debajo del QR
+const nombreQR = document.getElementById("nombreNegocioQR");
+
+if(nombreQR){
+    nombreQR.textContent = config.nombre_negocio || "";
+}
+
+// Generar QR del WhatsApp
+const qr = document.getElementById("qrWhatsapp");
+
+if(qr && config.whatsapp){
+
+    const numero = config.whatsapp.replace(/\D/g,"");
+
+    qr.src =
+    "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://wa.me/" + numero;
+
+}
 // PRUEBA
 alert("Importe recibido: " + data.importe);
 
