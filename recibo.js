@@ -137,13 +137,14 @@ document.getElementById("total").textContent =
 
 
 
+
 // IMPORTE RECIBIDO
 
 document.getElementById("importe").textContent =
 "$ " + Number(data.importe || 0).toLocaleString("es-AR");
 
-
-
+document.getElementById("importeTotal").textContent =
+Number(data.importe || 0).toLocaleString("es-AR");
 // SALDO PENDIENTE
 
 document.getElementById("saldoPendiente").textContent =
