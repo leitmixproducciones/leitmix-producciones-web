@@ -52,3 +52,28 @@ body{
     }
 
 }
+
+@media print{
+
+body{
+    padding:0;
+    background:white;
+}
+
+
+.recibo{
+
+    transform:scale(0.85);
+    transform-origin:top center;
+
+}
+
+
+#qrWhatsapp{
+
+    width:100px;
+    height:100px;
+
+}
+
+}
