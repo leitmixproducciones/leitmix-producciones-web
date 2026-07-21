@@ -113,7 +113,7 @@ alert("Configuración guardada correctamente");
 
 }
 
-cargarConfiguracion();/
+cargarConfiguracion();
 
 // ======================
 // SUBIR IMAGEN
