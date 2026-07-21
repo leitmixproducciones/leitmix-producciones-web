@@ -21,10 +21,11 @@ alert("Elegí una imagen");
 return;
 }
 
+
 const nombreArchivo = Date.now() + "-" + archivo.name;
 
 
-const { error } = await supabase.storage
+const {error}=await supabase.storage
 .from("Media")
 .upload("imagenes/" + nombreArchivo, archivo);
 
@@ -35,16 +36,20 @@ return;
 }
 
 
-const { data } = supabase.storage
+const {data}=supabase.storage
 .from("Media")
 .getPublicUrl("imagenes/" + nombreArchivo);
 
 
-const { error:errorDB } = await supabase
+
+const {error:errorDB}=await supabase
 .from("galeria")
 .insert([{
+
 Imagen:data.publicUrl,
+
 Titulo:tituloImagen.value
+
 }]);
 
 
@@ -56,8 +61,10 @@ return;
 
 alert("Imagen subida correctamente");
 
+
 archivoImagen.value="";
 tituloImagen.value="";
+
 
 cargarImagenes();
 
@@ -66,21 +73,24 @@ cargarImagenes();
 }
 
 
+
 // ======================
 // SUBIR VIDEO
 // ======================
 
-const archivoVideo = document.getElementById("videoArchivo");
-const tituloVideo = document.getElementById("videoTitulo");
-const botonVideo = document.getElementById("guardarVideo");
+
+const archivoVideo=document.getElementById("videoArchivo");
+const tituloVideo=document.getElementById("videoTitulo");
+const botonVideo=document.getElementById("guardarVideo");
 
 
 if(botonVideo){
 
-botonVideo.onclick = async () => {
+botonVideo.onclick=async()=>{
 
 
-const archivo = archivoVideo.files[0];
+const archivo=archivoVideo.files[0];
+
 
 if(!archivo){
 alert("Elegí un video");
@@ -88,12 +98,12 @@ return;
 }
 
 
-const nombreArchivo = Date.now() + "-" + archivo.name;
+const nombreArchivo=Date.now()+"-"+archivo.name;
 
 
-const { error } = await supabase.storage
+const {error}=await supabase.storage
 .from("Media")
-.upload("videos/" + nombreArchivo, archivo);
+.upload("videos/"+nombreArchivo,archivo);
 
 
 if(error){
@@ -102,16 +112,20 @@ return;
 }
 
 
-const { data } = supabase.storage
+const {data}=supabase.storage
 .from("Media")
-.getPublicUrl("videos/" + nombreArchivo);
+.getPublicUrl("videos/"+nombreArchivo);
 
 
-const { error:errorDB } = await supabase
+
+const {error:errorDB}=await supabase
 .from("videos")
 .insert([{
+
 Titulo:tituloVideo.value,
+
 Url:data.publicUrl
+
 }]);
 
 
@@ -123,8 +137,10 @@ return;
 
 alert("Video subido correctamente");
 
+
 archivoVideo.value="";
 tituloVideo.value="";
+
 
 cargarVideos();
 
@@ -133,15 +149,19 @@ cargarVideos();
 }
 
 
+
 // ======================
 // IMAGENES
 // ======================
+
 
 async function cargarImagenes(){
 
 const lista=document.getElementById("listaImagenes");
 
+
 if(!lista)return;
+
 
 
 const {data,error}=await supabase
@@ -161,6 +181,7 @@ lista.innerHTML="";
 
 data.forEach(imagen=>{
 
+
 lista.innerHTML+=`
 
 <div class="item">
@@ -179,12 +200,16 @@ Borrar
 
 });
 
+
 }
+
 
 
 window.borrarImagen=async function(id){
 
+
 if(!confirm("¿Borrar imagen?"))return;
+
 
 
 const {error}=await supabase
@@ -193,23 +218,28 @@ const {error}=await supabase
 .eq("id",id);
 
 
+
 if(error){
+
 alert(error.message);
 return;
+
 }
 
 
 cargarImagenes();
 
-};
 
+};
 // ======================
 // VIDEOS
 // ======================
 
+
 async function cargarVideos(){
 
 const lista=document.getElementById("listaVideos");
+
 
 if(!lista)return;
 
@@ -221,8 +251,10 @@ const {data,error}=await supabase
 
 
 if(error){
+
 console.log(error);
 return;
+
 }
 
 
@@ -231,19 +263,27 @@ lista.innerHTML="";
 
 data.forEach(video=>{
 
+
 lista.innerHTML+=`
 
 <div class="item">
 
 <p>${video.Titulo}</p>
 
+
 <video controls>
+
 <source src="${video.Url}">
+
 </video>
 
+
 <button class="borrar" onclick="borrarVideo(${video.id})">
+
 Borrar
+
 </button>
+
 
 </div>
 
@@ -251,13 +291,16 @@ Borrar
 
 });
 
+
 }
 
 
 
 window.borrarVideo=async function(id){
 
+
 if(!confirm("¿Borrar video?"))return;
+
 
 
 const {error}=await supabase
@@ -266,15 +309,20 @@ const {error}=await supabase
 .eq("id",id);
 
 
+
 if(error){
+
 alert(error.message);
 return;
+
 }
 
 
 cargarVideos();
 
+
 };
+
 
 
 
@@ -282,11 +330,15 @@ cargarVideos();
 // TESTIMONIOS
 // ======================
 
+
 async function cargarTestimonios(){
+
 
 const lista=document.getElementById("listaTestimonios");
 
+
 if(!lista)return;
+
 
 
 const {data,error}=await supabase
@@ -295,13 +347,18 @@ const {data,error}=await supabase
 .order("id",{ascending:false});
 
 
+
 if(error){
+
 console.log(error);
 return;
+
 }
 
 
+
 lista.innerHTML="";
+
 
 
 data.forEach(testimonio=>{
@@ -311,128 +368,28 @@ lista.innerHTML+=`
 
 <div class="item">
 
+
 <h3>${testimonio.nombre}</h3>
+
 
 <p>${testimonio.evento || ""}</p>
 
+
 <p>${testimonio.comentario}</p>
-
-<p>⭐ ${testimonio.estrellas}</p>
-
-<p>
-${testimonio.aprobado ? "🟢 Publicado":"🟡 Pendiente"}
-</p>
-
-
-${
-testimonio.aprobado
-
-?
-
-`<button onclick="ocultarTestimonio(${testimonio.id})">
-Ocultar
-</button>`
-
-:
-
-`<button onclick="aprobarTestimonio(${testimonio.id})">
-Aprobar
-</button>`
-
-}
-
-
-<button class="borrar" onclick="borrarTestimonio(${testimonio.id})">
-Borrar
-</button>
-
-
-</div>
-
-`;
-
-});
-
-}
-
-
-
-window.aprobarTestimonio=async function(id){
-
-const {error}=await supabase
-.from("testimonios")
-.update({
-aprobado:true
-})
-.eq("id",id);
-
-
-if(error){
-alert(error.message);
-return;
-}
-
-
-cargarTestimonios();
-
-};
-
-
-
-window.ocultarTestimonio=async function(id){
-
-const {error}=await supabase
-.from("testimonios")
-.update({
-aprobado:false
-})
-.eq("id",id);
-
-
-if(error){
-alert(error.message);
-return;
-}
-
-
-cargarTestimonios();
-
-};
-
-
-
-window.borrarTestimonio=async function(id){
-
-if(!confirm("¿Borrar testimonio?"))return;
-
-
-const {error}=await supabase
-.from("testimonios")
-.delete()
-.eq("id",id);
-
-
-if(error){
-alert(error.message);
-return;
-}
-
-
-cargarTestimonios();
-
-};
-
-
 
 // ======================
 // RESERVAS
 // ======================
 
+
 async function cargarReservas(){
+
 
 const lista=document.getElementById("listaReservas");
 
+
 if(!lista)return;
+
 
 
 const {data,error}=await supabase
@@ -441,13 +398,18 @@ const {data,error}=await supabase
 .order("id",{ascending:false});
 
 
+
 if(error){
+
 console.log(error);
 return;
+
 }
 
 
+
 lista.innerHTML="";
+
 
 
 data.forEach(reserva=>{
@@ -457,7 +419,9 @@ lista.innerHTML+=`
 
 <div class="item">
 
+
 <h3>${reserva.nombre}</h3>
+
 
 <p>📞 ${reserva.telefono}</p>
 
@@ -472,19 +436,29 @@ lista.innerHTML+=`
 <p>Estado: ${reserva.estado || "Pendiente"}</p>
 
 
+
 <button onclick="confirmarReserva(${reserva.id})">
+
 Confirmar
+
 </button>
+
 
 
 <button onclick="emitirRecibo(${reserva.id})">
+
 🧾 Emitir recibo
+
 </button>
+
 
 
 <button class="borrar" onclick="borrarReserva(${reserva.id})">
+
 Borrar
+
 </button>
+
 
 
 </div>
@@ -493,12 +467,15 @@ Borrar
 
 });
 
+
 }
-// ======================
-// ACCIONES RESERVAS
-// ======================
+
+
+
+
 
 window.confirmarReserva=async function(id){
+
 
 const {error}=await supabase
 .from("reservas")
@@ -508,23 +485,34 @@ estado:"Confirmada"
 .eq("id",id);
 
 
+
 if(error){
+
 alert(error.message);
 return;
+
 }
+
 
 
 alert("Reserva confirmada");
 
+
 cargarReservas();
+
 
 };
 
 
 
+
+
+
 window.borrarReserva=async function(id){
 
+
 if(!confirm("¿Borrar reserva?"))return;
+
 
 
 const {error}=await supabase
@@ -533,28 +521,39 @@ const {error}=await supabase
 .eq("id",id);
 
 
+
 if(error){
+
 alert(error.message);
 return;
+
 }
+
 
 
 alert("Reserva borrada");
 
+
 cargarReservas();
+
 
 };
 
 
 
+
+
 // ======================
-// RECIBOS DESDE PANEL
+// RECIBOS
 // ======================
+
 
 let reservaSeleccionada=null;
 
 
+
 window.emitirRecibo=async function(id){
+
 
 const {data,error}=await supabase
 .from("reservas")
@@ -563,6 +562,7 @@ const {data,error}=await supabase
 .single();
 
 
+
 if(error){
 
 alert(error.message);
@@ -571,17 +571,30 @@ return;
 }
 
 
+
 reservaSeleccionada=data;
 
 
-document.getElementById("reciboNombre").value=data.nombre || "";
-document.getElementById("reciboEvento").value=data.evento || "";
-document.getElementById("reciboFecha").value=data.fecha || "";
+
+const nombre=document.getElementById("reciboNombre");
+const evento=document.getElementById("reciboEvento");
+const fecha=document.getElementById("reciboFecha");
+
+
+
+if(nombre) nombre.value=data.nombre || "";
+
+if(evento) evento.value=data.evento || "";
+
+if(fecha) fecha.value=data.fecha || "";
+
 
 
 alert("Reserva cargada para recibo");
 
+
 };
+
 
 
 
@@ -589,7 +602,9 @@ alert("Reserva cargada para recibo");
 const botonCrearRecibo=document.getElementById("crearRecibo");
 
 
+
 if(botonCrearRecibo){
+
 
 
 botonCrearRecibo.onclick=async()=>{
@@ -604,14 +619,17 @@ return;
 }
 
 
+
 const total=Number(
 document.getElementById("reciboTotal").value
 );
 
 
+
 const importe=Number(
 document.getElementById("reciboImporte").value
 );
+
 
 
 if(!total || !importe){
@@ -623,15 +641,21 @@ return;
 }
 
 
+
 const saldo_pendiente=total-importe;
 
 
 
 const numero=
-"REC-" +
-new Date().getFullYear() +
-"-" +
+
+"REC-"+
+
+new Date().getFullYear()+
+
+"-"+
+
 String(Date.now()).slice(-6);
+
 
 
 
@@ -639,36 +663,48 @@ const {error}=await supabase
 .from("recibos")
 .insert([{
 
+
 numero_recibo:numero,
+
 
 reserva_id:reservaSeleccionada.id,
 
+
 nombre:reservaSeleccionada.nombre,
+
 
 telefono:reservaSeleccionada.telefono,
 
+
 evento:reservaSeleccionada.evento,
+
 
 fecha_evento:reservaSeleccionada.fecha,
 
+
 total:total,
+
 
 importe:importe,
 
-concepto:
-document.getElementById("reciboConcepto").value,
 
-forma_pago:
-document.getElementById("reciboFormaPago").value,
+concepto:document.getElementById("reciboConcepto").value,
+
+
+forma_pago:document.getElementById("reciboFormaPago").value,
+
 
 saldo_pendiente:saldo_pendiente,
 
-observaciones:
-document.getElementById("reciboObservaciones").value,
+
+observaciones:document.getElementById("reciboObservaciones").value,
+
 
 fecha_pago:new Date()
 
+
 }]);
+
 
 
 if(error){
@@ -680,35 +716,36 @@ return;
 }
 
 
-alert("Recibo creado: " + numero);
 
+alert("Recibo creado: "+numero);
 
-
-document.querySelectorAll(
-"#reciboTotal,#reciboImporte,#reciboConcepto,#reciboFormaPago,#reciboObservaciones"
-)
-.forEach(e=>e.value="");
 
 
 cargarRecibos();
 
 
+
 };
 
 
-}
+
+  }
 
 
-
+<p>⭐
 // ======================
 // RECIBOS EMITIDOS
 // ======================
 
+
 async function cargarRecibos(){
+
 
 const lista=document.getElementById("listaRecibos");
 
+
 if(!lista)return;
+
 
 
 const {data,error}=await supabase
@@ -717,4 +754,86 @@ const {data,error}=await supabase
 .order("id",{ascending:false});
 
 
-if
+
+if(error){
+
+console.log(error);
+return;
+
+}
+
+
+
+lista.innerHTML="";
+
+
+
+data.forEach(recibo=>{
+
+
+lista.innerHTML+=`
+
+<div class="item">
+
+
+<h3>🧾 ${recibo.numero_recibo}</h3>
+
+
+<p>👤 ${recibo.nombre}</p>
+
+
+<p>🎉 ${recibo.evento}</p>
+
+
+<p>💰 Total: $${Number(recibo.total || 0).toLocaleString("es-AR")}</p>
+
+
+<p>💵 Recibido: $${Number(recibo.importe || 0).toLocaleString("es-AR")}</p>
+
+
+<p>📌 Saldo: $${Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR")}</p>
+
+
+<p>📅 ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
+
+
+
+<p>
+
+<a href="recibo.html?id=${recibo.id}" target="_blank">
+
+📄 Ver recibo
+
+</a>
+
+</p>
+
+
+
+</div>
+
+`;
+
+});
+
+
+}
+
+
+
+
+
+// ======================
+// CARGAR TODO
+// ======================
+
+
+cargarImagenes();
+
+cargarVideos();
+
+cargarTestimonios();
+
+cargarReservas();
+
+cargarRecibos();
