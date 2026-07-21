@@ -938,6 +938,9 @@ lista.innerHTML+=`
 </p>
 
 
+<button class="borrar" onclick="borrarRecibo(${recibo.id})">
+🗑️ Borrar recibo
+</button>
 
 </div>
 
