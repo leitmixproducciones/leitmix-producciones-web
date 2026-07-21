@@ -1,51 +1,40 @@
 /* =========================
-   ESTILOS DEL RECIBO
+   IMPRESIÓN RECIBO
 ========================= */
 
-body{
-    margin:0;
-    padding:0;
-}
+@media print {
 
+    @page {
+        size: A4;
+        margin: 8mm;
+    }
 
-/* CONTENEDOR PRINCIPAL */
+    body {
+        margin:0;
+        padding:0;
+        background:white;
+    }
 
-.recibo{
-    width:190mm;
-    margin:auto;
-}
+    .recibo {
 
+        width:100%;
+        max-width:none;
 
-/* QR */
-
-#qrWhatsapp{
-    width:100px;
-    height:100px;
-}
-
-
-/* =========================
-   IMPRESIÓN
-========================= */
-
-@media print{
-
-    .recibo{
         padding:15px !important;
+        margin:0 !important;
+
+        border-radius:0;
+        box-shadow:none;
+
+        transform:none !important;
     }
 
-    .recibo h1,
-    .recibo h2{
-        margin:5px 0 !important;
-    }
 
-    .recibo p{
-        margin:3px 0 !important;
-    }
+    #qrWhatsapp {
 
-    #qrWhatsapp{
-        width:70px !important;
-        height:70px !important;
+        width:80px !important;
+        height:80px !important;
+
     }
 
 }
