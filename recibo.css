@@ -38,3 +38,18 @@
     }
 
 }
+
+@media print{
+
+footer,
+.pie,
+.footer{
+
+    margin-top:5px !important;
+    padding-top:5px !important;
+    line-height:1.1 !important;
+    font-size:11px !important;
+
+}
+
+}
