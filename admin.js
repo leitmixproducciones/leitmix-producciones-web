@@ -2,6 +2,120 @@ import { supabase } from "./supabase.js";
 
 
 // ======================
+// CONFIGURACIÓN DEL NEGOCIO
+// ======================
+
+
+const botonConfiguracion = document.getElementById("guardarConfiguracion");
+
+
+async function cargarConfiguracion(){
+
+const {data,error}=await supabase
+.from("configuracion")
+.select("*")
+.limit(1)
+.single();
+
+
+if(error){
+console.log("Sin configuración todavía");
+return;
+}
+
+
+if(data){
+
+document.getElementById("configNombre").value=data.nombre_negocio || "";
+
+document.getElementById("configWhatsapp").value=data.whatsapp || "";
+
+document.getElementById("configAlias").value=data.alias_pago || "";
+
+document.getElementById("configInstagram").value=data.instagram || "";
+
+}
+
+}
+
+
+
+if(botonConfiguracion){
+
+
+botonConfiguracion.onclick=async()=>{
+
+
+const configuracion={
+
+nombre_negocio:
+document.getElementById("configNombre").value,
+
+whatsapp:
+document.getElementById("configWhatsapp").value,
+
+alias_pago:
+document.getElementById("configAlias").value,
+
+instagram:
+document.getElementById("configInstagram").value
+
+};
+
+
+
+const {data}=await supabase
+.from("configuracion")
+.select("id")
+.limit(1);
+
+
+
+let resultado;
+
+
+if(data && data.length > 0){
+
+
+resultado=await supabase
+.from("configuracion")
+.update(configuracion)
+.eq("id",data[0].id);
+
+
+
+}else{
+
+
+resultado=await supabase
+.from("configuracion")
+.insert([configuracion]);
+
+
+}
+
+
+
+if(resultado.error){
+
+alert(resultado.error.message);
+
+return;
+
+}
+
+
+alert("Configuración guardada correctamente");
+
+
+};
+
+
+}
+
+cargarConfiguracion();/
+
+// ======================
 // SUBIR IMAGEN
 // ======================
 
