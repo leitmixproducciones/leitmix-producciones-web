@@ -1,0 +1,54 @@
+/* =========================
+   ESTILOS DEL RECIBO
+========================= */
+
+body{
+    margin:0;
+    padding:0;
+}
+
+
+/* CONTENEDOR PRINCIPAL */
+
+.recibo{
+    width:190mm;
+    margin:auto;
+}
+
+
+/* QR */
+
+#qrWhatsapp{
+    width:100px;
+    height:100px;
+}
+
+
+/* =========================
+   IMPRESIÓN
+========================= */
+
+@media print{
+
+    body{
+        margin:0;
+        padding:0;
+    }
+
+
+    .recibo{
+
+        transform:scale(0.88);
+        transform-origin:top center;
+
+    }
+
+
+    #qrWhatsapp{
+
+        width:100px;
+        height:100px;
+
+    }
+
+}
