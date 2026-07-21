@@ -1,0 +1,16 @@
+{
+  "name": "Leitmix Producciones - Panel",
+  "short_name": "Leitmix Panel",
+  "start_url": "admin/panel.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#f5b400",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/img/leitmix-logo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
