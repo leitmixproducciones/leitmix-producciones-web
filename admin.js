@@ -1,3 +1,4 @@
+import { supabase } from "./supabase.js";
 const { data } = await supabase.auth.getSession();
 
 console.log("SESION:", data.session);
