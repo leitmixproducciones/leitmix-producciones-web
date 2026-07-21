@@ -30,26 +30,22 @@ body{
 
 @media print{
 
-    body{
-        margin:0;
-        padding:0;
-        background:white;
-    }
-
-
     .recibo{
-
-        transform:scale(0.85);
-        transform-origin:top center;
-
+        padding:15px !important;
     }
 
+    .recibo h1,
+    .recibo h2{
+        margin:5px 0 !important;
+    }
+
+    .recibo p{
+        margin:3px 0 !important;
+    }
 
     #qrWhatsapp{
-
-        width:100px;
-        height:100px;
-
+        width:70px !important;
+        height:70px !important;
     }
 
 }
