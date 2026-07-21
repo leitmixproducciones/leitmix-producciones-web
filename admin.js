@@ -115,6 +115,96 @@ alert("Configuración guardada correctamente");
 
 cargarConfiguracion();
 
+
+// ======================
+// SUBIR LOGO DEL NEGOCIO
+// ======================
+
+const botonLogo = document.getElementById("guardarLogo");
+
+
+if(botonLogo){
+
+botonLogo.onclick = async()=>{
+
+
+const archivo = document.getElementById("configLogo").files[0];
+
+
+if(!archivo){
+
+alert("Elegí un logo");
+
+return;
+
+}
+
+
+const nombreArchivo = "logo-" + Date.now() + "-" + archivo.name;
+
+
+const {error}=await supabase.storage
+.from("Media")
+.upload("logo/" + nombreArchivo, archivo);
+
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+
+const {data}=supabase.storage
+.from("Media")
+.getPublicUrl("logo/" + nombreArchivo);
+
+
+
+const {data:config}=await supabase
+.from("configuracion")
+.select("id")
+.limit(1);
+
+
+
+if(config && config.length > 0){
+
+
+const {error:updateError}=await supabase
+.from("configuracion")
+.update({
+
+logo:data.publicUrl
+
+})
+.eq("id",config[0].id);
+
+
+
+if(updateError){
+
+alert(updateError.message);
+
+return;
+
+}
+
+
+}
+
+
+
+alert("Logo guardado correctamente");
+
+
+};
+
+}
 // ======================
 // SUBIR IMAGEN
 // ======================
