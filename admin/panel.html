@@ -9,6 +9,19 @@
 
 <style>
 
+*{
+box-sizing:border-box;
+}
+
+body{
+font-family:Arial,sans-serif;
+background:#050505;
+color:white;
+padding:15px;
+margin:0;
+overflow-x:hidden;
+}
+
 .logo-panel{
 width:100%;
 text-align:center;
@@ -24,12 +37,10 @@ object-fit:contain;
 border-radius:15px;
 box-shadow:0 0 20px rgba(245,180,0,.35);
 }
-}
 
 .logo-panel h1{
 font-size:24px;
 margin:15px 0 5px;
-}
 }
 
 .logo-panel p{
@@ -37,19 +48,7 @@ color:#ccc;
 font-size:16px;
 margin:0;
 }
-  
-*{
-box-sizing:border-box;
-}
 
-body{
-font-family:Arial,sans-serif;
-background:#050505;
-color:white;
-padding:15px;
-margin:0;
-overflow-x:hidden;
-}
 
 h1,h2{
 color:#f5b400;
@@ -59,6 +58,7 @@ h1{
 text-align:center;
 font-size:28px;
 }
+
 
 .card{
 
@@ -100,44 +100,64 @@ font-size:16px;
 
 
 button{
+
 width:100%;
+
 padding:14px;
+
 margin-top:10px;
+
 border-radius:12px;
+
 border:none;
+
 background:#f5b400;
+
 color:#000;
+
 font-weight:bold;
+
 font-size:16px;
+
 cursor:pointer;
+
 transition:all .25s ease;
+
 }
+
 
 button:hover{
+
 background:#ffd84d;
+
 transform:translateY(-2px);
+
 box-shadow:0 4px 12px rgba(245,180,0,.35);
+
 }
+
 
 button:active{
+
 transform:scale(.98);
+
 background:#d89b00;
+
 }
+
 
 .borrar{
+
 background:#d40000;
+
 color:#fff;
-transition:all .25s ease;
+
 }
+
 
 .borrar:hover{
-background:#ff2d2d;
-box-shadow:0 4px 12px rgba(255,0,0,.35);
-}
 
-.borrar:active{
-transform:scale(.98);
-}
+background:#ff2d2d;
 
 }
 
@@ -177,11 +197,6 @@ border-radius:12px;
 }
 
 
-
-
-
-
-
 a{
 
 color:#f5b400;
@@ -207,10 +222,8 @@ padding-bottom:10px;
 </head>
 
 
-
-
-
 <body>
+
 
 <div class="logo-panel">
 
@@ -236,6 +249,28 @@ Galería • Videos • Reservas • Recibos
 
 <div class="card">
 
+<h2>⚙️ Configuración del negocio</h2>
+
+<input id="configNombre" placeholder="Nombre del negocio">
+
+<input id="configWhatsapp" placeholder="WhatsApp">
+
+<input id="configAlias" placeholder="Alias de pago">
+
+<input id="configInstagram" placeholder="Instagram">
+
+<button id="guardarConfiguracion">
+
+Guardar configuración
+
+</button>
+
+</div>
+
+
+
+<div class="card">
+
 <h2>🖼️ Subir imagen</h2>
 
 <input id="imagenArchivo" type="file" accept="image/*">
@@ -243,7 +278,9 @@ Galería • Videos • Reservas • Recibos
 <input id="imagenTitulo" placeholder="Título de la imagen">
 
 <button id="guardarImagen">
+
 Guardar imagen
+
 </button>
 
 </div>
@@ -259,7 +296,9 @@ Guardar imagen
 <input id="videoTitulo" placeholder="Título del video">
 
 <button id="guardarVideo">
+
 Guardar video
+
 </button>
 
 </div>
@@ -327,15 +366,15 @@ Guardar video
 
 
 <button id="crearRecibo">
+
 Crear recibo
+
 </button>
 
 
-</div>
+</div>  
 
-
-
-<div class="card">
+  <div class="card">
 
 <h2>🧾 Crear Recibo Manual</h2>
 
