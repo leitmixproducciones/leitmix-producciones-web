@@ -740,7 +740,127 @@ cargarRecibos();
 
   }
 
+// ======================
+// RECIBO MANUAL
+// ======================
 
+const botonReciboManual = document.getElementById("crearReciboManual");
+
+
+if(botonReciboManual){
+
+
+botonReciboManual.onclick = async()=>{
+
+
+const nombre = document.getElementById("manualNombre").value;
+
+const telefono = document.getElementById("manualTelefono").value;
+
+const evento = document.getElementById("manualEvento").value;
+
+const fecha = document.getElementById("manualFecha").value;
+
+
+const total = Number(
+document.getElementById("manualTotal").value
+);
+
+
+const importe = Number(
+document.getElementById("manualImporte").value
+);
+
+
+if(!nombre || !evento || !total || !importe){
+
+alert("Completá los datos obligatorios");
+
+return;
+
+}
+
+
+const saldo_pendiente = total - importe;
+
+
+const numero =
+
+"REC-" +
+
+new Date().getFullYear() +
+
+"-" +
+
+String(Date.now()).slice(-6);
+
+
+
+const {error}=await supabase
+.from("recibos")
+.insert([{
+
+numero_recibo:numero,
+
+reserva_id:null,
+
+nombre:nombre,
+
+telefono:telefono,
+
+evento:evento,
+
+fecha_evento:fecha,
+
+total:total,
+
+importe:importe,
+
+concepto:
+document.getElementById("manualConcepto").value,
+
+forma_pago:
+document.getElementById("manualFormaPago").value,
+
+saldo_pendiente:saldo_pendiente,
+
+observaciones:
+document.getElementById("manualObservaciones").value,
+
+fecha_pago:new Date()
+
+}]);
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+alert("Recibo manual creado: " + numero);
+
+
+
+document.querySelectorAll(
+
+"#manualNombre,#manualTelefono,#manualEvento,#manualFecha,#manualTotal,#manualImporte,#manualConcepto,#manualFormaPago,#manualObservaciones"
+
+)
+.forEach(e=>e.value="");
+
+
+
+cargarRecibos();
+
+
+};
+
+
+}
 
 // ======================
 // RECIBOS EMITIDOS
