@@ -952,7 +952,35 @@ lista.innerHTML+=`
 }
 
 
+// ======================
+// BORRAR RECIBO
+// ======================
 
+window.borrarRecibo = async function(id){
+
+if(!confirm("¿Borrar este recibo?")) return;
+
+
+const {error}=await supabase
+.from("recibos")
+.delete()
+.eq("id",id);
+
+
+if(error){
+
+alert(error.message);
+return;
+
+}
+
+
+alert("Recibo borrado correctamente");
+
+
+cargarRecibos();
+
+};
 
 
 // ======================
