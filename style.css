@@ -16,6 +16,59 @@ body{
     width:100%;
 }
 
+/* CONTACTO PROFESIONAL */
+
+#contacto{
+    text-align:center;
+}
+
+#contacto > p{
+    color:#ccc;
+    font-size:16px;
+    max-width:600px;
+    margin:10px auto;
+}
+
+
+#formulario-presupuesto{
+    background:#151515;
+    padding:30px;
+    border-radius:20px;
+    border:1px solid #f5b400;
+    box-shadow:0 0 20px rgba(245,180,0,.15);
+    margin-top:30px;
+}
+
+
+#formulario-presupuesto input,
+#formulario-presupuesto select,
+#formulario-presupuesto textarea{
+    background:#080808;
+    border:1px solid #333;
+    color:white;
+}
+
+
+#formulario-presupuesto input:focus,
+#formulario-presupuesto select:focus,
+#formulario-presupuesto textarea:focus{
+    outline:none;
+    border-color:#f5b400;
+}
+
+
+#boton-whatsapp{
+    cursor:pointer;
+    background:#f5b400;
+    border:none;
+    transition:.3s;
+}
+
+
+#boton-whatsapp:hover{
+    transform:scale(1.05);
+}
+
 .logo-panel{
 width:100%;
 text-align:center;
