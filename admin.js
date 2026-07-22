@@ -307,9 +307,13 @@ const {error:errorDB}=await supabase
 
 Imagen:data.publicUrl,
 
-Titulo:tituloImagen.value
+Titulo:tituloImagen.value,
+
+user_id: usuarioActual.id
 
 }]);
+
+
 
 
 if(errorDB){
