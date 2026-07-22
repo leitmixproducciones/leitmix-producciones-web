@@ -752,10 +752,26 @@ const lista=document.getElementById("listaReservas");
 if(!lista)return;
 
 
+// OBTENER USUARIO LOGUEADO
+
+const {data:sesion}=await supabase.auth.getSession();
+
+
+if(!sesion.session){
+
+return;
+
+}
+
+
+const usuario = sesion.session.user;
+
+
 
 const {data,error}=await supabase
 .from("reservas")
 .select("*")
+.or(`user_id.eq.${usuario.id},user_id.is.null`)
 .order("id",{ascending:false});
 
 
@@ -899,9 +915,6 @@ cargarReservas();
 
 
 };
-
-
-
 
 
 // ======================
