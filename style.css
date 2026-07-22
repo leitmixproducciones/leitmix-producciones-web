@@ -388,3 +388,24 @@ section{
     margin: 10px auto;
     max-width: 600px;
 }
+
+/* TITULOS DE SECCIONES */
+
+#testimonios h3,
+#contacto p{
+    text-align:center;
+}
+
+
+#testimonios h3{
+    color:#f5b400;
+    margin:20px 0 25px;
+    font-size:22px;
+}
+
+
+#contacto p{
+    max-width:600px;
+    margin:10px auto;
+    color:#ccc;
+}
