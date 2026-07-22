@@ -12,10 +12,6 @@ window.location.href = "/leitmix-producciones-web/admin/login.html";
 
 };
 
-}
-
-const { data } = await supabase.auth.getSession();
-
 if(!data.session){
 
     window.location.href = "/leitmix-producciones-web/admin/login.html";
@@ -24,6 +20,7 @@ if(!data.session){
 
 }
 
+const usuarioActual = data.session.user;
 // ======================
 // CONFIGURACIÓN DEL NEGOCIO
 // ======================
