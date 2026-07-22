@@ -1,5 +1,19 @@
 import { supabase } from "./supabase.js";
 
+const botonCerrarSesion = document.getElementById("cerrarSesion");
+
+if(botonCerrarSesion){
+
+botonCerrarSesion.onclick = async ()=>{
+
+await supabase.auth.signOut();
+
+window.location.href = "admin/login.html";
+
+};
+
+}
+
 const { data } = await supabase.auth.getSession();
 
 if(!data.session){
