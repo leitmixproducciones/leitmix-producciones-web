@@ -647,7 +647,13 @@ lista.innerHTML+=`
 }
 
 
+window.aprobarTestimonio = async function(id){
+...
+}
 
+window.borrarTestimonio = async function(id){
+...
+}
 // ======================
 // RESERVAS
 // ======================
