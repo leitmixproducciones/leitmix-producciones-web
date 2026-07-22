@@ -409,3 +409,11 @@ section{
     margin:10px auto;
     color:#ccc;
 }
+
+#testimonios h3{
+    width:100%;
+    display:block;
+    text-align:center;
+    color:#f5b400;
+    margin:30px auto 25px;
+}
