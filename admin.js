@@ -3,13 +3,16 @@ import { supabase } from "./supabase.js";
 
 const { data } = await supabase.auth.getSession();
 
+if(!data.session){
+
+window.location.href = "./login.html";
+
 
 if(!data.session){
 
-window.location.href = "admin/login.html";
+window.location.href = "./login.html";
 
 }
-
 // ======================
 // CONFIGURACIÓN DEL NEGOCIO
 // ======================
