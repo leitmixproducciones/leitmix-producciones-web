@@ -8,7 +8,7 @@ botonCerrarSesion.onclick = async ()=>{
 
 await supabase.auth.signOut();
 
-window.location.href = "admin/login.html";
+window.location.href = "/leitmix-producciones-web/admin/login.html";
 
 };
 
