@@ -587,10 +587,11 @@ cargarVideos();
 
 
 
-
 // ======================
 // TESTIMONIOS
 // ======================
+
+
 async function cargarTestimonios(){
 
 
@@ -638,22 +639,106 @@ lista.innerHTML+=`
 <p>${testimonio.comentario}</p>
 
 
+<p>
+Estado:
+${testimonio.aprobado ? "✅ Publicado" : "⏳ Pendiente"}
+</p>
+
+
+
+${!testimonio.aprobado ? `
+
+<button onclick="aprobarTestimonio(${testimonio.id})">
+✅ Aprobar
+</button>
+
+` : ""}
+
+
+
+<button class="borrar" onclick="borrarTestimonio(${testimonio.id})">
+🗑️ Borrar
+</button>
+
+
+
 </div>
 
 `;
 
 });
 
+
 }
+
+
 
 
 window.aprobarTestimonio = async function(id){
-...
+
+
+const {error}=await supabase
+.from("testimonios")
+.update({
+aprobado:true
+})
+.eq("id",id);
+
+
+
+if(error){
+
+alert(error.message);
+return;
+
 }
 
+
+
+alert("Testimonio publicado");
+
+
+cargarTestimonios();
+
+
+};
+
+
+
+
+
 window.borrarTestimonio = async function(id){
-...
+
+
+if(!confirm("¿Borrar testimonio?")) return;
+
+
+
+const {error}=await supabase
+.from("testimonios")
+.delete()
+.eq("id",id);
+
+
+
+if(error){
+
+alert(error.message);
+return;
+
 }
+
+
+
+alert("Testimonio eliminado");
+
+
+cargarTestimonios();
+
+
+};
+
+
 // ======================
 // RESERVAS
 // ======================
