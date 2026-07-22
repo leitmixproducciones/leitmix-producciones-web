@@ -275,3 +275,34 @@ section{
 }
 
 }
+
+.formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 600px;
+    margin: auto;
+}
+
+.formulario label {
+    color: #f5b400;
+    font-weight: 600;
+    margin-bottom: -8px;
+}
+
+.formulario input,
+.formulario select,
+.formulario textarea {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #111;
+    color: white;
+    font-size: 15px;
+}
+
+.formulario textarea {
+    min-height: 120px;
+    resize: vertical;
+}
