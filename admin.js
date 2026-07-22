@@ -1,10 +1,13 @@
 import { supabase } from "./supabase.js";
+
+
 const { data } = await supabase.auth.getSession();
 
-console.log("SESION:", data.session);
 
 if(!data.session){
-    window.location.href="admin/login.html";
+
+window.location.href = "admin/login.html";
+
 }
 
 // ======================
