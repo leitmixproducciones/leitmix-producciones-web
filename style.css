@@ -306,3 +306,22 @@ section{
     min-height: 120px;
     resize: vertical;
 }
+
+.formulario {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100%;
+}
+
+.formulario > * {
+    width: 100% !important;
+    display: block !important;
+}
+
+.formulario input,
+.formulario select,
+.formulario textarea,
+.formulario button {
+    width: 100% !important;
+    display: block !important;
+}
