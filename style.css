@@ -325,3 +325,13 @@ section{
     width: 100% !important;
     display: block !important;
 }
+
+#contacto {
+    text-align: center;
+}
+
+#contacto p {
+    text-align: center;
+    margin: 10px auto;
+    max-width: 600px;
+}
