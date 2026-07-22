@@ -784,6 +784,9 @@ return;
 }
 
 
+console.log("RESERVAS:");
+console.log(data);
+
 
 lista.innerHTML="";
 
@@ -915,8 +918,6 @@ cargarReservas();
 
 
 };
-
-
 // ======================
 // RECIBOS
 // ======================
