@@ -145,6 +145,52 @@ window.location.href = "panel.html";
 
 };
 
+    // RECUPERAR CONTRASEÑA
+
+const botonRecuperar = document.getElementById("recuperar");
+
+
+botonRecuperar.onclick = async ()=>{
+
+
+const email = document.getElementById("email").value.trim();
+
+
+if(!email){
+
+document.getElementById("mensaje").textContent =
+"Escribí tu email primero";
+
+return;
+
+}
+
+
+const {error} = await supabase.auth.resetPasswordForEmail(
+email,
+{
+
+redirectTo:
+"https://leitmixproducciones.github.io/leitmix-producciones-web/admin/login.html"
+
+});
+
+
+if(error){
+
+document.getElementById("mensaje").textContent =
+error.message;
+
+return;
+
+}
+
+
+document.getElementById("mensaje").textContent =
+"Revisá tu correo para cambiar la contraseña";
+
+
+};
 
 </script>
 
