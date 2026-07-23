@@ -1800,3 +1800,41 @@ document.getElementById("confirmadasDash").innerText = confirmadas;
 
 
 actualizarDashboard();
+
+// ======================
+// CORRECCIÓN DASHBOARD USUARIO
+// ======================
+
+async function actualizarDashboardUsuario(){
+
+const { data, error } = await supabase
+.from("reservas")
+.select("estado")
+.eq("user_id", usuario.id);
+
+
+if(error){
+
+console.log("Error dashboard usuario:", error);
+
+return;
+
+}
+
+
+document.getElementById("totalReservasDash").innerText = data.length;
+
+
+document.getElementById("pendientesDash").innerText =
+data.filter(r => r.estado === "Pendiente").length;
+
+
+document.getElementById("confirmadasDash").innerText =
+data.filter(r => r.estado === "Confirmada").length;
+
+
+}
+
+
+// Actualiza el resumen con datos correctos
+actualizarDashboardUsuario();
