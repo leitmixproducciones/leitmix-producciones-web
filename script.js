@@ -4,6 +4,39 @@ import { supabase } from "./supabase.js";
 // SCRIPT PRINCIPAL
 
 
+// INICIALIZAR Y BLOQUEAR FECHAS OCUPADAS EN EL CALENDARIO
+
+async function inicializarCalendario() {
+  try {
+    // Consultar las reservas registradas que NO estén canceladas
+    const { data: reservas, error } = await supabase
+      .from("reservas")
+      .select("fecha")
+      .neq("estado", "Cancelado");
+
+    if (error) {
+      console.error("Error al obtener fechas ocupadas:", error);
+    }
+
+    // Extraer array de fechas ocupadas: ["2026-08-15", "2026-09-20"]
+    const fechasOcupadas = reservas ? reservas.map(r => r.fecha) : [];
+
+    // Inicializar Flatpickr en español
+    if (typeof flatpickr !== "undefined") {
+      flatpickr("#fecha", {
+        locale: "es",
+        minDate: "today", // Impide elegir fechas pasadas
+        dateFormat: "Y-m-d",
+        disable: fechasOcupadas, // 🚫 DESHABILITA LAS FECHAS RESERVADAS
+        disableMobile: true // Fuerza la interfaz visual personalizada también en teléfonos
+      });
+    }
+  } catch (err) {
+    console.error("Error inicializando el calendario:", err);
+  }
+}
+
+
 // WHATSAPP PRESUPUESTO
 
 async function enviarWhatsApp(){
@@ -38,7 +71,7 @@ const invitadosNumero =
 const localidad = document.getElementById("localidad").value;
 const comentarios = document.getElementById("comentarios").value;
 
-// 🔽 CAPTURAMOS LOS 3 CAMPOS NUEVOS DE LA PLAYLIST 🔽
+// CAPTURAMOS LOS 3 CAMPOS NUEVOS DE LA PLAYLIST
 const playlistInfaltables = document.getElementById("playlist-infaltables") ? document.getElementById("playlist-infaltables").value : "";
 const playlistProhibidos = document.getElementById("playlist-prohibidos") ? document.getElementById("playlist-prohibidos").value : "";
 const notasEvento = document.getElementById("notas-evento") ? document.getElementById("notas-evento").value : "";
@@ -77,7 +110,7 @@ comentarios: comentarios,
 estado: "Pendiente",
 user_id: configuracion.user_id,
 
-// 🔽 MAPEO A LAS COLUMNAS DE SUPABASE 🔽
+// MAPEO A LAS COLUMNAS DE SUPABASE
 playlist_infaltables: playlistInfaltables,
 playlist_prohibidos: playlistProhibidos,
 notas_evento: notasEvento
@@ -135,12 +168,14 @@ window.location.href = url;
 }
 
 
-// BOTON WHATSAPP
+// BOTON WHATSAPP E INICIALIZACIÓN
 
 document.addEventListener("DOMContentLoaded", function(){
 
-const boton = document.getElementById("boton-whatsapp");
+// Cargamos el calendario bloqueando fechas ocupadas de Supabase
+inicializarCalendario();
 
+const boton = document.getElementById("boton-whatsapp");
 
 if(boton){
 
