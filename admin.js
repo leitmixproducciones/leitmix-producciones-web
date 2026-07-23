@@ -1722,7 +1722,25 @@ cargarRecibos();
 
 
 // ======================
-// NUEVO MODULO DASHBOARD
+// DASHBOARD LEITMIX
 // ======================
 
-console.log("Dashboard conectado correctamente");
+const dashboardBox = document.createElement("div");
+
+dashboardBox.className = "card";
+
+dashboardBox.innerHTML = `
+<h2>📊 Resumen del negocio</h2>
+
+<p>Este es tu nuevo panel de control.</p>
+
+<p>Próximamente mostrará:</p>
+
+<ul>
+<li>📅 Próximos eventos</li>
+<li>⏳ Reservas pendientes</li>
+<li>💰 Pagos pendientes</li>
+</ul>
+`;
+
+document.body.appendChild(dashboardBox);
