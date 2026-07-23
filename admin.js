@@ -1764,3 +1764,39 @@ contadoresDashboard.innerHTML = `
 `;
 
 dashboardBox.appendChild(contadoresDashboard);
+
+// ======================
+// DATOS REALES DASHBOARD
+// ======================
+
+async function actualizarDashboard(){
+
+const { data, error } = await supabase
+.from("reservas")
+.select("estado");
+
+
+if(error){
+console.log("Error dashboard:", error);
+return;
+}
+
+
+let total = data.length;
+
+let pendientes = data.filter(r => r.estado === "Pendiente").length;
+
+let confirmadas = data.filter(r => r.estado === "Confirmada").length;
+
+
+document.getElementById("totalReservasDash").innerText = total;
+
+document.getElementById("pendientesDash").innerText = pendientes;
+
+document.getElementById("confirmadasDash").innerText = confirmadas;
+
+
+}
+
+
+actualizarDashboard();
