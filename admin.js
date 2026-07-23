@@ -1719,3 +1719,10 @@ cargarTestimonios();
 cargarReservas();
 
 cargarRecibos();
+
+
+// ======================
+// NUEVO MODULO DASHBOARD
+// ======================
+
+console.log("Dashboard conectado correctamente");
