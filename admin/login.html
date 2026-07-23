@@ -55,6 +55,11 @@ button{
     cursor:pointer;
 }
 
+.secundario{
+    background:#222;
+    color:#f5b400;
+}
+
 #mensaje{
     text-align:center;
     margin-top:15px;
@@ -76,17 +81,27 @@ button{
 
 <input id="password" type="password" placeholder="Contraseña">
 
+
 <button id="entrar">
 Ingresar
 </button>
 
-<button id="recuperar" style="background:#222;color:#f5b400;">
+
+<button id="recuperar" class="secundario">
 Olvidé mi contraseña
 </button>
 
+
+<button onclick="window.location.href='registro.html'" class="secundario">
+Crear cuenta DJ
+</button>
+
+
 <p id="mensaje"></p>
 
+
 </div>
+
 
 
 <script type="module">
@@ -107,7 +122,8 @@ const password = document.getElementById("password").value.trim();
 
 if(!email || !password){
 
-document.getElementById("mensaje").textContent="Completá email y contraseña";
+document.getElementById("mensaje").textContent =
+"Completá email y contraseña";
 
 return;
 
@@ -115,7 +131,8 @@ return;
 
 
 
-const { data, error } = await supabase.auth.signInWithPassword({
+const { data, error } =
+await supabase.auth.signInWithPassword({
 
 email: email,
 
@@ -127,7 +144,8 @@ password: password
 
 if(error){
 
-document.getElementById("mensaje").textContent = error.message;
+document.getElementById("mensaje").textContent =
+error.message;
 
 console.log(error);
 
@@ -145,15 +163,22 @@ window.location.href = "panel.html";
 
 };
 
-    // RECUPERAR CONTRASEÑA
 
-const botonRecuperar = document.getElementById("recuperar");
+
+
+// RECUPERAR CONTRASEÑA
+
+
+const botonRecuperar =
+document.getElementById("recuperar");
 
 
 botonRecuperar.onclick = async ()=>{
 
 
-const email = document.getElementById("email").value.trim();
+const email =
+document.getElementById("email").value.trim();
+
 
 
 if(!email){
@@ -166,13 +191,17 @@ return;
 }
 
 
-const {error} = await supabase.auth.resetPasswordForEmail(
+
+const {error} =
+await supabase.auth.resetPasswordForEmail(
 email,
 {
 
 redirectTo:
 "https://leitmixproducciones.github.io/leitmix-producciones-web/admin/nueva-password.html"
+
 });
+
 
 
 if(error){
@@ -185,11 +214,13 @@ return;
 }
 
 
+
 document.getElementById("mensaje").textContent =
 "Revisá tu correo para cambiar la contraseña";
 
 
 };
+
 
 </script>
 
