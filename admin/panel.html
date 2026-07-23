@@ -388,6 +388,57 @@ Crear recibo manual
 
 <script type="module" src="../admin.js"></script>
 
+ <!-- ========================================== -->
+<!-- NUEVAS TARJETAS Y MÉTRICAS DEL DASHBOARD   -->
+<!-- ========================================== -->
+<div class="dashboard-grid-extra">
+
+  <!-- Próximo evento -->
+  <div class="tarjeta-dash">
+    <h4>🎉 Próximo Evento</h4>
+    <div id="dashProximoEvento">Cargando...</div>
+  </div>
+
+  <!-- Eventos de esta semana -->
+  <div class="tarjeta-dash">
+    <h4>📅 Eventos esta semana</h4>
+    <p id="dashEventosSemana" class="numero-destacado">0</p>
+  </div>
+
+  <!-- Dinero pendiente de cobrar -->
+  <div class="tarjeta-dash">
+    <h4>💰 Pendiente de Cobro</h4>
+    <p id="dashPendienteCobro" class="numero-destacado">$0</p>
+  </div>
+
+  <!-- Últimos testimonios -->
+  <div class="tarjeta-dash">
+    <h4>⭐ Últimos Testimonios</h4>
+    <div id="dashUltimosTestimonios">Sin novedades</div>
+  </div>
+
+</div>
+
+<!-- Sección Gráficos y Servicios -->
+<div class="dashboard-analitica">
+
+  <!-- Gráfico resumen de reservas por mes -->
+  <div class="tarjeta-dash ancho-completo">
+    <h4>📈 Reservas por Mes (Año Actual)</h4>
+    <div id="graficoReservasMes" class="contenedor-grafico">
+      <!-- Se genera dinámicamente con barras CSS -->
+    </div>
+  </div>
+
+  <!-- Servicios más contratados -->
+  <div class="tarjeta-dash">
+    <h4>🔥 Servicios más contratados</h4>
+    <ul id="dashServiciosPopulares" class="lista-metricas">
+      <li>Cargando servicios...</li>
+    </ul>
+  </div>
+
+</div> 
 <script type="module" src="../dashboard.js"></script>
 
 
