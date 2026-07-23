@@ -52,7 +52,6 @@ font-size:16px;
 margin:0;
 }
 
-
 h1,h2{
 color:#f5b400;
 }
@@ -62,175 +61,100 @@ text-align:center;
 font-size:28px;
 }
 
-
 .card{
-
 background:#151515;
-
 border:1px solid #292929;
-
 padding:20px;
-
 border-radius:18px;
-
 margin-bottom:20px;
-
 box-shadow:0 5px 20px rgba(0,0,0,.5);
-
 }
-
 
 input,select{
-
 width:100%;
-
 padding:14px;
-
 margin:8px 0;
-
 border-radius:12px;
-
 border:none;
-
 background:#222;
-
 color:white;
-
 font-size:16px;
-
 }
-
-
 
 button{
-
 width:100%;
-
 padding:14px;
-
 margin-top:10px;
-
 border-radius:12px;
-
 border:none;
-
 background:#f5b400;
-
 color:#000;
-
 font-weight:bold;
-
 font-size:16px;
-
 cursor:pointer;
-
 transition:all .25s ease;
-
 }
-
 
 button:hover{
-
 background:#ffd84d;
-
 transform:translateY(-2px);
-
 box-shadow:0 4px 12px rgba(245,180,0,.35);
-
 }
-
 
 button:active{
-
 transform:scale(.98);
-
 background:#d89b00;
-
 }
-
 
 .borrar{
-
 background:#d40000;
-
 color:#fff;
-
 }
-
 
 .borrar:hover{
-
 background:#ff2d2d;
-
 }
-
 
 .item{
-
 background:#202020;
-
 padding:18px;
-
 border-radius:15px;
-
 margin-top:15px;
-
 border-left:4px solid #f5b400;
-
 }
-
 
 .item img{
-
 width:130px;
-
 border-radius:12px;
-
 }
-
 
 .item video{
-
 width:100%;
-
 max-width:350px;
-
 border-radius:12px;
-
 }
-
 
 a{
-
 color:#f5b400;
-
 font-weight:bold;
-
 text-decoration:none;
-
 }
-
 
 h2{
-
 border-bottom:1px solid #333;
-
 padding-bottom:10px;
-
 }
-
 
 </style>
 
 </head>
 
-
 <body>
-
 
 <div class="logo-panel">
 
 <img id="logoNegocio" src="../assets/img/leitmix-logo.jpeg" alt="Logo del negocio">
+
 <h1>🎧 LEITMIX PRODUCCIONES</h1>
 
 <p>Panel de Administración</p>
@@ -241,7 +165,8 @@ Cerrar sesión
 
 </div>
 
-  <div class="card">
+
+<div class="card">
 
 <h2>🚀 Sistema de Gestión</h2>
 
@@ -252,7 +177,26 @@ Galería • Videos • Reservas • Recibos
 </div>
 
 
+<div class="card">
 
+<h2>📊 Resumen del negocio</h2>
+
+<div class="item">
+📅 Total reservas:
+<strong id="totalReservasDash">0</strong>
+</div>
+
+<div class="item">
+⏳ Reservas pendientes:
+<strong id="pendientesDash">0</strong>
+</div>
+
+<div class="item">
+✅ Reservas confirmadas:
+<strong id="confirmadasDash">0</strong>
+</div>
+
+</div>
 
 <div class="card">
 
@@ -282,6 +226,7 @@ Guardar configuración
 </button>
 
 </div>
+
 
 
 <div class="card">
@@ -387,7 +332,7 @@ Crear recibo
 </button>
 
 
-</div>  
+</div>
 
 
 <div class="card">
@@ -429,7 +374,7 @@ Crear recibo manual
 </button>
 
 
-</div>
+</div>  
 
   <div class="card">
 
@@ -461,4 +406,3 @@ navigator.serviceWorker.register("../service-worker.js");
 
 </body>
 </html>
-  
