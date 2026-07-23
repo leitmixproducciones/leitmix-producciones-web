@@ -38,6 +38,62 @@ const usuario = sesion.session.user;
 
 
 // ======================
+// RESUMEN DEL NEGOCIO (DASHBOARD)
+// ======================
+
+async function cargarResumenNegocio(){
+
+// 1. Obtener Reservas
+const { data: reservas, error: errorReservas } = await supabase
+  .from("reservas")
+  .select("estado")
+  .eq("user_id", usuario.id);
+
+// 2. Obtener Testimonios
+const { data: testimonios, error: errorTestimonios } = await supabase
+  .from("testimonios")
+  .select("id")
+  .eq("user_id", usuario.id);
+
+// 3. Obtener Recibos para Recaudación
+const { data: recibos, error: errorRecibos } = await supabase
+  .from("recibos")
+  .select("importe")
+  .eq("user_id", usuario.id);
+
+
+// CALCULAR DATOS
+let confirmadas = 0;
+let pendientes = 0;
+
+if(reservas){
+  confirmadas = reservas.filter(r => r.estado === "Confirmada" || r.estado === "Confirmado").length;
+  pendientes = reservas.filter(r => !r.estado || r.estado === "Pendiente").length;
+}
+
+let totalTestimonios = testimonios ? testimonios.length : 0;
+
+let totalRecaudado = 0;
+if(recibos){
+  totalRecaudado = recibos.reduce((sum, r) => sum + Number(r.importe || 0), 0);
+}
+
+
+// IMPRIMIR EN LAS TARJETAS DEL RESUMEN (SI EXISTEN LOS ELEMENTOS)
+const elemConfirmadas = document.getElementById("resumenFechasConfirmadas") || document.getElementById("resumenConfirmadas") || document.getElementById("fechasConfirmadas");
+const elemTestimonios = document.getElementById("resumenTestimonios") || document.getElementById("totalTestimonios");
+const elemPendientes = document.getElementById("resumenPendientes") || document.getElementById("fechasPendientes");
+const elemRecaudado = document.getElementById("resumenTotalRecaudado") || document.getElementById("totalRecaudado");
+
+if(elemConfirmadas) elemConfirmadas.innerText = confirmadas;
+if(elemTestimonios) elemTestimonios.innerText = totalTestimonios;
+if(elemPendientes) elemPendientes.innerText = pendientes;
+if(elemRecaudado) elemRecaudado.innerText = "$" + totalRecaudado.toLocaleString("es-AR");
+
+}
+
+
+// ======================
 // CONFIGURACIÓN DEL NEGOCIO
 // ======================
 
@@ -903,6 +959,7 @@ ${!testimonio.aprobado ? `
 
 });
 
+cargarResumenNegocio();
 
 }
 
@@ -1106,6 +1163,7 @@ Borrar
 
 });
 
+cargarResumenNegocio();
 
 }
 
@@ -1665,6 +1723,7 @@ lista.innerHTML+=`
 
 });
 
+cargarResumenNegocio();
 
 }
 
@@ -1722,6 +1781,8 @@ cargarRecibos();
 // CARGAR TODO
 // ======================
 
+
+cargarResumenNegocio();
 
 cargarImagenes();
 
