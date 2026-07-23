@@ -1060,6 +1060,19 @@ ${reserva.estado || "Pendiente"}
 </p>
 
 
+<div style="margin: 12px 0; background: #1a1a1a; padding: 12px; border-radius: 8px; font-size: 13px; border: 1px solid #333; text-align: left;">
+
+  <strong style="color: #f5b400; font-size: 14px; display: block; margin-bottom: 6px;">🎵 Selección Musical del Cliente:</strong>
+
+  <p style="margin: 4px 0;"><strong>🔥 Infaltables:</strong> ${reserva.playlist_infaltables || 'Aún no cargó'}</p>
+
+  <p style="margin: 4px 0;"><strong>🚫 Prohibidos:</strong> ${reserva.playlist_prohibidos || 'Sin restricciones'}</p>
+
+  <p style="margin: 4px 0;"><strong>📝 Notas:</strong> ${reserva.notas_evento || 'Sin notas'}</p>
+
+</div>
+
+
 
 
 <button onclick="confirmarReserva(${reserva.id})">
@@ -1719,5 +1732,3 @@ cargarTestimonios();
 cargarReservas();
 
 cargarRecibos();
-
-
