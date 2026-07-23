@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Evento | Leitmix Producciones</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #050505;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px 15px;
+    }
+    .contenedor {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    .logo img {
+      width: 140px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(245, 180, 0, 0.3);
+    }
+    .card {
+      background: #151515;
+      border: 1px solid #292929;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+    h1, h2 {
+      color: #f5b400;
+      text-align: center;
+      margin-top: 0;
+    }
+    label {
+      color: #f5b400;
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 14px;
+      margin-top: 6px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      background: #222;
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus {
+      border-color: #f5b400;
+      outline: none;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border-radius: 12px;
+      border: none;
+      background: #f5b400;
+      color: #000;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    button:hover {
+      background: #ffd84d;
+      transform: translateY(-2px);
+    }
+    .oculto { display: none; }
+    .info-evento {
+      background: #202020;
+      padding: 12px 15px;
+      border-radius: 10px;
+      border-left: 4px solid #f5b400;
+      margin-bottom: 15px;
+    }
+    .mensaje-exito {
+      background: #1e3a1e;
+      color: #75b775;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="contenedor">
+
+  <div class="logo">
+    <img src="assets/img/leitmix-logo.jpeg" alt="Leitmix Producciones">
+    <h1>🎧 Mi Evento</h1>
+    <p style="color:#aaa; font-size:14px; margin-top:-10px;">Gestión de Playlist & Detalles</p>
+  </div>
+
+  <!-- PASO 1: LOGIN POR TELÉFONO -->
+  <div id="seccionLogin" class="card">
+    <h2>Accedé a tu Evento</h2>
+    <p style="color:#ccc; font-size:14px; text-align:center;">
+      Ingresá el número de teléfono con el que realizaste la reserva para cargar tu música.
+    </p>
+    
+    <label for="inputTelefono">Tu WhatsApp / Teléfono:</label>
+    <input type="tel" id="inputTelefono" placeholder="Ej: 1112345678">
+
+    <button id="btnBuscarReserva">Buscar mi Reserva</button>
+    <div id="msgLoginError" style="color:#ff4d4d; text-align:center; margin-top:10px; font-size:14px;"></div>
+  </div>
+
+  <!-- PASO 2: PANEL DE Carga PARA EL CLIENTE -->
+  <div id="seccionPlaylist" class="card oculto">
+    <div class="info-evento">
+      <h3 id="txtEventoNombre" style="margin:0 0 5px 0; color:#f5b400;">—</h3>
+      <p id="txtEventoFecha" style="margin:0; font-size:13px; color:#ccc;">📅 Fecha: —</p>
+      <p id="txtClienteNombre" style="margin:3px 0 0 0; font-size:13px; color:#ccc;">👤 Titular: —</p>
+    </div>
+
+    <h2>🎵 Planificación Musical</h2>
+
+    <label for="txtInfaltables">🔥 Temas Infaltables (Los que SÍ O SÍ tienen que sonar):</label>
+    <textarea id="txtInfaltables" rows="4" placeholder="Ej:&#10;- Queen - Don't Stop Me Now&#10;- Bizarrap - Session #52&#10;- La Cumbia de los Viejos Tiempos"></textarea>
+
+    <label for="txtProhibidos">🚫 Temas Prohibidos (Lo que PREFERÍS EVITAR):</label>
+    <textarea id="txtProhibidos" rows="3" placeholder="Ej:&#10;- No pasar reggaetón viejo&#10;- Evitar música electrónica pesada"></textarea>
+
+    <label for="txtNotas">📝 Notas del Evento / Momentos Clave:</label>
+    <textarea id="txtNotas" rows="3" placeholder="Ej:&#10;- Entrada a las 22:30 hs con el tema de Rocky&#10;- Vals a las 00:00 hs con la familia&#10;- Tanda de cotillón a la 02:00 hs"></textarea>
+
+    <button id="btnGuardarPlaylist">💾 Guardar Mi Selección</button>
+    <div id="msgExito" class="mensaje-exito oculto">¡Tu selección musical se guardó con éxito! Tu DJ ya la tiene lista.</div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { supabase } from "./supabase.js";
+
+  let reservaActual = null;
+
+  const seccionLogin = document.getElementById("seccionLogin");
+  const seccionPlaylist = document.getElementById("seccionPlaylist");
+  const inputTelefono = document.getElementById("inputTelefono");
+  const btnBuscarReserva = document.getElementById("btnBuscarReserva");
+  const msgLoginError = document.getElementById("msgLoginError");
+
+  const txtEventoNombre = document.getElementById("txtEventoNombre");
+  const txtEventoFecha = document.getElementById("txtEventoFecha");
+  const txtClienteNombre = document.getElementById("txtClienteNombre");
+
+  const txtInfaltables = document.getElementById("txtInfaltables");
+  const txtProhibidos = document.getElementById("txtProhibidos");
+  const txtNotas = document.getElementById("txtNotas");
+  const btnGuardarPlaylist = document.getElementById("btnGuardarPlaylist");
+  const msgExito = document.getElementById("msgExito");
+
+  // Buscar Reserva por Teléfono
+  btnBuscarReserva.addEventListener("click", async () => {
+    msgLoginError.innerText = "";
+    const tel = inputTelefono.value.trim();
+
+    if (!tel) {
+      msgLoginError.innerText = "Por favor ingresá tu número de teléfono.";
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("reservas")
+        .select("*")
+        .ilike("telefono", `%${tel}%`)
+        .order("id", { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        msgLoginError.innerText = "No encontramos ninguna reserva activa asociada a ese número.";
+        return;
+      }
+
+      reservaActual = data[0]; // Cargar la última reserva vinculada a ese teléfono
+
+      // Cargar los datos en la vista
+      txtEventoNombre.innerText = reservaActual.evento || "Tu Evento";
+      txtEventoFecha.innerText = `📅 Fecha: ${reservaActual.fecha || "A confirmar"}`;
+      txtClienteNombre.innerText = `👤 Titular: ${reservaActual.nombre || "Cliente"}`;
+
+      txtInfaltables.value = reservaActual.playlist_infaltables || "";
+      txtProhibidos.value = reservaActual.playlist_prohibidos || "";
+      txtNotas.value = reservaActual.notas_evento || "";
+
+      // Cambiar de pantalla
+      seccionLogin.classList.add("oculto");
+      seccionPlaylist.classList.remove("oculto");
+
+    } catch (err) {
+      msgLoginError.innerText = "Ocurrió un error al consultar los datos.";
+      console.error(err);
+    }
+  });
+
+  // Guardar Cambios en la Playlist
+  btnGuardarPlaylist.addEventListener("click", async () => {
+    if (!reservaActual) return;
+
+    btnGuardarPlaylist.innerText = "Guardando...";
+    btnGuardarPlaylist.disabled = true;
+
+    try {
+      const { error } = await supabase
+        .from("reservas")
+        .update({
+          playlist_infaltables: txtInfaltables.value,
+          playlist_prohibidos: txtProhibidos.value,
+          notas_evento: txtNotas.value
+        })
+        .eq("id", reservaActual.id);
+
+      if (error) throw error;
+
+      msgExito.classList.remove("oculto");
+      setTimeout(() => {
+        msgExito.classList.add("oculto");
+      }, 4000);
+
+    } catch (err) {
+      alert("Hubo un problema al guardar la música. Intentalo de nuevo.");
+      console.error(err);
+    } finally {
+      btnGuardarPlaylist.innerText = "💾 Guardar Mi Selección";
+      btnGuardarPlaylist.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
