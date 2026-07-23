@@ -38,6 +38,11 @@ const invitadosNumero =
 const localidad = document.getElementById("localidad").value;
 const comentarios = document.getElementById("comentarios").value;
 
+// 🔽 CAPTURAMOS LOS 3 CAMPOS NUEVOS DE LA PLAYLIST 🔽
+const playlistInfaltables = document.getElementById("playlist-infaltables")?.value || "";
+const playlistProhibidos = document.getElementById("playlist-prohibidos")?.value || "";
+const notasEvento = document.getElementById("notas-evento")?.value || "";
+
 
 // OBTENER EL USER_ID DEL DJ DESDE CONFIGURACION
 
@@ -70,7 +75,12 @@ invitados: invitadosNumero,
 localidad: localidad,
 comentarios: comentarios,
 estado: "Pendiente",
-user_id: configuracion.user_id
+user_id: configuracion.user_id,
+
+// 🔽 AGREGAMOS LAS 3 COLUMNAS PARA SUPABASE 🔽
+playlist_infaltables: playlistInfaltables,
+playlist_prohibidos: playlistProhibidos,
+notas_evento: notasEvento
 }
 ])
 .select();
