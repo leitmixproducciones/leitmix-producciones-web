@@ -29,8 +29,31 @@ return;
 
 
 const invitados = document.getElementById("invitados").value;
+
+// CONVERTIR INVITADOS A NÚMERO O NULL
+
+const invitadosNumero =
+    invitados === "" ? null : Number(invitados);
+
 const localidad = document.getElementById("localidad").value;
 const comentarios = document.getElementById("comentarios").value;
+
+
+// OBTENER EL USER_ID DEL DJ DESDE CONFIGURACION
+
+const { data: configuracion, error: errorConfig } = await supabase
+.from("configuracion")
+.select("user_id")
+.limit(1)
+.single();
+
+if(errorConfig){
+
+alert(errorConfig.message);
+
+return;
+
+}
 
 
 // GUARDAR RESERVA EN SUPABASE
@@ -43,10 +66,11 @@ nombre: nombre,
 telefono: telefono,
 evento: evento,
 fecha: fecha,
-invitados: invitados,
+invitados: invitadosNumero,
 localidad: localidad,
 comentarios: comentarios,
-estado: "Pendiente"
+estado: "Pendiente",
+user_id: configuracion.user_id
 }
 ])
 .select();
@@ -75,7 +99,7 @@ Nombre: ${nombre}
 Teléfono: ${telefono}
 Evento: ${evento}
 Fecha: ${fecha}
-Invitados: ${invitados}
+Invitados: ${invitados || "No informado"}
 Localidad: ${localidad}
 
 Comentarios:
