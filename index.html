@@ -60,6 +60,7 @@ Consultar fecha
 </a>
 
 </section>
+
 <section id="quienes">
 
 <h2>QUIÉNES SOMOS</h2>
@@ -166,14 +167,14 @@ Enviar comentario
 
 <section id="contacto">
 
-<h2>CONTACTO</h2>
+<h2>CONTACTO & RESERVAS</h2>
 
 <p>
 ¿Tenés una fecha para tu evento?
 </p>
 
 <p>
-Completá los datos y recibí tu presupuesto personalizado.
+Completá tus datos y la selección musical inicial para recibir tu presupuesto personalizado.
 </p>
 
 
@@ -205,7 +206,18 @@ Completá los datos y recibí tu presupuesto personalizado.
 <input type="text" id="localidad" placeholder="Localidad">
 
 
-<textarea id="comentarios" placeholder="Contanos qué necesitás para tu evento"></textarea>
+<textarea id="comentarios" placeholder="Contanos detalles de tu evento (horarios, lugar, etc.)"></textarea>
+
+<!-- NUEVOS CAMPOS DE PLAYLIST -->
+<label for="playlist-infaltables" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">🔥 Temas / Estilos Infaltables:</label>
+<textarea id="playlist-infaltables" placeholder="Canciones o géneros infaltables (ej: Cumbia 90s, Soda Stereo, Bizarrap)"></textarea>
+
+<label for="playlist-prohibidos" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">🚫 Temas / Géneros Prohibidos:</label>
+<textarea id="playlist-prohibidos" placeholder="Canciones o géneros que preferís evitar (ej: No pasar reggaetón viejo)"></textarea>
+
+<label for="notas-evento" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">📝 Notas Especiales para el DJ:</label>
+<textarea id="notas-evento" placeholder="Momento de entrada, canciones para el vals, tanda de cotillón, etc."></textarea>
+
 
 <button type="button" class="boton" id="boton-whatsapp">
 Solicitar presupuesto
@@ -258,3 +270,6 @@ alert("INDEX CARGADO");
 </script>
 
 <script type="module" src="testimonios.js"></script>
+
+</body>
+</html>
