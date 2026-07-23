@@ -52,7 +52,7 @@ font-size:16px;
 margin:0;
 }
 
-h1,h2{
+h1,h2,h3,h4{
 color:#f5b400;
 }
 
@@ -145,6 +145,32 @@ border-bottom:1px solid #333;
 padding-bottom:10px;
 }
 
+.numero-destacado{
+font-size:26px;
+font-weight:bold;
+margin:10px 0 0 0;
+color:#fff;
+}
+
+.grid-dashboard{
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+gap:15px;
+margin-top:15px;
+}
+
+.subtarjeta-dash{
+background:#202020;
+padding:15px;
+border-radius:12px;
+border-left:4px solid #f5b400;
+}
+
+.subtarjeta-dash h4{
+margin:0 0 8px 0;
+font-size:16px;
+}
+
 </style>
 
 </head>
@@ -171,32 +197,78 @@ Cerrar sesión
 <h2>🚀 Sistema de Gestión</h2>
 
 <p style="text-align:center;color:#ccc;margin:0;">
-Galería • Videos • Reservas • Recibos
+Galería • Videos • Reservas • Recibos • Dashboard
 </p>
 
 </div>
 
 
+<!-- ========================================== -->
+<!-- RESUMEN Y MÉTRICAS DEL NEGOCIO (DASHBOARD) -->
+<!-- ========================================== -->
 <div class="card">
 
-<h2>📊 Resumen del negocio</h2>
+<h2>📊 Resumen del Negocio</h2>
 
-<div class="item">
-📅 Total reservas:
-<strong id="totalReservasDash">0</strong>
+<div class="grid-dashboard">
+
+  <div class="subtarjeta-dash">
+    <h4>📅 Total reservas</h4>
+    <p id="totalReservasDash" class="numero-destacado">0</p>
+  </div>
+
+  <div class="subtarjeta-dash">
+    <h4>⏳ Reservas pendientes</h4>
+    <p id="pendientesDash" class="numero-destacado">0</p>
+  </div>
+
+  <div class="subtarjeta-dash">
+    <h4>✅ Reservas confirmadas</h4>
+    <p id="confirmadasDash" class="numero-destacado">0</p>
+  </div>
+
+  <div class="subtarjeta-dash">
+    <h4>🎉 Próximo Evento</h4>
+    <div id="dashProximoEvento" style="color:#ccc; font-size:14px;">Cargando...</div>
+  </div>
+
+  <div class="subtarjeta-dash">
+    <h4>📅 Eventos esta semana</h4>
+    <p id="dashEventosSemana" class="numero-destacado">0</p>
+  </div>
+
+  <div class="subtarjeta-dash">
+    <h4>💰 Pendiente de Cobro</h4>
+    <p id="dashPendienteCobro" class="numero-destacado">$0</p>
+  </div>
+
+  <div class="subtarjeta-dash">
+    <h4>⭐ Últimos Testimonios</h4>
+    <div id="dashUltimosTestimonios" style="color:#ccc; font-size:13px;">Sin novedades</div>
+  </div>
+
 </div>
 
-<div class="item">
-⏳ Reservas pendientes:
-<strong id="pendientesDash">0</strong>
+<h2 style="margin-top:25px;">📈 Analítica</h2>
+
+<div class="grid-dashboard">
+
+  <div class="subtarjeta-dash" style="grid-column: 1 / -1;">
+    <h4>📈 Reservas por Mes (Año Actual)</h4>
+    <div id="graficoReservasMes" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="subtarjeta-dash" style="grid-column: 1 / -1;">
+    <h4>🔥 Servicios más contratados</h4>
+    <ul id="dashServiciosPopulares" style="list-style:none; padding:0; margin:10px 0 0 0; color:#ccc;">
+      <li>Cargando servicios...</li>
+    </ul>
+  </div>
+
 </div>
 
-<div class="item">
-✅ Reservas confirmadas:
-<strong id="confirmadasDash">0</strong>
 </div>
 
-</div>
 
 <div class="card">
 
@@ -213,20 +285,14 @@ Galería • Videos • Reservas • Recibos
 <input id="configLogo" type="file" accept="image/*">
 
 <button id="guardarLogo">
-
 Guardar logo
-
 </button>
 
-
 <button id="guardarConfiguracion">
-
 Guardar configuración
-
 </button>
 
 </div>
-
 
 
 <div class="card">
@@ -238,13 +304,10 @@ Guardar configuración
 <input id="imagenTitulo" placeholder="Título de la imagen">
 
 <button id="guardarImagen">
-
 Guardar imagen
-
 </button>
 
 </div>
-
 
 
 <div class="card">
@@ -256,13 +319,10 @@ Guardar imagen
 <input id="videoTitulo" placeholder="Título del video">
 
 <button id="guardarVideo">
-
 Guardar video
-
 </button>
 
 </div>
-
 
 
 <div class="card">
@@ -274,7 +334,6 @@ Guardar video
 </div>
 
 
-
 <div class="card">
 
 <h2>🎥 Videos subidos</h2>
@@ -282,7 +341,6 @@ Guardar video
 <div id="listaVideos"></div>
 
 </div>
-
 
 
 <div class="card">
@@ -294,7 +352,6 @@ Guardar video
 </div>
 
 
-
 <div class="card">
 
 <h2>📅 Reservas</h2>
@@ -304,33 +361,23 @@ Guardar video
 </div>
 
 
-
 <div class="card">
 
 <h2>🧾 Crear Recibo</h2>
 
-
 <input id="reciboTotal" placeholder="Total del evento">
-
 
 <input id="reciboImporte" placeholder="Importe recibido">
 
-
 <input id="reciboConcepto" placeholder="Concepto (Seña / Pago parcial / Pago total)">
-
 
 <input id="reciboFormaPago" placeholder="Forma de pago">
 
-
 <input id="reciboObservaciones" placeholder="Observaciones">
 
-
 <button id="crearRecibo">
-
 Crear recibo
-
 </button>
-
 
 </div>
 
@@ -339,44 +386,31 @@ Crear recibo
 
 <h2>🧾 Crear Recibo Manual</h2>
 
-
 <input id="manualNombre" placeholder="Nombre del cliente">
-
 
 <input id="manualTelefono" placeholder="Teléfono">
 
-
 <input id="manualEvento" placeholder="Evento">
-
 
 <input id="manualFecha" type="date">
 
-
 <input id="manualTotal" placeholder="Total del evento">
-
 
 <input id="manualImporte" placeholder="Importe recibido">
 
-
 <input id="manualConcepto" placeholder="Concepto (Seña / Pago parcial / Pago total)">
-
 
 <input id="manualFormaPago" placeholder="Forma de pago">
 
-
 <input id="manualObservaciones" placeholder="Observaciones">
 
-
 <button id="crearReciboManual">
-
 Crear recibo manual
-
 </button>
-
 
 </div>  
 
-  <div class="card">
+<div class="card">
 
 <h2>🧾 Recibos emitidos</h2>
 
@@ -385,62 +419,9 @@ Crear recibo manual
 </div>
 
 
-
+<!-- SCRIPTS DEL SISTEMA Y DASHBOARD -->
 <script type="module" src="../admin.js"></script>
-
- <!-- ========================================== -->
-<!-- NUEVAS TARJETAS Y MÉTRICAS DEL DASHBOARD   -->
-<!-- ========================================== -->
-<div class="dashboard-grid-extra">
-
-  <!-- Próximo evento -->
-  <div class="tarjeta-dash">
-    <h4>🎉 Próximo Evento</h4>
-    <div id="dashProximoEvento">Cargando...</div>
-  </div>
-
-  <!-- Eventos de esta semana -->
-  <div class="tarjeta-dash">
-    <h4>📅 Eventos esta semana</h4>
-    <p id="dashEventosSemana" class="numero-destacado">0</p>
-  </div>
-
-  <!-- Dinero pendiente de cobrar -->
-  <div class="tarjeta-dash">
-    <h4>💰 Pendiente de Cobro</h4>
-    <p id="dashPendienteCobro" class="numero-destacado">$0</p>
-  </div>
-
-  <!-- Últimos testimonios -->
-  <div class="tarjeta-dash">
-    <h4>⭐ Últimos Testimonios</h4>
-    <div id="dashUltimosTestimonios">Sin novedades</div>
-  </div>
-
-</div>
-
-<!-- Sección Gráficos y Servicios -->
-<div class="dashboard-analitica">
-
-  <!-- Gráfico resumen de reservas por mes -->
-  <div class="tarjeta-dash ancho-completo">
-    <h4>📈 Reservas por Mes (Año Actual)</h4>
-    <div id="graficoReservasMes" class="contenedor-grafico">
-      <!-- Se genera dinámicamente con barras CSS -->
-    </div>
-  </div>
-
-  <!-- Servicios más contratados -->
-  <div class="tarjeta-dash">
-    <h4>🔥 Servicios más contratados</h4>
-    <ul id="dashServiciosPopulares" class="lista-metricas">
-      <li>Cargando servicios...</li>
-    </ul>
-  </div>
-
-</div> 
 <script type="module" src="../dashboard.js"></script>
-
 
 </body>
 </html>
