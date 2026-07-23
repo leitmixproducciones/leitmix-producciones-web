@@ -39,9 +39,9 @@ const localidad = document.getElementById("localidad").value;
 const comentarios = document.getElementById("comentarios").value;
 
 // 🔽 CAPTURAMOS LOS 3 CAMPOS NUEVOS DE LA PLAYLIST 🔽
-const playlistInfaltables = document.getElementById("playlist-infaltables")?.value || "";
-const playlistProhibidos = document.getElementById("playlist-prohibidos")?.value || "";
-const notasEvento = document.getElementById("notas-evento")?.value || "";
+const playlistInfaltables = document.getElementById("playlist-infaltables") ? document.getElementById("playlist-infaltables").value : "";
+const playlistProhibidos = document.getElementById("playlist-prohibidos") ? document.getElementById("playlist-prohibidos").value : "";
+const notasEvento = document.getElementById("notas-evento") ? document.getElementById("notas-evento").value : "";
 
 
 // OBTENER EL USER_ID DEL DJ DESDE CONFIGURACION
@@ -77,7 +77,7 @@ comentarios: comentarios,
 estado: "Pendiente",
 user_id: configuracion.user_id,
 
-// 🔽 AGREGAMOS LAS 3 COLUMNAS PARA SUPABASE 🔽
+// 🔽 MAPEO A LAS COLUMNAS DE SUPABASE 🔽
 playlist_infaltables: playlistInfaltables,
 playlist_prohibidos: playlistProhibidos,
 notas_evento: notasEvento
@@ -92,7 +92,7 @@ console.log("Error:", error);
 
 if(error){
 
-alert(error.message);
+alert("Error al guardar en Supabase: " + error.message);
 
 return;
 
@@ -101,6 +101,8 @@ return;
 
 alert("Reserva guardada correctamente");
 
+
+// CONSTRUIR MENSAJE DE WHATSAPP INCLUYENDO LOS CAMPOS DE MÚSICA
 
 const mensaje =
 `Hola Leitmix Producciones, quiero solicitar un presupuesto.
@@ -113,7 +115,16 @@ Invitados: ${invitados || "No informado"}
 Localidad: ${localidad}
 
 Comentarios:
-${comentarios}`;
+${comentarios || "Sin comentarios"}
+
+🔥 Temas Infaltables:
+${playlistInfaltables || "No especificó"}
+
+🚫 Temas Prohibidos:
+${playlistProhibidos || "No especificó"}
+
+📝 Notas para el DJ:
+${notasEvento || "Sin notas adicionales"}`;
 
 
 const url = "https://wa.me/5491150480339?text=" + encodeURIComponent(mensaje);
