@@ -1744,3 +1744,23 @@ dashboardBox.innerHTML = `
 `;
 
 document.body.appendChild(dashboardBox);
+
+// ======================
+// CONTADORES DASHBOARD
+// ======================
+
+const contadoresDashboard = document.createElement("div");
+
+contadoresDashboard.innerHTML = `
+
+<hr>
+
+<p>📅 Próximas reservas: <b id="totalReservasDash">0</b></p>
+
+<p>⏳ Reservas pendientes: <b id="pendientesDash">0</b></p>
+
+<p>✅ Reservas confirmadas: <b id="confirmadasDash">0</b></p>
+
+`;
+
+dashboardBox.appendChild(contadoresDashboard);
