@@ -22,6 +22,12 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+<!-- ESTILOS Y SCRIPTS DE FLATPICKR (CALENDARIO) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+
 </head>
 
 <body>
@@ -197,7 +203,8 @@ Completá tus datos y la selección musical inicial para recibir tu presupuesto 
 </select>
 
 
-<input type="date" id="fecha" required>
+<!-- CAMPO DE FECHA ADAPTADO PARA FLATPICKR -->
+<input type="text" id="fecha" placeholder="Seleccioná la fecha de tu evento" required readonly style="cursor: pointer; background-color: #ffffff;">
 
 
 <input type="number" id="invitados" placeholder="Cantidad de invitados">
@@ -261,7 +268,7 @@ DJ Profesional • Sonido • Iluminación • Eventos Sociales y Corporativos
 
 </footer>
 
-<script type="module" src="script.js"></script>
+<script type="module" src="script.js?v=100"></script>
 <script type="module" src="galeria.js"></script>
 <script type="module" src="Videos.js"></script>
 
