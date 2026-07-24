@@ -1,74 +1,60 @@
-import { supabase } from "./supabase.js";
+import { supabase, DJ_USER_ID } from "./supabase.js";
 
-// 1. OBTENER EL USER_ID DEL DJ DESDE LA URL (?dj=UUID)
-const urlParams = new URLSearchParams(window.location.search);
-let djUserId = urlParams.get("dj");
-
-// Función para identificar qué DJ está activo en la página
-async function obtenerDjUserId() {
-  if (djUserId) return djUserId;
-
-  // Si no viene en la URL, busca la primera configuración como respaldo
-  const { data, error } = await supabase
-    .from("configuracion")
-    .select("user_id")
-    .limit(1)
-    .maybeSingle();
-
-  if (error || !data) {
-    console.error("No se pudo identificar al DJ activo:", error);
-    return null;
-  }
-
-  djUserId = data.user_id;
-  return djUserId;
-}
-
-// 2. MOSTRAR TESTIMONIOS PUBLICADOS (APROBADOS) DEL DJ EN LA PÁGINA
 async function cargarTestimoniosPublicos() {
   const contenedor = document.getElementById("testimonios-dinamicos");
   if (!contenedor) return;
 
-  const idDJ = await obtenerDjUserId();
-  if (!idDJ) return;
+  // 1. Mensaje azul: Nos avisa que el script está funcionando y leyendo el ID
+  contenedor.innerHTML = `<p style="color: #4da6ff; font-weight: bold;">Buscando testimonios para el DJ: ${DJ_USER_ID}...</p>`;
 
-  const { data: testimonios, error } = await supabase
-    .from("testimonios")
-    .select("*")
-    .eq("user_id", idDJ)      // Solo los de este DJ
-    .eq("aprobado", true)     // Solo los aprobados por el DJ
-    .order("created_at", { ascending: false });
+  try {
+    const { data: testimonios, error } = await supabase
+      .from("testimonios")
+      .select("*")
+      .eq("user_id", DJ_USER_ID)
+      .eq("aprobado", true)
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error al cargar testimonios:", error);
-    return;
+    // 2. Mensaje rojo: Si Supabase bloquea la lectura por permisos, lo leemos acá
+    if (error) {
+      contenedor.innerHTML = `<div style="background: #ffcccc; color: #cc0000; padding: 10px; border-radius: 5px;">
+        <strong>Error de Supabase:</strong> ${error.message}
+      </div>`;
+      return;
+    }
+
+    // 3. Mensaje naranja: Si la conexión fue exitosa pero no encontró ninguno aprobado
+    if (!testimonios || testimonios.length === 0) {
+      contenedor.innerHTML = `<p style="color: #ffa500; font-weight: bold;">
+        Conexión exitosa, pero Supabase dice que hay 0 testimonios aprobados para este ID.
+      </p>`;
+      return;
+    }
+
+    // 4. Si todo va bien, los muestra normalmente
+    contenedor.innerHTML = "";
+    testimonios.forEach((t) => {
+      const cantidadEstrellas = t.estrellas ? Number(t.estrellas) : 5;
+      const estrellas = "⭐".repeat(cantidadEstrellas);
+
+      contenedor.innerHTML += `
+        <div class="card-testimonio" style="margin-bottom:15px; padding:15px; border:1px solid #444; border-radius:8px;">
+          <h4>${t.nombre} <span style="font-size:12px; color:#f5b400;">(${t.evento || "Evento"})</span></h4>
+          <p>${estrellas}</p>
+          <p>"${t.comentario}"</p>
+        </div>
+      `;
+    });
+
+  } catch (err) {
+    // 5. Si hay un error de código JS, lo atrapamos
+    contenedor.innerHTML = `<p style="color: red; font-weight: bold;">Error interno: ${err.message}</p>`;
   }
-
-  contenedor.innerHTML = "";
-
-  if (!testimonios || testimonios.length === 0) {
-    contenedor.innerHTML = "<p>Aún no hay testimonios publicados.</p>";
-    return;
-  }
-
-  testimonios.forEach((t) => {
-    const estrellas = "⭐".repeat(t.estrellas || 5);
-    contenedor.innerHTML += `
-      <div class="card-testimonio" style="margin-bottom: 15px; padding: 15px; border: 1px solid #333; border-radius: 8px;">
-        <h4>${t.nombre} <small>(${t.evento || "Evento"})</small></h4>
-        <p>${estrellas}</p>
-        <p>"${t.comentario}"</p>
-      </div>
-    `;
-  });
 }
 
-// 3. ENVIAR NUEVO TESTIMONIO CON EL USER_ID DEL DJ
 async function enviarTestimonio() {
-  const idDJ = await obtenerDjUserId();
-
-  if (!idDJ) {
-    alert("Error: No se pudo identificar al DJ correspondiente.");
+  if (!DJ_USER_ID) {
+    alert("Error: No se encontró el ID del DJ.");
     return;
   }
 
@@ -87,36 +73,29 @@ async function enviarTestimonio() {
     return;
   }
 
-  // GUARDAR EN SUPABASE
   const { error } = await supabase.from("testimonios").insert([
     {
-      user_id: idDJ,          // 👈 ¡ASIGNA AUTOMÁTICAMENTE EL USER_ID DEL DJ!
+      user_id: DJ_USER_ID,
       nombre: nombre,
       evento: evento,
       estrellas: estrellas,
       comentario: comentario,
-      aprobado: false         // Arranca en pendiente para que el DJ lo apruebe desde su panel
+      aprobado: false 
     }
   ]);
 
   if (error) {
-    alert("Error al enviar el comentario: " + error.message);
+    alert("Error al enviar: " + error.message);
     return;
   }
 
-  alert("¡Gracias por tu comentario! Será publicado una vez que el DJ lo revise.");
-
-  // Limpiar el formulario
+  alert("¡Gracias por tu comentario! El DJ lo revisará antes de publicarlo.");
   const form = document.getElementById("formulario-testimonio");
   if (form) form.reset();
 }
 
-// 4. ESCUCHAR EVENTOS AL CARGAR LA PÁGINA
 document.addEventListener("DOMContentLoaded", () => {
   cargarTestimoniosPublicos();
-
   const botonEnviar = document.getElementById("enviar-testimonio");
-  if (botonEnviar) {
-    botonEnviar.addEventListener("click", enviarTestimonio);
-  }
+  if (botonEnviar) botonEnviar.addEventListener("click", enviarTestimonio);
 });
