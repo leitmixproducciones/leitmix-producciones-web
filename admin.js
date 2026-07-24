@@ -26,40 +26,85 @@ const usuario = sesion.session.user;
 // ======================
 async function cargarResumenNegocio() {
   const [{ data: reservas }, { data: testimonios }, { data: recibos }] = await Promise.all([
-    supabase.from("reservas").select("estado").eq("user_id", usuario.id),
+    supabase.from("reservas").select("*").eq("user_id", usuario.id),
     supabase.from("testimonios").select("id").eq("user_id", usuario.id),
-    supabase.from("recibos").select("importe").eq("user_id", usuario.id)
+    supabase.from("recibos").select("importe, total, saldo_pendiente").eq("user_id", usuario.id)
   ]);
 
+  let totalReservas = 0;
   let confirmadas = 0;
   let pendientes = 0;
+  let proximoEventoStr = "Sin eventos próximos";
+  let eventosSemana = 0;
 
-  if (reservas) {
-    confirmadas = reservas.filter(r => r.estado === "Confirmada" || r.estado === "Confirmado").length;
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  const dentroDeSieteDias = new Date(hoy);
+  dentroDeSieteDias.setDate(hoy.getDate() + 7);
+
+  if (reservas && reservas.length > 0) {
+    totalReservas = reservas.length;
+
+    const confirmadasLista = reservas.filter(
+      r => r.estado === "Confirmada" || r.estado === "Confirmado"
+    );
+
+    confirmadas = confirmadasLista.length;
     pendientes = reservas.filter(r => !r.estado || r.estado === "Pendiente").length;
+
+    // Fechas futuras
+    const fechasFuturas = confirmadasLista
+      .map(r => {
+        const partes = r.fecha ? r.fecha.split("-") : [];
+        if (partes.length === 3) {
+          return {
+            ...r,
+            fechaObj: new Date(partes[0], partes[1] - 1, partes[2])
+          };
+        }
+        return null;
+      })
+      .filter(r => r && r.fechaObj >= hoy)
+      .sort((a, b) => a.fechaObj - b.fechaObj);
+
+    // 1. Próximo evento
+    if (fechasFuturas.length > 0) {
+      const prox = fechasFuturas[0];
+      const dia = String(prox.fechaObj.getDate()).padStart(2, "0");
+      const mes = String(prox.fechaObj.getMonth() + 1).padStart(2, "0");
+      proximoEventoStr = `<b>${dia}/${mes}</b> - ${prox.nombre || prox.evento || 'Evento'}`;
+    }
+
+    // 2. Eventos esta semana
+    eventosSemana = fechasFuturas.filter(
+      r => r.fechaObj >= hoy && r.fechaObj <= dentroDeSieteDias
+    ).length;
   }
 
-  const totalTestimonios = testimonios ? testimonios.length : 0;
-  const totalRecaudado = recibos ? recibos.reduce((sum, r) => sum + Number(r.importe || 0), 0) : 0;
+  // 3. Pendiente de cobro
+  const totalPendienteCobro = recibos ? recibos.reduce((sum, r) => sum + Number(r.saldo_pendiente || 0), 0) : 0;
 
-  const elemConfirmadas = document.getElementById("resumenFechasConfirmadas") || document.getElementById("resumenConfirmadas") || document.getElementById("fechasConfirmadas");
-  const elemTestimonios = document.getElementById("resumenTestimonios") || document.getElementById("totalTestimonios");
-  const elemPendientes = document.getElementById("resumenPendientes") || document.getElementById("fechasPendientes");
-  const elemRecaudado = document.getElementById("resumenTotalRecaudado") || document.getElementById("totalRecaudado");
+  // Renderizar en los IDs exactos de tu HTML
+  const elemTotalReservas = document.getElementById("totalReservasDash");
+  const elemPendientes = document.getElementById("pendientesDash");
+  const elemConfirmadas = document.getElementById("confirmadasDash");
+  const elemProximo = document.getElementById("dashProximoEvento");
+  const elemEventosSemana = document.getElementById("dashEventosSemana");
+  const elemPendienteCobro = document.getElementById("dashPendienteCobro");
 
-  if (elemConfirmadas) elemConfirmadas.innerText = confirmadas;
-  if (elemTestimonios) elemTestimonios.innerText = totalTestimonios;
+  if (elemTotalReservas) elemTotalReservas.innerText = totalReservas;
   if (elemPendientes) elemPendientes.innerText = pendientes;
-  if (elemRecaudado) elemRecaudado.innerText = "$" + totalRecaudado.toLocaleString("es-AR");
+  if (elemConfirmadas) elemConfirmadas.innerText = confirmadas;
+  if (elemProximo) elemProximo.innerHTML = proximoEventoStr;
+  if (elemEventosSemana) elemEventosSemana.innerText = eventosSemana;
+  if (elemPendienteCobro) elemPendienteCobro.innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
 }
 
 // ======================
 // CONFIGURACIÓN DEL NEGOCIO
 // ======================
-const botonConfiguracion = document.getElementById("guardarConfiguracion");
-
 async function cargarConfiguracion() {
-  // Configurar enlace de difusión pública detectando la subcarpeta del repositorio
   const pathActual = window.location.pathname;
   const baseRepo = pathActual.includes("/admin") 
     ? pathActual.substring(0, pathActual.indexOf("/admin")) 
@@ -90,7 +135,6 @@ async function cargarConfiguracion() {
   }
 
   if (data) {
-    // Usamos fallback con || "" para evitar que aparezca 'null' en los inputs
     if (document.getElementById("configNombre")) {
       document.getElementById("configNombre").value = data.nombre_fantasia || data.nombre_negocio || data.nombre || "";
     }
@@ -115,6 +159,7 @@ async function cargarConfiguracion() {
   }
 }
 
+const botonConfiguracion = document.getElementById("guardarConfiguracion");
 if (botonConfiguracion) {
   botonConfiguracion.onclick = async () => {
     const configuracion = {
@@ -126,8 +171,6 @@ if (botonConfiguracion) {
       instagram_url: document.getElementById("configInstagram")?.value.trim() || null,
       tiktok_url: document.getElementById("configTiktok")?.value.trim() || null,
       youtube_url: document.getElementById("configYoutube")?.value.trim() || null,
-
-      // Mantenemos compatibilidad con columnas anteriores
       nombre_negocio: document.getElementById("configNombre")?.value.trim() || null,
       whatsapp: document.getElementById("configWhatsapp")?.value.trim() || null,
       alias_pago: document.getElementById("configAlias")?.value.trim() || null,
@@ -159,10 +202,7 @@ async function cargarLogo() {
     .eq("user_id", usuario.id)
     .single();
 
-  if (error) {
-    console.log(error);
-    return;
-  }
+  if (error) return;
 
   if (data && data.logo) {
     const logo = document.getElementById("logoNegocio");
@@ -173,7 +213,6 @@ async function cargarLogo() {
 cargarLogo();
 
 const botonLogo = document.getElementById("guardarLogo");
-
 if (botonLogo) {
   botonLogo.onclick = async () => {
     const archivo = document.getElementById("configLogo").files[0];
@@ -253,7 +292,7 @@ async function cargarImagenes() {
     .eq("user_id", usuario.id)
     .order("id", { ascending: false });
 
-  if (error) return console.log(error);
+  if (error) return;
 
   lista.innerHTML = "";
   data.forEach(imagen => {
@@ -331,7 +370,7 @@ async function cargarVideos() {
     .eq("user_id", usuario.id)
     .order("id", { ascending: false });
 
-  if (error) return console.log(error);
+  if (error) return;
 
   lista.innerHTML = "";
   data.forEach(video => {
@@ -371,7 +410,7 @@ async function cargarTestimonios() {
     .eq("user_id", usuario.id)
     .order("id", { ascending: false });
 
-  if (error) return console.log(error);
+  if (error) return;
 
   lista.innerHTML = "";
   data.forEach(testimonio => {
@@ -417,7 +456,7 @@ window.borrarTestimonio = async function(id) {
 };
 
 // ======================
-// RESERVAS & HOJA DE RUTA
+// RESERVAS
 // ======================
 async function cargarReservas() {
   const lista = document.getElementById("listaReservas");
@@ -429,7 +468,7 @@ async function cargarReservas() {
     .eq("user_id", usuario.id)
     .order("id", { ascending: false });
 
-  if (error) return console.log(error);
+  if (error) return;
 
   lista.innerHTML = "";
   data.forEach(reserva => {
@@ -504,20 +543,10 @@ window.emitirRecibo = async function(id) {
   if (error) return alert(error.message);
 
   reservaSeleccionada = data;
-
-  const nombre = document.getElementById("reciboNombre");
-  const evento = document.getElementById("reciboEvento");
-  const fecha = document.getElementById("reciboFecha");
-
-  if (nombre) nombre.value = data.nombre || "";
-  if (evento) evento.value = data.evento || "";
-  if (fecha) fecha.value = data.fecha || "";
-
-  alert("Reserva cargada para recibo");
+  alert("Reserva seleccionada para recibo");
 };
 
 const botonCrearRecibo = document.getElementById("crearRecibo");
-
 if (botonCrearRecibo) {
   botonCrearRecibo.onclick = async () => {
     if (!reservaSeleccionada) return alert("Primero seleccioná una reserva");
@@ -556,9 +585,7 @@ if (botonCrearRecibo) {
   };
 }
 
-// RECIBO MANUAL
 const botonReciboManual = document.getElementById("crearReciboManual");
-
 if (botonReciboManual) {
   botonReciboManual.onclick = async () => {
     const nombre = document.getElementById("manualNombre").value;
@@ -611,7 +638,7 @@ async function cargarRecibos() {
     .eq("user_id", usuario.id)
     .order("id", { ascending: false });
 
-  if (error) return console.log(error);
+  if (error) return;
 
   lista.innerHTML = "";
   data.forEach(recibo => {
@@ -649,7 +676,7 @@ window.borrarRecibo = async function(id) {
 };
 
 // ======================
-// INICIALIZACIÓN DE LA APP
+// INICIALIZACIÓN
 // ======================
 cargarResumenNegocio();
 cargarImagenes();
