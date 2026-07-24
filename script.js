@@ -1,34 +1,57 @@
 import { supabase } from "./supabase.js";
 
-// LEITMIX PRODUCCIONES
-// SCRIPT PRINCIPAL
+// LEITMIX PRODUCCIONES - SCRIPT PRINCIPAL PÚBLICO
 
+// 1. OBTENER EL USER_ID DEL DJ DESDE LA URL (?dj=UUID)
+const urlParams = new URLSearchParams(window.location.search);
+let djUserId = urlParams.get("dj");
 
-// INICIALIZAR Y BLOQUEAR FECHAS OCUPADAS EN EL CALENDARIO
+// Función para obtener el user_id del DJ activo
+async function obtenerDjUserId() {
+  if (djUserId) return djUserId;
 
+  // Si no viene en la URL, busca el primero en configuración como respaldo
+  const { data, error } = await supabase
+    .from("configuracion")
+    .select("user_id")
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("No se pudo identificar al DJ activo:", error);
+    return null;
+  }
+
+  djUserId = data.user_id;
+  return djUserId;
+}
+
+// 2. INICIALIZAR Y BLOQUEAR FECHAS OCUPADAS EN EL CALENDARIO (FILTRADO POR DJ)
 async function inicializarCalendario() {
   try {
-    // Consultar las reservas registradas que NO estén canceladas
+    const idDJ = await obtenerDjUserId();
+    if (!idDJ) return;
+
+    // Consultar las reservas registradas de este DJ que NO estén canceladas
     const { data: reservas, error } = await supabase
       .from("reservas")
       .select("fecha")
+      .eq("user_id", idDJ)
       .neq("estado", "Cancelado");
 
     if (error) {
       console.error("Error al obtener fechas ocupadas:", error);
     }
 
-    // Extraer array de fechas ocupadas: ["2026-08-15", "2026-09-20"]
     const fechasOcupadas = reservas ? reservas.map(r => r.fecha) : [];
 
-    // Inicializar Flatpickr en español
     if (typeof flatpickr !== "undefined") {
       flatpickr("#fecha", {
         locale: "es",
-        minDate: "today", // Impide elegir fechas pasadas
+        minDate: "today",
         dateFormat: "Y-m-d",
-        disable: fechasOcupadas, // 🚫 DESHABILITA LAS FECHAS RESERVADAS
-        disableMobile: true // Fuerza la interfaz visual personalizada también en teléfonos
+        disable: fechasOcupadas,
+        disableMobile: true
       });
     }
   } catch (err) {
@@ -36,108 +59,64 @@ async function inicializarCalendario() {
   }
 }
 
+// 3. WHATSAPP Y RESERVA DE PRESUPUESTO
+async function enviarWhatsApp() {
+  const nombre = document.getElementById("nombre").value;
+  const telefono = document.getElementById("telefono").value;
+  const evento = document.getElementById("evento").value;
+  let fecha = document.getElementById("fecha").value;
 
-// WHATSAPP PRESUPUESTO
+  if (!fecha) {
+    alert("Elegí una fecha para el evento");
+    return;
+  }
 
-async function enviarWhatsApp(){
+  const invitados = document.getElementById("invitados").value;
+  const invitadosNumero = invitados === "" ? null : Number(invitados);
+  const localidad = document.getElementById("localidad").value;
+  const comentarios = document.getElementById("comentarios").value;
 
-const nombre = document.getElementById("nombre").value;
-const telefono = document.getElementById("telefono").value;
-const evento = document.getElementById("evento").value;
+  const playlistInfaltables = document.getElementById("playlist-infaltables") ? document.getElementById("playlist-infaltables").value : "";
+  const playlistProhibidos = document.getElementById("playlist-prohibidos") ? document.getElementById("playlist-prohibidos").value : "";
+  const notasEvento = document.getElementById("notas-evento") ? document.getElementById("notas-evento").value : "";
 
-let fecha = document.getElementById("fecha").value;
+  const idDJ = await obtenerDjUserId();
 
-console.log("FECHA QUE ENVIA:", fecha);
+  if (!idDJ) {
+    alert("Error: No se pudo identificar al DJ correspondiente.");
+    return;
+  }
 
+  // GUARDAR RESERVA EN SUPABASE CON EL USER_ID DEL DJ
+  const { data, error } = await supabase
+    .from("reservas")
+    .insert([
+      {
+        nombre: nombre,
+        telefono: telefono,
+        evento: evento,
+        fecha: fecha,
+        invitados: invitadosNumero,
+        localidad: localidad,
+        comentarios: comentarios,
+        estado: "Pendiente",
+        user_id: idDJ,
+        playlist_infaltables: playlistInfaltables,
+        playlist_prohibidos: playlistProhibidos,
+        notas_evento: notasEvento
+      }
+    ])
+    .select();
 
-// Verificar fecha
+  if (error) {
+    alert("Error al guardar en Supabase: " + error.message);
+    return;
+  }
 
-if(!fecha){
+  alert("Reserva guardada correctamente");
 
-alert("Elegí una fecha para el evento");
-
-return;
-
-}
-
-
-const invitados = document.getElementById("invitados").value;
-
-// CONVERTIR INVITADOS A NÚMERO O NULL
-
-const invitadosNumero =
-    invitados === "" ? null : Number(invitados);
-
-const localidad = document.getElementById("localidad").value;
-const comentarios = document.getElementById("comentarios").value;
-
-// CAPTURAMOS LOS 3 CAMPOS NUEVOS DE LA PLAYLIST
-const playlistInfaltables = document.getElementById("playlist-infaltables") ? document.getElementById("playlist-infaltables").value : "";
-const playlistProhibidos = document.getElementById("playlist-prohibidos") ? document.getElementById("playlist-prohibidos").value : "";
-const notasEvento = document.getElementById("notas-evento") ? document.getElementById("notas-evento").value : "";
-
-
-// OBTENER EL USER_ID DEL DJ DESDE CONFIGURACION
-
-const { data: configuracion, error: errorConfig } = await supabase
-.from("configuracion")
-.select("user_id")
-.limit(1)
-.single();
-
-if(errorConfig){
-
-alert(errorConfig.message);
-
-return;
-
-}
-
-
-// GUARDAR RESERVA EN SUPABASE
-
-const { data, error } = await supabase
-.from("reservas")
-.insert([
-{
-nombre: nombre,
-telefono: telefono,
-evento: evento,
-fecha: fecha,
-invitados: invitadosNumero,
-localidad: localidad,
-comentarios: comentarios,
-estado: "Pendiente",
-user_id: configuracion.user_id,
-
-// MAPEO A LAS COLUMNAS DE SUPABASE
-playlist_infaltables: playlistInfaltables,
-playlist_prohibidos: playlistProhibidos,
-notas_evento: notasEvento
-}
-])
-.select();
-
-
-console.log("Reserva enviada:", data);
-console.log("Error:", error);
-
-
-if(error){
-
-alert("Error al guardar en Supabase: " + error.message);
-
-return;
-
-}
-
-
-alert("Reserva guardada correctamente");
-
-
-// CONSTRUIR MENSAJE DE WHATSAPP INCLUYENDO LOS CAMPOS DE MÚSICA
-
-const mensaje =
+  // CONSTRUIR MENSAJE DE WHATSAPP
+  const mensaje =
 `Hola Leitmix Producciones, quiero solicitar un presupuesto.
 
 Nombre: ${nombre}
@@ -159,28 +138,64 @@ ${playlistProhibidos || "No especificó"}
 📝 Notas para el DJ:
 ${notasEvento || "Sin notas adicionales"}`;
 
-
-const url = "https://wa.me/5491150480339?text=" + encodeURIComponent(mensaje);
-
-
-window.location.href = url;
-
+  const url = "https://wa.me/5491150480339?text=" + encodeURIComponent(mensaje);
+  window.location.href = url;
 }
 
+// 4. GUARDAR TESTIMONIO CON EL USER_ID DEL DJ AUTOMÁTICO
+async function guardarTestimonio(e) {
+  if (e) e.preventDefault();
 
-// BOTON WHATSAPP E INICIALIZACIÓN
+  const idDJ = await obtenerDjUserId();
 
-document.addEventListener("DOMContentLoaded", function(){
+  if (!idDJ) {
+    alert("Error: No se pudo identificar al DJ para asociar este testimonio.");
+    return;
+  }
 
-// Cargamos el calendario bloqueando fechas ocupadas de Supabase
-inicializarCalendario();
+  const nombre = document.getElementById("testimonioNombre") ? document.getElementById("testimonioNombre").value : "";
+  const evento = document.getElementById("testimonioEvento") ? document.getElementById("testimonioEvento").value : "";
+  const comentario = document.getElementById("testimonioComentario") ? document.getElementById("testimonioComentario").value : "";
 
-const boton = document.getElementById("boton-whatsapp");
+  if (!nombre || !comentario) {
+    alert("Por favor completá tu nombre y el comentario.");
+    return;
+  }
 
-if(boton){
+  const { error } = await supabase
+    .from("testimonios")
+    .insert([
+      {
+        user_id: idDJ, // 👈 Se asigna automáticamente el user_id del DJ
+        nombre: nombre,
+        evento: evento,
+        comentario: comentario,
+        aprobado: false // Pendiente de revisión en el panel del DJ
+      }
+    ]);
 
-boton.addEventListener("click", enviarWhatsApp);
+  if (error) {
+    alert("Error al enviar el testimonio: " + error.message);
+    return;
+  }
 
+  alert("¡Gracias por tu testimonio! El DJ lo revisará antes de publicarlo.");
+
+  const form = document.getElementById("formTestimonio");
+  if (form) form.reset();
 }
 
+// 5. INICIALIZACIÓN AL CARGAR LA PÁGINA
+document.addEventListener("DOMContentLoaded", function () {
+  inicializarCalendario();
+
+  const boton = document.getElementById("boton-whatsapp");
+  if (boton) {
+    boton.addEventListener("click", enviarWhatsApp);
+  }
+
+  const formTestimonio = document.getElementById("formTestimonio");
+  if (formTestimonio) {
+    formTestimonio.addEventListener("submit", guardarTestimonio);
+  }
 });
