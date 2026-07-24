@@ -1,72 +1,60 @@
-import { supabase } from "./supabase.js";
+import { supabase, DJ_USER_ID } from "./supabase.js";
 
+async function cargarVideos() {
+  const contenedor = document.getElementById("videos-dinamicos");
+  if (!contenedor) return;
 
-async function cargarVideos(){
+  if (!DJ_USER_ID || DJ_USER_ID === "TU_ID_DE_SUPABASE_AQUI") {
+    contenedor.innerHTML = "<p style='color:orange;'>Falta configurar el DJ_USER_ID en supabase.js</p>";
+    return;
+  }
 
-const contenedor = document.getElementById("videos-dinamicos");
+  contenedor.innerHTML = "";
 
-if(!contenedor) return;
+  // 1. Pedimos a Supabase SOLO los videos que pertenecen a este DJ
+  const { data, error } = await supabase
+    .from("videos")
+    .select("*")
+    .eq("user_id", DJ_USER_ID);
 
-contenedor.innerHTML = "";
+  if (error) {
+    contenedor.innerHTML = "<p style='color:red;'>Error al cargar videos: " + error.message + "</p>";
+    console.log(error);
+    return;
+  }
 
+  if (!data || data.length === 0) {
+    contenedor.innerHTML = "<p style='color:#ccc;'>No hay videos cargados para este DJ.</p>";
+    return;
+  }
 
-const { data, error } = await supabase
-.from("videos")
-.select("*");
+  // 2. Recorremos los videos devueltos y los mostramos
+  data.forEach((item) => {
+    // Detectamos la URL sin importar si en Supabase se llama "url" o "Url"
+    const videoUrl = item.url || item.Url;
 
+    if (!videoUrl) return;
 
-if(error){
+    const video = document.createElement("video");
+    const source = document.createElement("source");
 
-contenedor.innerHTML = "Error: " + error.message;
-console.log(error);
-return;
+    source.src = videoUrl;
+    source.type = "video/mp4";
 
+    video.appendChild(source);
+    video.controls = true;
+    video.preload = "metadata";
+    video.style.width = "100%";
+    video.style.maxWidth = "500px";
+    video.style.margin = "10px";
+    video.style.borderRadius = "8px";
+
+    video.onerror = function () {
+      console.log("Error cargando video:", videoUrl);
+    };
+
+    contenedor.appendChild(video);
+  });
 }
 
-
-if(!data || data.length === 0){
-
-contenedor.innerHTML = "No hay videos cargados";
-return;
-
-}
-
-
-data.forEach((item)=>{
-
-
-const video = document.createElement("video");
-
-const source = document.createElement("source");
-
-source.src = item.Url;
-source.type = "video/mp4";
-
-
-video.appendChild(source);
-
-video.controls = true;
-video.preload = "metadata";
-
-video.style.width = "100%";
-video.style.maxWidth = "500px";
-video.style.margin = "10px";
-
-
-video.onerror = function(){
-
-console.log("Error cargando video:", item.Url);
-
-};
-
-
-contenedor.appendChild(video);
-
-
-});
-
-
-}
-
-
-cargarVideos();
+document.addEventListener("DOMContentLoaded", cargarVideos);
