@@ -174,3 +174,122 @@ cargarTestimonios();
 
 
 });
+
+// ==============================
+// CORRECCIÓN USER_ID TESTIMONIOS
+// AGREGAR AL FINAL DEL ARCHIVO
+// ==============================
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+
+const botonTestimonio = document.getElementById("enviar-testimonio");
+
+
+if(!botonTestimonio) return;
+
+
+// Evitar doble envío
+const nuevoBoton = botonTestimonio.cloneNode(true);
+botonTestimonio.parentNode.replaceChild(nuevoBoton, botonTestimonio);
+
+
+
+nuevoBoton.addEventListener("click", async ()=>{
+
+
+const nombre =
+document.getElementById("nombre-testimonio").value.trim();
+
+
+const evento =
+document.getElementById("evento-testimonio").value.trim();
+
+
+const comentario =
+document.getElementById("comentario-testimonio").value.trim();
+
+
+const estrellas =
+document.getElementById("estrellas-testimonio").value;
+
+
+
+if(!nombre || !comentario){
+
+alert("Completá nombre y comentario");
+return;
+
+}
+
+
+
+// Obtener usuario del negocio
+
+const {data: configuracion, error: errorConfig} =
+await supabase
+.from("configuracion")
+.select("user_id")
+.limit(1)
+.single();
+
+
+
+if(errorConfig){
+
+alert(errorConfig.message);
+return;
+
+}
+
+
+
+
+const {error} =
+await supabase
+.from("testimonios")
+.insert([{
+
+nombre:nombre,
+
+evento:evento,
+
+comentario:comentario,
+
+estrellas:Number(estrellas),
+
+aprobado:false,
+
+user_id:configuracion.user_id
+
+}]);
+
+
+
+
+if(error){
+
+console.log(error);
+
+alert("No se pudo enviar el testimonio");
+
+return;
+
+}
+
+
+
+alert("Testimonio enviado correctamente. Será publicado luego de su aprobación.");
+
+
+
+document.getElementById("nombre-testimonio").value="";
+document.getElementById("evento-testimonio").value="";
+document.getElementById("comentario-testimonio").value="";
+document.getElementById("estrellas-testimonio").value="5";
+
+
+
+});
+
+
+});
