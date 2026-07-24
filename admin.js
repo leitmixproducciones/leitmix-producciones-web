@@ -145,7 +145,7 @@ async function cargarConfiguracion() {
       document.getElementById("configWhatsapp").value = data.telefono_whatsapp || data.whatsapp || "";
     }
     if (document.getElementById("configAlias")) {
-      document.getElementById("configAlias").value = data.alias || data.alias_pago || "";
+      document.getElementById("configAlias").value = data.alias_pago || "";
     }
     if (document.getElementById("configInstagram")) {
       document.getElementById("configInstagram").value = data.instagram_url || data.instagram || "";
@@ -167,13 +167,12 @@ if (botonConfiguracion) {
       nombre_fantasia: document.getElementById("configNombre")?.value.trim() || null,
       subtitulo: document.getElementById("configSubtitulo")?.value.trim() || null,
       telefono_whatsapp: document.getElementById("configWhatsapp")?.value.trim() || null,
-      alias: document.getElementById("configAlias")?.value.trim() || null,
+      alias_pago: document.getElementById("configAlias")?.value.trim() || null,
       instagram_url: document.getElementById("configInstagram")?.value.trim() || null,
       tiktok_url: document.getElementById("configTiktok")?.value.trim() || null,
       youtube_url: document.getElementById("configYoutube")?.value.trim() || null,
       nombre_negocio: document.getElementById("configNombre")?.value.trim() || null,
       whatsapp: document.getElementById("configWhatsapp")?.value.trim() || null,
-      alias_pago: document.getElementById("configAlias")?.value.trim() || null,
       instagram: document.getElementById("configInstagram")?.value.trim() || null
     };
 
@@ -186,7 +185,7 @@ if (botonConfiguracion) {
       return;
     }
 
-    alert("Configuración guardada correctamente");
+    alert("¡Configuración guardada correctamente!");
   };
 }
 
