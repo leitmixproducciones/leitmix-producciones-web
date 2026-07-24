@@ -270,27 +270,52 @@ Galería • Videos • Reservas • Recibos • Dashboard
 </div>
 
 
+<!-- ========================================== -->
+<!-- SECCIÓN DE CONFIGURACIÓN AMPLIADA Y LIMPIA  -->
+<!-- ========================================== -->
 <div class="card">
 
 <h2>⚙️ Configuración del negocio</h2>
 
-<input id="configNombre" placeholder="Nombre del negocio">
+<label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Nombre del DJ / Productora:</label>
+<input id="configNombre" placeholder="Ej: Leitmix Producciones">
 
-<input id="configWhatsapp" placeholder="WhatsApp">
+<label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Eslogan o Subtítulo:</label>
+<input id="configSubtitulo" placeholder="Ej: Sonido profesional • Iluminación • Eventos">
 
-<input id="configAlias" placeholder="Alias de pago">
+<label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">WhatsApp para reservas (con código de país sin +):</label>
+<input id="configWhatsapp" placeholder="Ej: 5491150480339">
 
-<input id="configInstagram" placeholder="Instagram">
+<label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Alias de Pago (MercadoPago / CBU):</label>
+<input id="configAlias" placeholder="Ej: leitmix.mp">
 
+<h3 style="margin-top:20px; font-size:18px;">🔗 Redes Sociales</h3>
+
+<label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Link de Instagram:</label>
+<input id="configInstagram" placeholder="https://www.instagram.com/tu_usuario">
+
+<label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Link de TikTok:</label>
+<input id="configTiktok" placeholder="https://www.tiktok.com/@tu_usuario">
+
+<label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Link de YouTube:</label>
+<input id="configYoutube" placeholder="https://www.youtube.com/@tu_canal">
+
+<h3 style="margin-top:20px; font-size:18px;">🖼️ Logo del Negocio</h3>
 <input id="configLogo" type="file" accept="image/*">
 
-<button id="guardarLogo">
+<button id="guardarLogo" style="margin-bottom: 10px;">
 Guardar logo
 </button>
 
 <button id="guardarConfiguracion">
 Guardar configuración
 </button>
+
+<div id="contenedorLinkDifusion" style="margin-top:20px; background:#202020; padding:15px; border-radius:12px; border-left:4px solid #f5b400;">
+  <h4 style="margin:0 0 5px 0; color:#f5b400;">🔗 Tu Link de Difusión Pública:</h4>
+  <p id="textoLinkPublico" style="word-break:break-all; font-size:13px; color:#fff; margin:5px 0;"></p>
+  <button id="copiarLinkPublico" style="background:#333; color:#fff; font-size:14px; padding:8px;">📋 Copiar Enlace</button>
+</div>
 
 </div>
 
