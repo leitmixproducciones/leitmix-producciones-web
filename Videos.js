@@ -1,40 +1,45 @@
 import { supabase } from "./supabase.js";
 
-async function cargarVideos() {
+async function probarVideos() {
   const contenedor = document.getElementById("videos-dinamicos");
-  if (!contenedor) return;
 
-  contenedor.innerHTML = "";
+  // Alerta en pantalla si no encuentra el contenedor
+  if (!contenedor) {
+    alert("¡ATENCIÓN! No existe ningún elemento con id='videos-dinamicos' en el HTML.");
+    return;
+  }
+
+  contenedor.innerHTML = "<p style='color:yellow; font-weight:bold;'>Conectando con Supabase para traer videos...</p>";
 
   try {
     const { data, error } = await supabase.from("videos").select("*");
 
     if (error) {
-      contenedor.innerHTML = `<p style="color:red;">Error de Supabase: ${error.message}</p>`;
+      contenedor.innerHTML = `<p style="color:red; font-size:18px;">Error de Supabase: ${error.message}</p>`;
       return;
     }
 
     if (!data || data.length === 0) {
-      contenedor.innerHTML = "<p style='color:#ccc;'>No hay videos cargados en la base de datos.</p>";
+      contenedor.innerHTML = "<p style='color:orange; font-size:18px;'>Supabase respondió OK, pero la tabla 'videos' está vacía.</p>";
       return;
     }
 
+    contenedor.innerHTML = `<p style='color:lime;'>¡Éxito! Se encontraron ${data.length} video(s):</p>`;
+
     data.forEach((item) => {
       const videoUrl = item.url || item.Url;
-      if (!videoUrl) return;
+
+      if (!videoUrl) {
+        contenedor.innerHTML += "<p style='color:red;'>Un video no tiene URL válida.</p>";
+        return;
+      }
 
       const video = document.createElement("video");
-      const source = document.createElement("source");
-
-      source.src = videoUrl;
-      source.type = "video/mp4";
-
-      video.appendChild(source);
+      video.src = videoUrl;
       video.controls = true;
-      video.preload = "metadata";
       video.style.width = "100%";
       video.style.maxWidth = "500px";
-      video.style.margin = "10px auto";
+      video.style.margin = "10px 0";
       video.style.display = "block";
       video.style.borderRadius = "8px";
 
@@ -42,9 +47,13 @@ async function cargarVideos() {
     });
 
   } catch (err) {
-    contenedor.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+    contenedor.innerHTML = `<p style="color:red; font-size:18px;">Error inesperado: ${err.message}</p>`;
   }
 }
 
-// Ejecutamos la función inmediatamente al cargar
-cargarVideos();
+// Ejecución al cargar
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", probarVideos);
+} else {
+  probarVideos();
+}
