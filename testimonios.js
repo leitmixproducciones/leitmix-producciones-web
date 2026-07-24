@@ -1,25 +1,29 @@
-import { supabase } from "./supabase.js";
+import { supabase, DJ_USER_ID } from "./supabase.js";
 
 async function cargarTestimoniosPublicos() {
   const contenedor = document.getElementById("testimonios-dinamicos");
   if (!contenedor) return;
 
-  contenedor.innerHTML = "<p style='color:#f5b400; font-weight:bold;'>Cargando testimonios desde Supabase...</p>";
+  if (!DJ_USER_ID || DJ_USER_ID === "TU_ID_DE_SUPABASE_AQUI") {
+    contenedor.innerHTML = "<p style='color:orange;'>Falta configurar el DJ_USER_ID en supabase.js</p>";
+    return;
+  }
 
   try {
     const { data: testimonios, error } = await supabase
       .from("testimonios")
       .select("*")
-      .eq("aprobado", true);
+      .eq("user_id", DJ_USER_ID)
+      .eq("aprobado", true)
+      .order("created_at", { ascending: false });
 
     if (error) {
-      alert("Error de Supabase: " + error.message);
-      contenedor.innerHTML = `<p style='color:red;'>Error: ${error.message}</p>`;
+      contenedor.innerHTML = `<p style='color:red;'>Error al cargar: ${error.message}</p>`;
       return;
     }
 
     if (!testimonios || testimonios.length === 0) {
-      contenedor.innerHTML = "<p style='color:orange;'>Supabase no tiene testimonios con aprobado = true.</p>";
+      contenedor.innerHTML = "<p style='color:#ccc;'>Aún no hay opiniones aprobadas para este DJ.</p>";
       return;
     }
 
@@ -38,12 +42,16 @@ async function cargarTestimoniosPublicos() {
     });
 
   } catch (err) {
-    alert("Error de Javascript: " + err.message);
+    contenedor.innerHTML = `<p style='color:red;'>Error: ${err.message}</p>`;
   }
 }
 
-// Guardar un nuevo testimonio desde la web
 async function enviarTestimonio() {
+  if (!DJ_USER_ID || DJ_USER_ID === "TU_ID_DE_SUPABASE_AQUI") {
+    alert("Error de configuración: Falta el ID del DJ en supabase.js");
+    return;
+  }
+
   const nombreInput = document.getElementById("nombre-testimonio");
   const eventoInput = document.getElementById("evento-testimonio");
   const estrellasInput = document.getElementById("estrellas-testimonio");
@@ -61,6 +69,7 @@ async function enviarTestimonio() {
 
   const { error } = await supabase.from("testimonios").insert([
     {
+      user_id: DJ_USER_ID,
       nombre: nombre,
       evento: evento,
       estrellas: estrellas,
