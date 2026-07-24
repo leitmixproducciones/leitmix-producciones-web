@@ -59,8 +59,14 @@ async function cargarResumenNegocio() {
 const botonConfiguracion = document.getElementById("guardarConfiguracion");
 
 async function cargarConfiguracion() {
-  // Configurar enlace de difusión pública con el ID del usuario
-  const linkPublico = `${window.location.origin}/index.html?dj=${usuario.id}`;
+  // Configurar enlace de difusión pública detectando la subcarpeta del repositorio
+  const pathActual = window.location.pathname;
+  const baseRepo = pathActual.includes("/admin") 
+    ? pathActual.substring(0, pathActual.indexOf("/admin")) 
+    : "";
+  
+  const linkPublico = `${window.location.origin}${baseRepo}/index.html?dj=${usuario.id}`;
+
   const elemLink = document.getElementById("textoLinkPublico");
   if (elemLink) elemLink.textContent = linkPublico;
 
@@ -121,7 +127,7 @@ if (botonConfiguracion) {
       tiktok_url: document.getElementById("configTiktok")?.value.trim() || null,
       youtube_url: document.getElementById("configYoutube")?.value.trim() || null,
 
-      // Mantenemos compatibilidad con columnas anteriores si existieran
+      // Mantenemos compatibilidad con columnas anteriores
       nombre_negocio: document.getElementById("configNombre")?.value.trim() || null,
       whatsapp: document.getElementById("configWhatsapp")?.value.trim() || null,
       alias_pago: document.getElementById("configAlias")?.value.trim() || null,
