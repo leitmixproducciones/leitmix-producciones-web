@@ -1,45 +1,46 @@
-import { supabase } from "./supabase.js";
+const SUPABASE_URL = 'https://fevvtbbyzxvnanzeedzp.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_l8Hb4ydFb7uGcjODFG8sBg_jY-jEFrF';
 
-async function probarVideos() {
+async function cargarVideosDirecto() {
   const contenedor = document.getElementById("videos-dinamicos");
+  if (!contenedor) return;
 
-  // Alerta en pantalla si no encuentra el contenedor
-  if (!contenedor) {
-    alert("¡ATENCIÓN! No existe ningún elemento con id='videos-dinamicos' en el HTML.");
-    return;
-  }
-
-  contenedor.innerHTML = "<p style='color:yellow; font-weight:bold;'>Conectando con Supabase para traer videos...</p>";
+  contenedor.innerHTML = "<p style='color:yellow; text-align:center;'>Cargando videos...</p>";
 
   try {
-    const { data, error } = await supabase.from("videos").select("*");
+    const respuesta = await fetch(`${SUPABASE_URL}/rest/v1/videos?select=*`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
 
-    if (error) {
-      contenedor.innerHTML = `<p style="color:red; font-size:18px;">Error de Supabase: ${error.message}</p>`;
+    if (!respuesta.ok) {
+      contenedor.innerHTML = `<p style="color:red; text-align:center;">Error de servidor: ${respuesta.status}</p>`;
       return;
     }
+
+    const data = await respuesta.json();
 
     if (!data || data.length === 0) {
-      contenedor.innerHTML = "<p style='color:orange; font-size:18px;'>Supabase respondió OK, pero la tabla 'videos' está vacía.</p>";
+      contenedor.innerHTML = "<p style='color:#ccc; text-align:center;'>La tabla de videos está vacía en Supabase.</p>";
       return;
     }
 
-    contenedor.innerHTML = `<p style='color:lime;'>¡Éxito! Se encontraron ${data.length} video(s):</p>`;
+    contenedor.innerHTML = "";
 
     data.forEach((item) => {
+      // Busca la URL se llame 'url' o 'Url'
       const videoUrl = item.url || item.Url;
-
-      if (!videoUrl) {
-        contenedor.innerHTML += "<p style='color:red;'>Un video no tiene URL válida.</p>";
-        return;
-      }
+      if (!videoUrl) return;
 
       const video = document.createElement("video");
       video.src = videoUrl;
       video.controls = true;
+      video.preload = "metadata";
       video.style.width = "100%";
       video.style.maxWidth = "500px";
-      video.style.margin = "10px 0";
+      video.style.margin = "15px auto";
       video.style.display = "block";
       video.style.borderRadius = "8px";
 
@@ -47,13 +48,9 @@ async function probarVideos() {
     });
 
   } catch (err) {
-    contenedor.innerHTML = `<p style="color:red; font-size:18px;">Error inesperado: ${err.message}</p>`;
+    contenedor.innerHTML = `<p style="color:red; text-align:center;">Error de conexión: ${err.message}</p>`;
   }
 }
 
-// Ejecución al cargar
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", probarVideos);
-} else {
-  probarVideos();
-}
+document.addEventListener("DOMContentLoaded", cargarVideosDirecto);
+cargarVideosDirecto();
