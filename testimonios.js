@@ -10,12 +10,12 @@ async function cargarTestimoniosPublicos() {
   }
 
   try {
+    // Le pedimos a Supabase los testimonios filtrando SOLO por user_id y aprobados
     const { data: testimonios, error } = await supabase
       .from("testimonios")
       .select("*")
       .eq("user_id", DJ_USER_ID)
-      .eq("aprobado", true)
-      .order("created_at", { ascending: false });
+      .eq("aprobado", true);
 
     if (error) {
       contenedor.innerHTML = `<p style='color:red;'>Error al cargar: ${error.message}</p>`;
