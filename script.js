@@ -199,3 +199,65 @@ document.addEventListener("DOMContentLoaded", function () {
     formTestimonio.addEventListener("submit", guardarTestimonio);
   }
 });
+// ==========================================
+// 6. CARGAR VIDEOS DINÁMICOS (FILTRADO POR DJ)
+// ==========================================
+async function cargarVideosPublicos() {
+  const contenedor = document.getElementById("videos-dinamicos");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = "<p style='color:yellow; text-align:center;'>Cargando videos...</p>";
+
+  try {
+    const idDJ = await obtenerDjUserId();
+
+    if (!idDJ) {
+      contenedor.innerHTML = "<p style='color:orange; text-align:center;'>No se pudo identificar al DJ para cargar sus videos.</p>";
+      return;
+    }
+
+    // Buscamos los videos en Supabase filtrados por el user_id del DJ activo
+    const { data: videos, error } = await supabase
+      .from("videos")
+      .select("*")
+      .eq("user_id", idDJ);
+
+    if (error) {
+      contenedor.innerHTML = `<p style="color:red; text-align:center;">Error al cargar videos: ${error.message}</p>`;
+      return;
+    }
+
+    if (!videos || videos.length === 0) {
+      contenedor.innerHTML = "<p style='color:#ccc; text-align:center;'>Aún no hay videos subidos para este DJ.</p>";
+      return;
+    }
+
+    contenedor.innerHTML = "";
+
+    videos.forEach((item) => {
+      // Capturamos la URL del video (en minúscula o mayúscula)
+      const videoUrl = item.url || item.Url;
+      if (!videoUrl) return;
+
+      const video = document.createElement("video");
+      video.src = videoUrl;
+      video.controls = true;
+      video.preload = "metadata";
+      video.style.width = "100%";
+      video.style.maxWidth = "500px";
+      video.style.margin = "15px auto";
+      video.style.display = "block";
+      video.style.borderRadius = "8px";
+
+      contenedor.appendChild(video);
+    });
+
+  } catch (err) {
+    contenedor.innerHTML = `<p style="color:red; text-align:center;">Error interno: ${err.message}</p>`;
+  }
+}
+
+// Agregar el llamado a la función cuando se cargue el DOM
+document.addEventListener("DOMContentLoaded", function () {
+  cargarVideosPublicos();
+});
