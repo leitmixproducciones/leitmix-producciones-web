@@ -59,22 +59,53 @@ async function cargarResumenNegocio() {
 const botonConfiguracion = document.getElementById("guardarConfiguracion");
 
 async function cargarConfiguracion() {
+  // Configurar enlace de difusión pública con el ID del usuario
+  const linkPublico = `${window.location.origin}/index.html?dj=${usuario.id}`;
+  const elemLink = document.getElementById("textoLinkPublico");
+  if (elemLink) elemLink.textContent = linkPublico;
+
+  const btnCopiar = document.getElementById("copiarLinkPublico");
+  if (btnCopiar) {
+    btnCopiar.onclick = () => {
+      navigator.clipboard.writeText(linkPublico);
+      alert("¡Enlace copiado al portapapeles!");
+    };
+  }
+
   const { data, error } = await supabase
     .from("configuracion")
     .select("*")
     .eq("user_id", usuario.id)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    console.log("Sin configuración todavía");
+    console.log("Sin configuración todavía:", error.message);
     return;
   }
 
   if (data) {
-    document.getElementById("configNombre").value = data.nombre_negocio || "";
-    document.getElementById("configWhatsapp").value = data.whatsapp || "";
-    document.getElementById("configAlias").value = data.alias_pago || "";
-    document.getElementById("configInstagram").value = data.instagram || "";
+    // Usamos fallback con || "" para evitar que aparezca 'null' en los inputs
+    if (document.getElementById("configNombre")) {
+      document.getElementById("configNombre").value = data.nombre_fantasia || data.nombre_negocio || data.nombre || "";
+    }
+    if (document.getElementById("configSubtitulo")) {
+      document.getElementById("configSubtitulo").value = data.subtitulo || "";
+    }
+    if (document.getElementById("configWhatsapp")) {
+      document.getElementById("configWhatsapp").value = data.telefono_whatsapp || data.whatsapp || "";
+    }
+    if (document.getElementById("configAlias")) {
+      document.getElementById("configAlias").value = data.alias || data.alias_pago || "";
+    }
+    if (document.getElementById("configInstagram")) {
+      document.getElementById("configInstagram").value = data.instagram_url || data.instagram || "";
+    }
+    if (document.getElementById("configTiktok")) {
+      document.getElementById("configTiktok").value = data.tiktok_url || "";
+    }
+    if (document.getElementById("configYoutube")) {
+      document.getElementById("configYoutube").value = data.youtube_url || "";
+    }
   }
 }
 
@@ -82,31 +113,27 @@ if (botonConfiguracion) {
   botonConfiguracion.onclick = async () => {
     const configuracion = {
       user_id: usuario.id,
-      nombre_negocio: document.getElementById("configNombre").value,
-      whatsapp: document.getElementById("configWhatsapp").value,
-      alias_pago: document.getElementById("configAlias").value,
-      instagram: document.getElementById("configInstagram").value
+      nombre_fantasia: document.getElementById("configNombre")?.value.trim() || null,
+      subtitulo: document.getElementById("configSubtitulo")?.value.trim() || null,
+      telefono_whatsapp: document.getElementById("configWhatsapp")?.value.trim() || null,
+      alias: document.getElementById("configAlias")?.value.trim() || null,
+      instagram_url: document.getElementById("configInstagram")?.value.trim() || null,
+      tiktok_url: document.getElementById("configTiktok")?.value.trim() || null,
+      youtube_url: document.getElementById("configYoutube")?.value.trim() || null,
+
+      // Mantenemos compatibilidad con columnas anteriores si existieran
+      nombre_negocio: document.getElementById("configNombre")?.value.trim() || null,
+      whatsapp: document.getElementById("configWhatsapp")?.value.trim() || null,
+      alias_pago: document.getElementById("configAlias")?.value.trim() || null,
+      instagram: document.getElementById("configInstagram")?.value.trim() || null
     };
 
-    const { data } = await supabase
+    const { error } = await supabase
       .from("configuracion")
-      .select("id")
-      .eq("user_id", usuario.id);
+      .upsert(configuracion, { onConflict: "user_id" });
 
-    let resultado;
-    if (data && data.length > 0) {
-      resultado = await supabase
-        .from("configuracion")
-        .update(configuracion)
-        .eq("id", data[0].id);
-    } else {
-      resultado = await supabase
-        .from("configuracion")
-        .insert([configuracion]);
-    }
-
-    if (resultado.error) {
-      alert(resultado.error.message);
+    if (error) {
+      alert("Error al guardar: " + error.message);
       return;
     }
 
