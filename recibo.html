@@ -31,25 +31,24 @@
             padding: 24px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
             position: relative;
-            overflow: hidden; /* Para contener la marca de agua */
+            overflow: hidden;
         }
 
-        /* MARCA DE AGUA EN EL CENTRO DEL RECIBO */
+        /* MARCA DE AGUA CENTRADA Y NÍTIDA */
         .marca-de-agua {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) rotate(-12deg);
-            width: 75%;
-            max-width: 380px;
-            opacity: 0.06; /* Muy suave en pantalla */
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 420px;
+            opacity: 0.12; /* Ajuste suave pero claro */
             pointer-events: none;
             z-index: 0;
             object-fit: contain;
-            filter: grayscale(30%);
         }
 
-        /* Aseguramos que todo el contenido quede por encima de la marca de agua */
+        /* Capas por encima de la marca de agua */
         .header, .info-section, .detalles-tabla, .totales-box, 
         .observaciones-box, .gracias-mensaje, .footer-contacto, .acciones {
             position: relative;
@@ -63,10 +62,10 @@
             margin-bottom: 14px;
         }
 
-        /* LOGO PRINCIPAL AGRANDADO */
+        /* LOGO PRINCIPAL EN ENCABEZADO */
         .logo-img {
-            max-height: 100px; /* Aumentado para que resalte más */
-            max-width: 280px;  /* Aumentado proporcionalmente */
+            max-height: 110px;
+            max-width: 300px;
             margin-bottom: 8px;
             object-fit: contain;
         }
@@ -227,17 +226,17 @@
                 page-break-inside: avoid !important;
             }
             .marca-de-agua {
-                opacity: 0.08 !important; /* Visible de forma tenue en la impresión */
-                filter: grayscale(100%) !important;
+                opacity: 0.14 !important; /* Claramente visible pero legible */
+                filter: none !important;
             }
             .info-section, .totales-box, .observaciones-box {
-                background: #f8f9fa !important;
+                background: rgba(248, 249, 250, 0.9) !important;
                 border: 1px solid #ddd !important;
                 color: #000 !important;
             }
             .detalles-tabla th {
                 color: #000 !important;
-                background: #eee !important;
+                background: rgba(238, 238, 238, 0.9) !important;
                 border-bottom: 2px solid #000 !important;
             }
             .detalles-tabla td {
@@ -276,18 +275,18 @@
             box-shadow: none !important;
         }
         .modo-pdf .marca-de-agua {
-            opacity: 0.08 !important;
-            filter: grayscale(100%) !important;
+            opacity: 0.15 !important;
+            filter: none !important;
         }
         .modo-pdf .info-section, 
         .modo-pdf .totales-box, 
         .modo-pdf .observaciones-box {
-            background: #f9f9f9 !important;
+            background: rgba(249, 249, 249, 0.88) !important;
             border: 1px solid #ddd !important;
             color: #000 !important;
         }
         .modo-pdf .detalles-tabla th {
-            background: #eee !important;
+            background: rgba(238, 238, 238, 0.88) !important;
             color: #000 !important;
             border-bottom: 2px solid #000 !important;
         }
