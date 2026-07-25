@@ -207,7 +207,7 @@
     <div class="recibo-container">
         <div class="header">
             <div id="contenedorLogo"></div>
-            <h1 id="reciboNombreNegocio">Cargando...</h1>
+            <h1 id="reciboNombreNegocio">Cargando comprobante...</h1>
             <p id="reciboSubtitulo"></p>
         </div>
 
@@ -269,14 +269,36 @@
     </div>
 
     <script type="module">
-        import { supabase } from "./admin/supabase.js";
+        async function obtenerSupabase() {
+            try {
+                const mod = await import("./admin/supabase.js");
+                return mod.supabase;
+            } catch (e1) {
+                try {
+                    const mod = await import("./supabase.js");
+                    return mod.supabase;
+                } catch (e2) {
+                    console.error("No se pudo cargar la librería de Supabase:", e2);
+                    return null;
+                }
+            }
+        }
 
         async function cargarDatosRecibo() {
+            const supabase = await obtenerSupabase();
+            
+            if (!supabase) {
+                document.getElementById("reciboNombreNegocio").innerText = "Error al conectar con la Base de Datos";
+                alert("No se encontró el archivo de conexión a Supabase (supabase.js).");
+                return;
+            }
+
             const params = new URLSearchParams(window.location.search);
             const idRecibo = params.get("id");
 
             if (!idRecibo) {
-                alert("No se especificó ningún número o ID de recibo.");
+                document.getElementById("reciboNombreNegocio").innerText = "Comprobante no especificado";
+                alert("No se especificó ningún ID de recibo en la dirección web (?id=...)");
                 return;
             }
 
@@ -288,55 +310,59 @@
                 .single();
 
             if (errorRecibo || !recibo) {
-                alert("No se encontró el comprobante solicitado.");
+                document.getElementById("reciboNombreNegocio").innerText = "Comprobante no encontrado";
+                alert("No se encontró el comprobante en la base de datos.");
                 return;
             }
 
             // 2. Cargar los datos de configuración del DJ / Marca usando user_id
-            const { data: config } = await supabase
-                .from("configuracion")
-                .select("*")
-                .eq("user_id", recibo.user_id)
-                .maybeSingle();
+            if (recibo.user_id) {
+                const { data: config } = await supabase
+                    .from("configuracion")
+                    .select("*")
+                    .eq("user_id", recibo.user_id)
+                    .maybeSingle();
 
-            // Rellenar Marca y Contacto
-            if (config) {
-                // Logo
-                if (config.logo) {
-                    document.getElementById("contenedorLogo").innerHTML = `<img src="${config.logo}" class="logo-img" alt="Logo">`;
+                if (config) {
+                    // Logo
+                    if (config.logo) {
+                        document.getElementById("contenedorLogo").innerHTML = `<img src="${config.logo}" class="logo-img" alt="Logo">`;
+                    }
+
+                    // Nombre comercial
+                    const nombreMarca = config.nombre_fantasia || config.nombre_negocio || config.nombre || "Leitmix Producciones";
+                    document.getElementById("reciboNombreNegocio").innerText = nombreMarca;
+                    document.getElementById("reciboSubtitulo").innerText = config.subtitulo || "Servicios Integrales para Eventos";
+
+                    // Contacto (WhatsApp & Alias)
+                    const whatsapp = config.telefono_whatsapp || config.whatsapp || "";
+                    const alias = config.alias_pago || "";
+                    
+                    let contactoHtml = "";
+                    if (whatsapp) contactoHtml += `📲 <strong>WhatsApp:</strong> ${whatsapp} `;
+                    if (alias) contactoHtml += `${contactoHtml ? '| ' : ''}💳 <strong>Alias:</strong> ${alias}`;
+                    
+                    document.getElementById("reciboContactoInfo").innerHTML = contactoHtml;
+
+                    // Redes Sociales
+                    const instagram = config.instagram_url || config.instagram || "";
+                    const tiktok = config.tiktok_url || "";
+                    const youtube = config.youtube_url || "";
+
+                    let redesHtml = [];
+                    if (instagram) redesHtml.push(`📷 <strong>Instagram:</strong> ${instagram.replace('https://', '').replace('http://', '')}`);
+                    if (tiktok) redesHtml.push(`🎵 <strong>TikTok:</strong> ${tiktok.replace('https://', '').replace('http://', '')}`);
+                    if (youtube) redesHtml.push(`▶️ <strong>YouTube:</strong> ${youtube.replace('https://', '').replace('http://', '')}`);
+
+                    document.getElementById("reciboRedesInfo").innerHTML = redesHtml.join(" &nbsp;|&nbsp; ");
+                } else {
+                    document.getElementById("reciboNombreNegocio").innerText = "Leitmix Producciones";
                 }
-
-                // Nombre comercial
-                const nombreMarca = config.nombre_fantasia || config.nombre_negocio || config.nombre || "Leitmix Producciones";
-                document.getElementById("reciboNombreNegocio").innerText = nombreMarca;
-                document.getElementById("reciboSubtitulo").innerText = config.subtitulo || "Servicios Integrales para Eventos";
-
-                // Contacto (WhatsApp & Alias)
-                const whatsapp = config.telefono_whatsapp || config.whatsapp || "";
-                const alias = config.alias_pago || "";
-                
-                let contactoHtml = "";
-                if (whatsapp) contactoHtml += `📲 <strong>WhatsApp:</strong> ${whatsapp} `;
-                if (alias) contactoHtml += `${contactoHtml ? '| ' : ''}💳 <strong>Alias Mercado Pago:</strong> ${alias}`;
-                
-                document.getElementById("reciboContactoInfo").innerHTML = contactoHtml;
-
-                // Redes Sociales
-                const instagram = config.instagram_url || config.instagram || "";
-                const tiktok = config.tiktok_url || "";
-                const youtube = config.youtube_url || "";
-
-                let redesHtml = [];
-                if (instagram) redesHtml.push(`📷 <strong>Instagram:</strong> ${instagram.replace('https://', '').replace('http://', '')}`);
-                if (tiktok) redesHtml.push(`🎵 <strong>TikTok:</strong> ${tiktok.replace('https://', '').replace('http://', '')}`);
-                if (youtube) redesHtml.push(`▶️ <strong>YouTube:</strong> ${youtube.replace('https://', '').replace('http://', '')}`);
-
-                document.getElementById("reciboRedesInfo").innerHTML = redesHtml.join(" &nbsp;|&nbsp; ");
             } else {
                 document.getElementById("reciboNombreNegocio").innerText = "Leitmix Producciones";
             }
 
-            // Rellenar datos del cliente y montos del recibo
+            // 3. Rellenar datos del cliente y montos del recibo
             document.getElementById("reciboCliente").innerText = recibo.nombre || "-";
             document.getElementById("reciboTelefono").innerText = recibo.telefono || "-";
             document.getElementById("reciboEvento").innerText = recibo.evento || "-";
