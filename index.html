@@ -173,25 +173,23 @@ Enviar comentario
 
 <section id="contacto">
 
-<h2>CONTACTO & RESERVAS</h2>
+<h2>CONTACTO & RESERVAS (HOJA DE RUTA)</h2>
 
 <p>
 ¿Tenés una fecha para tu evento?
 </p>
 
 <p>
-Completá tus datos y la selección musical inicial para recibir tu presupuesto personalizado.
+Completá los datos clave para generar tu presupuesto personalizado y armar la Hoja de Ruta de tu fiesta.
 </p>
 
 
 <form id="formulario-presupuesto" class="formulario">
 
+<!-- SECCIÓN 1: DATOS GENERALES -->
+<input type="text" id="nombre" placeholder="Nombre y apellido del cliente / agasajado" required>
 
-<input type="text" id="nombre" placeholder="Nombre y apellido" required>
-
-
-<input type="tel" id="telefono" placeholder="Teléfono" required>
-
+<input type="tel" id="telefono" placeholder="Teléfono / WhatsApp de contacto" required>
 
 <select id="evento" required>
 <option value="">Tipo de evento</option>
@@ -202,32 +200,70 @@ Completá tus datos y la selección musical inicial para recibir tu presupuesto 
 <option>Fiesta privada</option>
 </select>
 
-
 <!-- CAMPO DE FECHA ADAPTADO PARA FLATPICKR -->
 <input type="text" id="fecha" placeholder="Seleccioná la fecha de tu evento" required readonly style="cursor: pointer; background-color: #ffffff;">
 
+<input type="number" id="invitados" placeholder="Cantidad aproximada de invitados">
 
-<input type="number" id="invitados" placeholder="Cantidad de invitados">
-
-
-<input type="text" id="localidad" placeholder="Localidad">
+<input type="text" id="localidad" placeholder="Localidad / Zona">
 
 
-<textarea id="comentarios" placeholder="Contanos detalles de tu evento (horarios, lugar, etc.)"></textarea>
+<!-- SECCIÓN 2: CRONOGRAMA & MOMENTOS -->
+<h4 style="color:#f5b400; font-weight:bold; text-align:left; margin-top:20px; margin-bottom:5px; border-bottom:1px solid #f5b400; padding-bottom:3px;">
+  ⏰ CRONOGRAMA & MOMENTOS (HOJA DE RUTA)
+</h4>
 
-<!-- NUEVOS CAMPOS DE PLAYLIST -->
-<label for="playlist-infaltables" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">🔥 Temas / Estilos Infaltables:</label>
-<textarea id="playlist-infaltables" placeholder="Canciones o géneros infaltables (ej: Cumbia 90s, Soda Stereo, Bizarrap)"></textarea>
+<label for="horarios" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">
+  Horarios del Evento (Inicio y Fin):
+</label>
+<input type="text" id="horarios" placeholder="Ej: 21:00 hs a 05:00 hs">
 
-<label for="playlist-prohibidos" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">🚫 Temas / Géneros Prohibidos:</label>
-<textarea id="playlist-prohibidos" placeholder="Canciones o géneros que preferís evitar (ej: No pasar reggaetón viejo)"></textarea>
+<label for="comentarios" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">
+  Detalles del Salón / Quinta:
+</label>
+<textarea id="comentarios" placeholder="Nombre del salón, dirección exacta, accesos para armado, etc."></textarea>
 
-<label for="notas-evento" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">📝 Notas Especiales para el DJ:</label>
-<textarea id="notas-evento" placeholder="Momento de entrada, canciones para el vals, tanda de cotillón, etc."></textarea>
+
+<!-- SECCIÓN 3: TANDAS & INFALTABLES -->
+<h4 style="color:#f5b400; font-weight:bold; text-align:left; margin-top:20px; margin-bottom:5px; border-bottom:1px solid #f5b400; padding-bottom:3px;">
+  🔥 TANDAS & INFALTABLES
+</h4>
+
+<label for="tema-entrada" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">
+  🎵 Tema de Entrada / Momentos Clave:
+</label>
+<input type="text" id="tema-entrada" placeholder="Ej: Coldplay - A Sky Full of Stars / Vals tradicional">
+
+<label for="playlist-infaltables" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">
+  🔥 Temas / Estilos Infaltables por Tanda:
+</label>
+<textarea id="playlist-infaltables" placeholder="Canciones o géneros infaltables (ej: Set House 90s, Bizarrap, Cumbia 90s)"></textarea>
+
+
+<!-- SECCIÓN 4: PROHIBIDOS -->
+<h4 style="color:#f5b400; font-weight:bold; text-align:left; margin-top:20px; margin-bottom:5px; border-bottom:1px solid #f5b400; padding-bottom:3px;">
+  🚫 PROHIBIDOS
+</h4>
+
+<label for="playlist-prohibidos" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">
+  🚫 Temas / Géneros Prohibidos:
+</label>
+<textarea id="playlist-prohibidos" placeholder="Canciones o géneros que preferís evitar (ej: Heavy Metal, Folclore, RKT)"></textarea>
+
+
+<!-- SECCIÓN 5: OBSERVACIONES Y PISADORES -->
+<h4 style="color:#f5b400; font-weight:bold; text-align:left; margin-top:20px; margin-bottom:5px; border-bottom:1px solid #f5b400; padding-bottom:3px;">
+  🎙️ OBSERVACIONES & PEDIDOS ESPECIALES
+</h4>
+
+<label for="notas-evento" style="color:#f5b400; font-weight:bold; display:block; text-align:left; margin-top:10px;">
+  📝 Notas Especiales para el DJ / FX:
+</label>
+<textarea id="notas-evento" placeholder="Ej: Usar pisador 'Leitmix DJ in the mix' en enganchados, disparo de chispas frías en la entrada, etc."></textarea>
 
 
 <button type="button" class="boton" id="boton-whatsapp">
-Solicitar presupuesto
+Solicitar Presupuesto & Guardar Hoja de Ruta
 </button>
 
 </form>
