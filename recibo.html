@@ -30,19 +30,47 @@
             max-width: 650px;
             padding: 24px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden; /* Para contener la marca de agua */
         }
+
+        /* MARCA DE AGUA EN EL CENTRO DEL RECIBO */
+        .marca-de-agua {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-12deg);
+            width: 75%;
+            max-width: 380px;
+            opacity: 0.06; /* Muy suave en pantalla */
+            pointer-events: none;
+            z-index: 0;
+            object-fit: contain;
+            filter: grayscale(30%);
+        }
+
+        /* Aseguramos que todo el contenido quede por encima de la marca de agua */
+        .header, .info-section, .detalles-tabla, .totales-box, 
+        .observaciones-box, .gracias-mensaje, .footer-contacto, .acciones {
+            position: relative;
+            z-index: 1;
+        }
+
         .header {
             text-align: center;
             border-bottom: 2px solid #f5b400;
             padding-bottom: 12px;
             margin-bottom: 14px;
         }
+
+        /* LOGO PRINCIPAL AGRANDADO */
         .logo-img {
-            max-height: 60px;
-            max-width: 200px;
+            max-height: 100px; /* Aumentado para que resalte más */
+            max-width: 280px;  /* Aumentado proporcionalmente */
             margin-bottom: 8px;
             object-fit: contain;
         }
+
         .header h1 {
             color: #f5b400;
             font-size: 22px;
@@ -59,7 +87,7 @@
             justify-content: space-between;
             margin-bottom: 14px;
             font-size: 13px;
-            background: #222;
+            background: rgba(34, 34, 34, 0.85);
             padding: 12px;
             border-radius: 6px;
             gap: 10px;
@@ -85,10 +113,10 @@
         }
         .detalles-tabla th {
             color: #f5b400;
-            background: #222;
+            background: rgba(34, 34, 34, 0.85);
         }
         .totales-box {
-            background: #222;
+            background: rgba(34, 34, 34, 0.85);
             padding: 12px;
             border-radius: 6px;
             margin-bottom: 14px;
@@ -109,7 +137,7 @@
             margin-top: 6px;
         }
         .observaciones-box {
-            background: #161616;
+            background: rgba(22, 22, 22, 0.85);
             border-left: 3px solid #f5b400;
             padding: 8px 12px;
             border-radius: 4px;
@@ -118,7 +146,6 @@
             color: #ccc;
         }
         
-        /* MENSAGE DE AGRADECIMIENTO */
         .gracias-mensaje {
             text-align: center;
             font-size: 14px;
@@ -140,7 +167,6 @@
             color: #f5b400;
         }
         
-        /* REDES SOCIALES EN COLUMNA (UNA ABAJO DE LA OTRA) */
         .redes-lista {
             display: flex;
             flex-direction: column;
@@ -200,6 +226,10 @@
                 padding: 16px !important;
                 page-break-inside: avoid !important;
             }
+            .marca-de-agua {
+                opacity: 0.08 !important; /* Visible de forma tenue en la impresión */
+                filter: grayscale(100%) !important;
+            }
             .info-section, .totales-box, .observaciones-box {
                 background: #f8f9fa !important;
                 border: 1px solid #ddd !important;
@@ -245,6 +275,10 @@
             border: 1px solid #ccc !important;
             box-shadow: none !important;
         }
+        .modo-pdf .marca-de-agua {
+            opacity: 0.08 !important;
+            filter: grayscale(100%) !important;
+        }
         .modo-pdf .info-section, 
         .modo-pdf .totales-box, 
         .modo-pdf .observaciones-box {
@@ -278,6 +312,9 @@
 </head>
 <body>
     <div class="recibo-container" id="reciboArea">
+        <!-- MARCA DE AGUA FLOTANTE -->
+        <div id="contenedorMarcaAgua"></div>
+
         <div class="header">
             <div id="contenedorLogo"></div>
             <h1 id="reciboNombreNegocio">Cargando comprobante...</h1>
@@ -402,9 +439,10 @@
                     .maybeSingle();
 
                 if (config) {
-                    // Logo
+                    // Logo principal y Marca de Agua
                     if (config.logo) {
                         document.getElementById("contenedorLogo").innerHTML = `<img src="${config.logo}" class="logo-img" alt="Logo">`;
+                        document.getElementById("contenedorMarcaAgua").innerHTML = `<img src="${config.logo}" class="marca-de-agua" alt="Marca de agua">`;
                     }
 
                     // Nombre comercial
@@ -422,7 +460,7 @@
                     
                     document.getElementById("reciboContactoInfo").innerHTML = contactoHtml;
 
-                    // Redes Sociales (Una abajo de la otra)
+                    // Redes Sociales
                     const instagram = config.instagram_url || config.instagram || "";
                     const tiktok = config.tiktok_url || "";
                     const youtube = config.youtube_url || "";
