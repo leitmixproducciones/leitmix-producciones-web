@@ -22,7 +22,7 @@ if (!sesion.session) {
 const usuario = sesion.session.user;
 
 // ======================
-// RESUMEN DEL NEGOCIO (DASHBOARD)
+// RESUMEN DEL NEGOCIO (DASHBOARD & ANALÍTICA)
 // ======================
 async function cargarResumenNegocio() {
   const [{ data: reservas }, { data: testimonios }, { data: recibos }] = await Promise.all([
@@ -43,6 +43,12 @@ async function cargarResumenNegocio() {
   const dentroDeSieteDias = new Date(hoy);
   dentroDeSieteDias.setDate(hoy.getDate() + 7);
 
+  // Variables para analítica de barras y servicios
+  const anioActual = new Date().getFullYear();
+  const nombresMeses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  const reservasPorMes = Array(12).fill(0);
+  const serviciosContador = {};
+
   if (reservas && reservas.length > 0) {
     totalReservas = reservas.length;
 
@@ -53,22 +59,41 @@ async function cargarResumenNegocio() {
     confirmadas = confirmadasLista.length;
     pendientes = reservas.filter(r => !r.estado || r.estado === "Pendiente").length;
 
-    // Fechas futuras
-    const fechasFuturas = confirmadasLista
-      .map(r => {
-        const partes = r.fecha ? r.fecha.split("-") : [];
-        if (partes.length === 3) {
-          return {
-            ...r,
-            fechaObj: new Date(partes[0], partes[1] - 1, partes[2])
-          };
-        }
-        return null;
-      })
-      .filter(r => r && r.fechaObj >= hoy)
-      .sort((a, b) => a.fechaObj - b.fechaObj);
+    // Procesamiento de fechas y analítica
+    const fechasFuturas = [];
 
-    // 1. Próximo evento
+    reservas.forEach(r => {
+      // 1. Contador por servicios/eventos
+      const servicio = r.evento || r.tipo_evento || "Sin Especificar";
+      serviciosContador[servicio] = (serviciosContador[servicio] || 0) + 1;
+
+      // 2. Extracción de fecha para calendario y gráfico por meses
+      let fechaObj = null;
+      if (r.fecha) {
+        const partes = r.fecha.split("-");
+        if (partes.length === 3) {
+          fechaObj = new Date(partes[0], partes[1] - 1, partes[2]);
+        }
+      } else if (r.created_at) {
+        fechaObj = new Date(r.created_at);
+      }
+
+      if (fechaObj) {
+        // Conteo por mes del año actual
+        if (fechaObj.getFullYear() === anioActual) {
+          reservasPorMes[fechaObj.getMonth()] += 1;
+        }
+
+        // Si es una reserva confirmada y futura
+        if ((r.estado === "Confirmada" || r.estado === "Confirmado") && fechaObj >= hoy) {
+          fechasFuturas.push({ ...r, fechaObj });
+        }
+      }
+    });
+
+    fechasFuturas.sort((a, b) => a.fechaObj - b.fechaObj);
+
+    // Próximo evento
     if (fechasFuturas.length > 0) {
       const prox = fechasFuturas[0];
       const dia = String(prox.fechaObj.getDate()).padStart(2, "0");
@@ -76,16 +101,16 @@ async function cargarResumenNegocio() {
       proximoEventoStr = `<b>${dia}/${mes}</b> - ${prox.nombre || prox.evento || 'Evento'}`;
     }
 
-    // 2. Eventos esta semana
+    // Eventos esta semana
     eventosSemana = fechasFuturas.filter(
       r => r.fechaObj >= hoy && r.fechaObj <= dentroDeSieteDias
     ).length;
   }
 
-  // 3. Pendiente de cobro
+  // Pendiente de cobro
   const totalPendienteCobro = recibos ? recibos.reduce((sum, r) => sum + Number(r.saldo_pendiente || 0), 0) : 0;
 
-  // Renderizar en los IDs exactos de tu HTML
+  // Renderizar tarjetas de métricas
   const elemTotalReservas = document.getElementById("totalReservasDash");
   const elemPendientes = document.getElementById("pendientesDash");
   const elemConfirmadas = document.getElementById("confirmadasDash");
@@ -99,6 +124,45 @@ async function cargarResumenNegocio() {
   if (elemProximo) elemProximo.innerHTML = proximoEventoStr;
   if (elemEventosSemana) elemEventosSemana.innerText = eventosSemana;
   if (elemPendienteCobro) elemPendienteCobro.innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
+
+  // RENDERIZAR BARRAS DE MESES (2026)
+  const maxReservasMes = Math.max(...reservasPorMes, 1);
+  const contMeses = document.getElementById("contenedorMeses");
+
+  if (contMeses) {
+    contMeses.innerHTML = nombresMeses.map((mes, idx) => {
+      const cantidad = reservasPorMes[idx];
+      const porcentaje = (cantidad / maxReservasMes) * 100;
+      return `
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #fff;">
+          <span style="width: 35px; font-weight: bold;">${mes}</span>
+          <div style="flex: 1; background: #222; height: 10px; border-radius: 5px; overflow: hidden;">
+            <div style="width: ${porcentaje}%; background: #f5b400; height: 100%; transition: width 0.3s ease;"></div>
+          </div>
+          <span style="width: 25px; text-align: right; font-weight: bold; color: #f5b400;">${cantidad}</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // RENDERIZAR SERVICIOS MÁS CONTRATADOS
+  const contServicios = document.getElementById("contenedorServicios");
+
+  if (contServicios) {
+    const serviciosOrdenados = Object.entries(serviciosContador)
+      .sort((a, b) => b[1] - a[1]);
+
+    if (serviciosOrdenados.length === 0) {
+      contServicios.innerHTML = `<p style="color: #888; font-size: 14px;">No hay registros de servicios aún.</p>`;
+    } else {
+      contServicios.innerHTML = serviciosOrdenados.map(([servicio, cantidad]) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px 14px; border-radius: 6px; color: #fff; margin-bottom: 6px; border: 1px solid #2a2a2a;">
+          <span style="font-size: 14px; font-weight: 500;">${servicio}</span>
+          <span style="background: #f5b400; color: #000; padding: 2px 10px; border-radius: 12px; font-weight: bold; font-size: 13px;">${cantidad}</span>
+        </div>
+      `).join("");
+    }
+  }
 }
 
 // ======================
