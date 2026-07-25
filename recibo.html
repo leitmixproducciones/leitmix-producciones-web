@@ -1,453 +1,331 @@
-
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Recibo - Leitmix Producciones</title>
-
-<link rel="stylesheet" href="recibo.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-<style>
-
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Poppins,sans-serif;
-}
-
-body{
-background:#080808;
-padding:30px;
-color:white;
-}
-
-.recibo{
-max-width:900px;
-margin:auto;
-background:#151515;
-border-radius:20px;
-padding:40px;
-border:3px solid #f5b400;
-box-shadow:0 0 25px rgba(245,180,0,.35);
-}
-
-
-.encabezado{
-text-align:center;
-margin-bottom:30px;
-}
-
-
-.encabezado img{
-width:130px;
-margin-bottom:15px;
-}
-
-
-.encabezado h1{
-color:#f5b400;
-font-size:34px;
-}
-
-
-.encabezado h2{
-font-size:18px;
-font-weight:400;
-}
-
-
-.datos-negocio{
-
-margin-top:15px;
-
-font-size:14px;
-
-color:#ccc;
-
-line-height:1.6;
-
-}
-
-
-.numero{
-margin-top:20px;
-font-size:20px;
-color:#f5b400;
-font-weight:bold;
-}
-
-
-.seccion{
-margin-top:30px;
-}
-
-
-.seccion h3{
-color:#f5b400;
-margin-bottom:15px;
-border-bottom:2px solid #333;
-padding-bottom:8px;
-}
-
-
-.dato{
-display:flex;
-justify-content:space-between;
-margin:12px 0;
-}
-
-
-.total{
-margin-top:35px;
-background:#f5b400;
-color:#000;
-padding:20px;
-border-radius:12px;
-text-align:center;
-font-size:34px;
-font-weight:bold;
-}
-
-
-.botones{
-margin-top:35px;
-display:flex;
-gap:20px;
-}
-
-
-.botones button{
-flex:1;
-padding:16px;
-border:none;
-border-radius:10px;
-font-size:18px;
-font-weight:bold;
-cursor:pointer;
-}
-
-
-.imprimir{
-background:#f5b400;
-}
-
-
-.pdf{
-background:#222;
-color:white;
-}
-
-.qr-contacto{
-text-align:center;
-margin-top:25px;
-padding-top:20px;
-border-top:2px solid #333;
-}
-
-.qr-contacto h3{
-color:#f5b400;
-margin-bottom:10px;
-}
-
-.qr-contacto img{
-width:140px;
-height:140px;
-display:block;
-margin:10px auto;
-background:#fff;
-padding:8px;
-border-radius:12px;
-}
-
-.qr-contacto p{
-color:#aaa;
-font-size:13px;
-} 
-
-.footer{
-margin-top:40px;
-text-align:center;
-color:#aaa;
-}
-
-   
-/* IMPRESION */
-
-@media print {
-
-body{
-background:white;
-padding:0;
-color:black;
-}
-
-
-.recibo{
-width:100%;
-max-width:none;
-padding:20px;
-margin:0;
-box-shadow:none;
-border-radius:0;
-}
-
-
-.encabezado img{
-width:90px;
-}
-
-
-.encabezado h1{
-font-size:24px;
-}
-
-
-.encabezado h2{
-font-size:16px;
-}
-
-
-.datos-negocio{
-font-size:12px;
-}
-
-
-.seccion{
-margin-top:15px;
-}
-
-
-.dato{
-margin:6px 0;
-font-size:14px;
-}
-
-
-.total{
-margin-top:20px;
-padding:12px;
-font-size:26px;
-}
-
-
-.botones{
-display:none;
-}
-
-
-.footer{
-margin-top:20px;
-font-size:12px;
-}
-
-
-.recibo{
-page-break-inside:avoid;
-}
-
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobante de Pago</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .recibo-container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #f5b400;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-height: 65px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        .header h1 {
+            margin: 0;
+            color: #f5b400;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 5px 0 0;
+            color: #aaa;
+            font-size: 13px;
+        }
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            gap: 15px;
+        }
+        .info-column {
+            flex: 1;
+        }
+        .info-column p {
+            margin: 5px 0;
+        }
+        .detalles-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .detalles-tabla th, .detalles-tabla td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+            font-size: 14px;
+        }
+        .detalles-tabla th {
+            color: #f5b400;
+        }
+        .totales-box {
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .totales-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .totales-row.total-final {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f5b400;
+            border-top: 1px solid #444;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+        .observaciones-box {
+            background: #161616;
+            border-left: 3px solid #f5b400;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #ccc;
+        }
+        .footer-contacto {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+        }
+        .footer-contacto p {
+            margin: 4px 0;
+        }
+        .acciones {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn {
+            background: #f5b400;
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #d49a00;
+        }
+
+        /* Estilos limpios para impresión / PDF */
+        @media print {
+            body {
+                background: #fff;
+                color: #000;
+                padding: 0;
+            }
+            .recibo-container {
+                background: #fff;
+                border: none;
+                box-shadow: none;
+                color: #000;
+                max-width: 100%;
+                padding: 0;
+            }
+            .info-section, .totales-box, .observaciones-box {
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                color: #000;
+            }
+            .detalles-tabla th {
+                color: #000;
+            }
+            .totales-row.total-final {
+                color: #000;
+                border-top: 1px solid #000;
+            }
+            .header {
+                border-bottom: 2px solid #000;
+            }
+            .header h1 {
+                color: #000;
+            }
+            .footer-contacto {
+                border-top: 1px solid #ddd;
+                color: #555;
+            }
+            .acciones {
+                display: none;
+            }
+        }
+    </style>
 </head>
-
-
 <body>
-
-
-<div class="recibo">
-
-
-<div class="encabezado">
-
-
-<img id="logoNegocio" src="assets/img/leitmix-logo.jpeg" alt="Logo del negocio">
-
-
-<h1 id="nombreNegocio">
-LEITMIX PRODUCCIONES
-</h1>
-
-
-<h2>
-Recibo de pago
-</h2>
-
-
-<div class="datos-negocio">
-
-<p id="whatsappNegocio"></p>
-
-<p id="aliasPago"></p>
-
-<p id="instagramNegocio"></p>
-
-</div>
-
-
-<div class="numero">
-
-<span id="numeroRecibo"></span>
-
-</div>
-
-
-</div>
-
-
-
-<div class="seccion">
-
-<h3>Datos del Cliente</h3>
-
-
-<div class="dato">
-<strong>Nombre:</strong>
-<span id="nombre"></span>
-</div>
-
-
-<div class="dato">
-<strong>Teléfono:</strong>
-<span id="telefono"></span>
-</div>
-
-
-<div class="dato">
-<strong>Evento:</strong>
-<span id="evento"></span>
-</div>
-
-
-<div class="dato">
-<strong>Fecha del Evento:</strong>
-<span id="fechaEvento"></span>
-</div>
-
-
-</div>
-
-
-
-<div class="seccion">
-
-<h3>Detalle del Pago</h3>
-
-
-<div class="dato">
-<strong>Concepto:</strong>
-<span id="concepto"></span>
-</div>
-
-
-<div class="dato">
-<strong>Forma de Pago:</strong>
-<span id="formaPago"></span>
-</div>
-
-
-<div class="dato">
-<strong>Total del Evento:</strong>
-<span id="total"></span>
-</div>
-
-
-<div class="dato">
-<strong>Importe Recibido:</strong>
-<span id="importe"></span>
-</div>
-
-
-<div class="dato">
-<strong>Saldo Pendiente:</strong>
-<span id="saldoPendiente"></span>
-</div>
-
-
-<div class="dato">
-<strong>Observaciones:</strong>
-<span id="observaciones"></span>
-</div>
-
-
-</div>
-
-
-
-
-<div class="total">
-
-$ <span id="importeTotal"></span>
-
-</div>
-
-<div class="qr-contacto">
-
-<h3>📱 Escaneá para comunicarte</h3>
-
-<img id="qrWhatsapp" src="" alt="QR WhatsApp">
-
-<p>WhatsApp de <span id="nombreNegocioQR"></span></p>
-
-</div>
-
-
-<div class="botones">
-
-
-<button class="imprimir" onclick="window.print()">
-
-🖨️ Imprimir
-
-</button>
-
-
-<button class="pdf" id="descargarPDF">
-
-📄 Descargar PDF
-
-</button>
-
-
-</div>
-
-
-
-<div class="footer">
-
-<strong id="footerNegocio">
-Leitmix Producciones
-</strong>
-
-<br>
-
-DJ • Sonido • Iluminación • Eventos Sociales
-
-<br>
-
-Buenos Aires
-
-</div>
-
-<div style="text-align:center;margin-top:15px;font-size:12px;color:#777;">
-
-Gracias por confiar en nosotros ❤️
-
-</div>
-
-
-
-<script type="module" src="recibo.js"></script>
-
-
+    <div class="recibo-container">
+        <div class="header">
+            <img id="reciboLogo" src="" alt="Logo" style="display:none;">
+            <h1 id="reciboNombreNegocio">Cargando comprobante...</h1>
+            <p id="reciboSubtitulo">Servicios de Eventos</p>
+        </div>
+
+        <div class="info-section">
+            <div class="info-column">
+                <p><strong>Cliente:</strong> <span id="reciboCliente">-</span></p>
+                <p><strong>Teléfono:</strong> <span id="reciboTelefono">-</span></p>
+                <p><strong>Evento:</strong> <span id="reciboEvento">-</span></p>
+            </div>
+            <div class="info-column" style="text-align: right;">
+                <p><strong>Nº Recibo:</strong> <span id="reciboNumero">-</span></p>
+                <p><strong>Fecha Pago:</strong> <span id="reciboFechaPago">-</span></p>
+                <p><strong>Fecha Evento:</strong> <span id="reciboFechaEvento">-</span></p>
+            </div>
+        </div>
+
+        <table class="detalles-tabla">
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th style="text-align: right;">Forma de Pago</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="reciboConcepto">-</td>
+                    <td id="reciboFormaPago" style="text-align: right;">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="totales-box">
+            <div class="totales-row">
+                <span>Importe Total del Servicio:</span>
+                <span id="reciboTotal">$0</span>
+            </div>
+            <div class="totales-row">
+                <span>Monto Abonado en este pago:</span>
+                <span id="reciboImporte" style="color: #4cd137; font-weight: bold;">$0</span>
+            </div>
+            <div class="totales-row total-final">
+                <span>Saldo Pendiente:</span>
+                <span id="reciboSaldo">$0</span>
+            </div>
+        </div>
+
+        <div id="observacionesContainer" class="observaciones-box" style="display: none;">
+            <strong>Observaciones:</strong> <span id="reciboObservaciones"></span>
+        </div>
+
+        <div class="footer-contacto">
+            <p id="reciboContactoInfo">Cargando datos de contacto...</p>
+            <p id="reciboRedesInfo"></p>
+        </div>
+
+        <div class="acciones">
+            <button class="btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from "./admin/supabase.js";
+
+        async function cargarDatosRecibo() {
+            const params = new URLSearchParams(window.location.search);
+            const idRecibo = params.get("id");
+
+            if (!idRecibo) {
+                alert("No se especificó un recibo válido.");
+                return;
+            }
+
+            // 1. Obtener datos del recibo
+            const { data: recibo, error: errorRecibo } = await supabase
+                .from("recibos")
+                .select("*")
+                .eq("id", idRecibo)
+                .single();
+
+            if (errorRecibo || !recibo) {
+                alert("No se encontró el registro del recibo.");
+                return;
+            }
+
+            // 2. Obtener la configuración del negocio utilizando el user_id
+            const { data: config } = await supabase
+                .from("configuracion")
+                .select("*")
+                .eq("user_id", recibo.user_id)
+                .maybeSingle();
+
+            // Rellenar datos del negocio y marca
+            if (config) {
+                if (config.logo) {
+                    const imgLogo = document.getElementById("reciboLogo");
+                    imgLogo.src = config.logo;
+                    imgLogo.style.display = "inline-block";
+                }
+                
+                const nombreNegocio = config.nombre_fantasia || config.nombre_negocio || config.nombre || "Leitmix Producciones";
+                document.getElementById("reciboNombreNegocio").innerText = nombreNegocio;
+                document.getElementById("reciboSubtitulo").innerText = config.subtitulo || "Servicios profesionales para eventos";
+
+                let contactoTexto = "";
+                const tel = config.telefono_whatsapp || config.whatsapp;
+                if (tel) contactoTexto += `📞 WhatsApp: ${tel}`;
+                const alias = config.alias_pago;
+                if (alias) contactoTexto += ` &nbsp;|&nbsp; 💳 Alias: ${alias}`;
+                document.getElementById("reciboContactoInfo").innerHTML = contactoTexto || "";
+
+                let redesTexto = "";
+                const ig = config.instagram_url || config.instagram;
+                if (ig) redesTexto += `Instagram: ${ig}`;
+                const tk = config.tiktok_url;
+                if (tk) redesTexto += ` &nbsp;|&nbsp; TikTok: ${tk}`;
+                document.getElementById("reciboRedesInfo").innerHTML = redesTexto || "";
+            } else {
+                document.getElementById("reciboNombreNegocio").innerText = "Leitmix Producciones";
+            }
+
+            // Rellenar campos del recibo
+            document.getElementById("reciboCliente").innerText = recibo.nombre || "-";
+            document.getElementById("reciboTelefono").innerText = recibo.telefono || "-";
+            document.getElementById("reciboEvento").innerText = recibo.evento || "-";
+            document.getElementById("reciboNumero").innerText = recibo.numero_recibo || "-";
+
+            const fechaPago = recibo.fecha_pago ? new Date(recibo.fecha_pago).toLocaleDateString("es-AR") : "-";
+            document.getElementById("reciboFechaPago").innerText = fechaPago;
+            document.getElementById("reciboFechaEvento").innerText = recibo.fecha_evento || "-";
+
+            document.getElementById("reciboConcepto").innerText = recibo.concepto || "Seña / Pago de servicio";
+            document.getElementById("reciboFormaPago").innerText = recibo.forma_pago || "Efectivo / Transferencia";
+
+            document.getElementById("reciboTotal").innerText = "$" + Number(recibo.total || 0).toLocaleString("es-AR");
+            document.getElementById("reciboImporte").innerText = "$" + Number(recibo.importe || 0).toLocaleString("es-AR");
+            document.getElementById("reciboSaldo").innerText = "$" + Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR");
+
+            if (recibo.observaciones && recibo.observaciones.trim() !== "") {
+                document.getElementById("reciboObservaciones").innerText = recibo.observaciones;
+                document.getElementById("observacionesContainer").style.display = "block";
+            }
+        }
+
+        cargarDatosRecibo();
+    </script>
 </body>
-
 </html>
