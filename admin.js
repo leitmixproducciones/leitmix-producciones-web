@@ -174,18 +174,8 @@ async function cargarConfiguracion() {
     ? pathActual.substring(0, pathActual.indexOf("/admin")) 
     : "";
   
-  const linkPublico = `${window.location.origin}${baseRepo}/index.html?dj=${usuario.id}`;
-
-  const elemLink = document.getElementById("textoLinkPublico");
-  if (elemLink) elemLink.textContent = linkPublico;
-
-  const btnCopiar = document.getElementById("copiarLinkPublico");
-  if (btnCopiar) {
-    btnCopiar.onclick = () => {
-      navigator.clipboard.writeText(linkPublico);
-      alert("¡Enlace copiado al portapapeles!");
-    };
-  }
+  // Link por defecto generado para el sistema
+  let linkPublico = `${window.location.origin}${baseRepo}/index.html?dj=${usuario.id}`;
 
   const { data, error } = await supabase
     .from("configuracion")
@@ -195,10 +185,16 @@ async function cargarConfiguracion() {
 
   if (error) {
     console.log("Sin configuración todavía:", error.message);
-    return;
   }
 
   if (data) {
+    // Si el usuario configuró una URL web propia, la asignamos al link
+    if (data.url_web) {
+      linkPublico = data.url_web;
+      if (document.getElementById("configUrlWeb")) {
+        document.getElementById("configUrlWeb").value = data.url_web;
+      }
+    }
     if (document.getElementById("configNombre")) {
       document.getElementById("configNombre").value = data.nombre_fantasia || data.nombre_negocio || data.nombre || "";
     }
@@ -221,6 +217,18 @@ async function cargarConfiguracion() {
       document.getElementById("configYoutube").value = data.youtube_url || "";
     }
   }
+
+  // Mostrar el link público actualizado
+  const elemLink = document.getElementById("textoLinkPublico");
+  if (elemLink) elemLink.textContent = linkPublico;
+
+  const btnCopiar = document.getElementById("copiarLinkPublico");
+  if (btnCopiar) {
+    btnCopiar.onclick = () => {
+      navigator.clipboard.writeText(linkPublico);
+      alert("¡Enlace copiado al portapapeles!");
+    };
+  }
 }
 
 const botonConfiguracion = document.getElementById("guardarConfiguracion");
@@ -228,6 +236,7 @@ if (botonConfiguracion) {
   botonConfiguracion.onclick = async () => {
     const configuracion = {
       user_id: usuario.id,
+      url_web: document.getElementById("configUrlWeb")?.value.trim() || null,
       nombre_fantasia: document.getElementById("configNombre")?.value.trim() || null,
       subtitulo: document.getElementById("configSubtitulo")?.value.trim() || null,
       telefono_whatsapp: document.getElementById("configWhatsapp")?.value.trim() || null,
@@ -250,6 +259,7 @@ if (botonConfiguracion) {
     }
 
     alert("¡Configuración guardada correctamente!");
+    cargarConfiguracion(); // Recargar el bloque para refrescar el enlace mostrado
   };
 }
 
