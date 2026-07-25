@@ -18,6 +18,7 @@ padding:20px;
 
 h1,h2,h3{
 color:#f5b400;
+margin-top:0;
 }
 
 input,button{
@@ -72,6 +73,32 @@ margin-bottom: 8px;
 display: block;
 }
 
+/* Botón de configuración desplegable */
+.btn-config-toggle {
+background: #222;
+color: #f5b400;
+border: 1px solid #f5b400;
+padding: 10px 15px;
+border-radius: 8px;
+font-weight: bold;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+width: 100%;
+margin-top: 10px;
+}
+
+.btn-config-toggle:hover {
+background: #333;
+}
+
+/* Ocultar la sección por defecto */
+.oculto {
+display: none;
+}
+
 </style>
 
 </head>
@@ -84,17 +111,22 @@ display: block;
 
 <h1>Panel Leitmix Producciones</h1>
 
+<!-- Botón para mostrar/ocultar configuración -->
+<button type="button" id="btnToggleConfig" class="btn-config-toggle">
+  ⚙️ Mostrar / Ocultar Configuración del Negocio
+</button>
+
 </div>
 
 
-<!-- SECCIÓN: CONFIGURACIÓN DEL NEGOCIO COMPLETA -->
-<div class="card">
+<!-- SECCIÓN DE CONFIGURACIÓN (Oculta hasta tocar el botón) -->
+<div id="seccionConfiguracion" class="card oculto">
 
 <h2>⚙️ Configuración del negocio</h2>
 
 <label for="configUrlWeb"><b>🌐 Dirección de tu Página Web (URL):</b></label>
 <input id="configUrlWeb" type="url" placeholder="https://tu-sitio-dj.com">
-<span class="ayuda">Link completo de tu web. Se usará para redireccionar y para tus recibos.</span>
+<span class="ayuda">Link completo de tu web. Se usará para tus recibos y redirección.</span>
 
 <label for="configNombre"><b>Nombre del DJ / Productora:</b></label>
 <input id="configNombre" type="text" placeholder="Leitmix Producciones">
@@ -180,6 +212,13 @@ Guardar video
 
 </div>
 
+<!-- Script para el botón desplegable -->
+<script>
+  document.getElementById('btnToggleConfig').addEventListener('click', () => {
+    const config = document.getElementById('seccionConfiguracion');
+    config.classList.toggle('oculto');
+  });
+</script>
 
 <script type="module" src="admin.js"></script>
 
