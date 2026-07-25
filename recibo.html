@@ -1,9 +1,11 @@
-<!DOCTYPE html>  
+<!DOCTYPE html> 
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comprobante de Pago</title>
+    <!-- Librería para generar y descargar PDFs directamente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -115,6 +117,17 @@
             font-size: 12px;
             color: #ccc;
         }
+        
+        /* MENSAGE DE AGRADECIMIENTO */
+        .gracias-mensaje {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #f5b400;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
         .footer-contacto {
             text-align: center;
             font-size: 12px;
@@ -126,26 +139,46 @@
         .footer-contacto strong {
             color: #f5b400;
         }
+        
+        /* REDES SOCIALES EN COLUMNA (UNA ABAJO DE LA OTRA) */
+        .redes-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
         .acciones {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
             margin-top: 18px;
+            flex-wrap: wrap;
         }
         .btn {
             background: #f5b400;
             color: #000;
             border: none;
-            padding: 10px 22px;
+            padding: 10px 20px;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
         }
         .btn:hover {
             background: #d49a00;
         }
+        .btn-secundario {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+        }
+        .btn-secundario:hover {
+            background: #444;
+        }
 
-        /* REGLAS STRICTAS IMPRESIÓN / SALIDA PDF A4 (1 HOJA ÚNICA) */
+        /* REGLAS STRICTAS IMPRESIÓN / SALIDA PDF A4 */
         @media print {
             @page {
                 size: A4 portrait;
@@ -190,6 +223,9 @@
             .header h1 {
                 color: #000 !important;
             }
+            .gracias-mensaje {
+                color: #000 !important;
+            }
             .footer-contacto {
                 border-top: 1px solid #000 !important;
                 color: #222 !important;
@@ -201,10 +237,47 @@
                 display: none !important;
             }
         }
+
+        /* ESTILO TEMPORAL PARA CAPTURA PDF */
+        .modo-pdf {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #ccc !important;
+            box-shadow: none !important;
+        }
+        .modo-pdf .info-section, 
+        .modo-pdf .totales-box, 
+        .modo-pdf .observaciones-box {
+            background: #f9f9f9 !important;
+            border: 1px solid #ddd !important;
+            color: #000 !important;
+        }
+        .modo-pdf .detalles-tabla th {
+            background: #eee !important;
+            color: #000 !important;
+            border-bottom: 2px solid #000 !important;
+        }
+        .modo-pdf .detalles-tabla td {
+            color: #000 !important;
+            border-bottom: 1px solid #ddd !important;
+        }
+        .modo-pdf .header h1,
+        .modo-pdf .totales-row.total-final,
+        .modo-pdf .gracias-mensaje,
+        .modo-pdf .footer-contacto strong {
+            color: #000 !important;
+        }
+        .modo-pdf .header {
+            border-bottom: 2px solid #000 !important;
+        }
+        .modo-pdf .footer-contacto {
+            border-top: 1px solid #000 !important;
+            color: #333 !important;
+        }
     </style>
 </head>
 <body>
-    <div class="recibo-container">
+    <div class="recibo-container" id="reciboArea">
         <div class="header">
             <div id="contenedorLogo"></div>
             <h1 id="reciboNombreNegocio">Cargando comprobante...</h1>
@@ -258,13 +331,18 @@
             <strong>Observaciones:</strong> <span id="reciboObservaciones"></span>
         </div>
 
-        <div class="footer-contacto">
-            <div id="reciboContactoInfo"></div>
-            <div id="reciboRedesInfo"></div>
+        <div class="gracias-mensaje">
+            ✨ ¡Muchas gracias por confiar en nosotros! ✨
         </div>
 
-        <div class="acciones">
-            <button class="btn" onclick="window.print()">🖨️ Imprimir / Guardar en PDF</button>
+        <div class="footer-contacto">
+            <div id="reciboContactoInfo"></div>
+            <div id="reciboRedesInfo" class="redes-lista"></div>
+        </div>
+
+        <div class="acciones" id="bloqueAcciones">
+            <button class="btn" id="btnDescargarPDF">📥 Descargar PDF</button>
+            <button class="btn btn-secundario" onclick="window.print()">🖨️ Imprimir</button>
         </div>
     </div>
 
@@ -344,17 +422,17 @@
                     
                     document.getElementById("reciboContactoInfo").innerHTML = contactoHtml;
 
-                    // Redes Sociales
+                    // Redes Sociales (Una abajo de la otra)
                     const instagram = config.instagram_url || config.instagram || "";
                     const tiktok = config.tiktok_url || "";
                     const youtube = config.youtube_url || "";
 
-                    let redesHtml = [];
-                    if (instagram) redesHtml.push(`📷 <strong>Instagram:</strong> ${instagram.replace('https://', '').replace('http://', '')}`);
-                    if (tiktok) redesHtml.push(`🎵 <strong>TikTok:</strong> ${tiktok.replace('https://', '').replace('http://', '')}`);
-                    if (youtube) redesHtml.push(`▶️ <strong>YouTube:</strong> ${youtube.replace('https://', '').replace('http://', '')}`);
+                    let redesHtml = "";
+                    if (instagram) redesHtml += `<div>📷 <strong>Instagram:</strong> ${instagram.replace('https://', '').replace('http://', '')}</div>`;
+                    if (tiktok) redesHtml += `<div>🎵 <strong>TikTok:</strong> ${tiktok.replace('https://', '').replace('http://', '')}</div>`;
+                    if (youtube) redesHtml += `<div>▶️ <strong>YouTube:</strong> ${youtube.replace('https://', '').replace('http://', '')}</div>`;
 
-                    document.getElementById("reciboRedesInfo").innerHTML = redesHtml.join(" &nbsp;|&nbsp; ");
+                    document.getElementById("reciboRedesInfo").innerHTML = redesHtml;
                 } else {
                     document.getElementById("reciboNombreNegocio").innerText = "Leitmix Producciones";
                 }
@@ -366,7 +444,8 @@
             document.getElementById("reciboCliente").innerText = recibo.nombre || "-";
             document.getElementById("reciboTelefono").innerText = recibo.telefono || "-";
             document.getElementById("reciboEvento").innerText = recibo.evento || "-";
-            document.getElementById("reciboNumero").innerText = recibo.numero_recibo || `#${recibo.id}`;
+            const numReciboLimpio = recibo.numero_recibo || `#${recibo.id}`;
+            document.getElementById("reciboNumero").innerText = numReciboLimpio;
 
             const fechaEmision = recibo.fecha_pago ? new Date(recibo.fecha_pago).toLocaleDateString("es-AR") : new Date().toLocaleDateString("es-AR");
             document.getElementById("reciboFechaPago").innerText = fechaEmision;
@@ -383,6 +462,30 @@
                 document.getElementById("reciboObservaciones").innerText = recibo.observaciones;
                 document.getElementById("observacionesContainer").style.display = "block";
             }
+
+            // Configurar acción de descarga directa del PDF
+            document.getElementById("btnDescargarPDF").addEventListener("click", () => {
+                const elemento = document.getElementById("reciboArea");
+                const bloqueAcciones = document.getElementById("bloqueAcciones");
+
+                // Ocultar botones y aplicar estilo claro para el archivo PDF final
+                bloqueAcciones.style.display = "none";
+                elemento.classList.add("modo-pdf");
+
+                const opciones = {
+                    margin:       10,
+                    filename:     `Recibo_${numReciboLimpio.replace('#', '')}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opciones).from(elemento).save().then(() => {
+                    // Restaurar visualización en pantalla
+                    bloqueAcciones.style.display = "flex";
+                    elemento.classList.remove("modo-pdf");
+                });
+            });
         }
 
         cargarDatosRecibo();
