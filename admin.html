@@ -65,6 +65,20 @@ background:#d40000;
 color:white;
 }
 
+/* Estilos para textos de ayuda en el formulario */
+.ayuda {
+font-size: 12px;
+color: #aaa;
+margin-bottom: 8px;
+display: block;
+}
+
+.btn-secundario {
+background: #333;
+color: #fff;
+margin-top: 5px;
+}
+
 </style>
 
 </head>
@@ -79,6 +93,31 @@ color:white;
 
 </div>
 
+
+<!-- NUEVA SECCIÓN: CONFIGURACIÓN DEL NEGOCIO Y URL WEB -->
+<div class="card">
+
+<h2>⚙️ Configuración de tu Web</h2>
+
+<label for="configUrlWeb"><b>🌐 Dirección de tu Página Web (URL):</b></label>
+<input id="configUrlWeb" type="url" placeholder="https://tu-sitio-dj.com">
+<span class="ayuda">Ejemplo: https://mi-pagina-dj.com (Se usa para enviar los recibos a tus clientes).</span>
+
+<label for="configNombre"><b>🎧 Nombre de Fantasía / Marca:</b></label>
+<input id="configNombre" type="text" placeholder="Ej: DJ Carlos Eventos">
+
+<label for="configWhatsapp"><b>📱 Teléfono / WhatsApp:</b></label>
+<input id="configWhatsapp" type="tel" placeholder="Ej: 5491112345678">
+
+<button id="guardarConfiguracion">
+Guardar Configuración
+</button>
+
+<button id="btnVerWeb" class="btn-secundario">
+👁️ Visitar mi página web
+</button>
+
+</div>
 
 
 <div class="card">
@@ -136,6 +175,77 @@ Guardar video
 </div>
 
 
+<!-- Script para guardar y cargar la URL y datos del DJ en Supabase -->
+<script type="module">
+    import { supabase } from './supabase.js';
+
+    // Cargar la configuración guardada del usuario al iniciar
+    async function cargarConfiguracion() {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data, error } = await supabase
+                .from('configuracion')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
+
+            if (data) {
+                if (data.url_web) document.getElementById('configUrlWeb').value = data.url_web;
+                if (data.nombre_fantasia) document.getElementById('configNombre').value = data.nombre_fantasia;
+                if (data.telefono_whatsapp) document.getElementById('configWhatsapp').value = data.telefono_whatsapp;
+            }
+        } catch (e) {
+            console.log("Aún no hay configuración guardada o tabla no creada.");
+        }
+    }
+
+    // Guardar la configuración en Supabase
+    document.getElementById('guardarConfiguracion').addEventListener('click', async () => {
+        const urlWeb = document.getElementById('configUrlWeb').value.trim();
+        const nombre = document.getElementById('configNombre').value.trim();
+        const whatsapp = document.getElementById('configWhatsapp').value.trim();
+
+        if (!urlWeb) {
+            alert('Por favor ingresá la URL de tu página web.');
+            return;
+        }
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            alert('Debes estar logueado para guardar la configuración.');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('configuracion')
+            .upsert({
+                user_id: user.id,
+                url_web: urlWeb,
+                nombre_fantasia: nombre,
+                telefono_whatsapp: whatsapp
+            });
+
+        if (error) {
+            alert('Error al guardar: ' + error.message);
+        } else {
+            alert('¡Configuración guardada correctamente!');
+        }
+    });
+
+    // Botón para visitar la web ingresada
+    document.getElementById('btnVerWeb').addEventListener('click', () => {
+        const url = document.getElementById('configUrlWeb').value.trim();
+        if (url) {
+            window.open(url, '_blank');
+        } else {
+            alert('Primero ingresá y guardá la URL de tu sitio web.');
+        }
+    });
+
+    cargarConfiguracion();
+</script>
 
 <script type="module" src="admin.js"></script>
 
