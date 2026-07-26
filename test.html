@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba Celular</title>
+  <style>
+    body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 30px; }
+    button { padding: 15px 20px; font-size: 16px; background: #f5b400; font-weight: bold; border: none; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <h2>🎧 Prueba de Conexión</h2>
+  <button id="btnProbar">PROBAR CONEXIÓN</button>
+  <p id="resultado" style="margin-top:20px; color:#f5b400;"></p>
+
+  <script type="module">
+    import { supabase } from "./supabase.js";
+
+    document.getElementById("btnProbar").onclick = async () => {
+      document.getElementById("resultado").innerText = "Cargando...";
+      try {
+        const { data, error } = await supabase.from("configuracion").select("*");
+        if (error) {
+          alert("Error de Supabase: " + error.message);
+          document.getElementById("resultado").innerText = "Error: " + error.message;
+        } else {
+          alert("¡CONECTÓ PERFECTO! Registros encontrados: " + data.length);
+          document.getElementById("resultado").innerText = "✅ Conexión exitosa";
+        }
+      } catch (err) {
+        alert("Error de JavaScript: " + err.message);
+        document.getElementById("resultado").innerText = "Error grave: " + err.message;
+      }
+    };
+  </script>
+
+</body>
+</html>
