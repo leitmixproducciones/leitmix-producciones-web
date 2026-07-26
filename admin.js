@@ -29,14 +29,17 @@ const seccionConfiguracion = document.getElementById("seccionConfiguracion");
 
 if (btnToggleConfig && seccionConfiguracion) {
   btnToggleConfig.onclick = () => {
-    // Alterna la visibilidad de la tarjeta
-    seccionConfiguracion.classList.toggle("oculto");
+    const estáOculto = seccionConfiguracion.style.display === "none" || seccionConfiguracion.classList.contains("oculto");
 
-    // Cambia dinámicamente el texto del botón según el estado
-    const estaOculto = seccionConfiguracion.classList.contains("oculto");
-    btnToggleConfig.innerHTML = estaOculto
-      ? "⚙️ Mostrar Configuración del Negocio ▼"
-      : "⚙️ Ocultar Configuración del Negocio ▲";
+    if (estáOculto) {
+      seccionConfiguracion.style.display = "block";
+      seccionConfiguracion.classList.remove("oculto");
+      btnToggleConfig.innerHTML = "⚙️ Ocultar Configuración del Negocio ▲";
+    } else {
+      seccionConfiguracion.style.display = "none";
+      seccionConfiguracion.classList.add("oculto");
+      btnToggleConfig.innerHTML = "⚙️ Mostrar Configuración del Negocio ▼";
+    }
   };
 }
 
@@ -312,6 +315,7 @@ if (botonLogo) {
     if (updateError) return alert(updateError.message);
 
     alert("Logo guardado correctamente");
+    cargarLogo();
   };
 }
 
@@ -371,10 +375,10 @@ async function cargarImagenes() {
   lista.innerHTML = "";
   data.forEach(imagen => {
     lista.innerHTML += `
-      <div class="item">
-        <img src="${imagen.Imagen}">
-        <p>${imagen.Titulo || ""}</p>
-        <button class="borrar" onclick="borrarImagen(${imagen.id})">Borrar</button>
+      <div class="item" style="background:#222; padding:8px; border-radius:4px;">
+        <img src="${imagen.Imagen}" style="max-width:120px; display:block; border-radius:4px;">
+        <p style="font-size:12px; margin:5px 0;">${imagen.Titulo || ""}</p>
+        <button class="borrar" onclick="borrarImagen(${imagen.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer;">Borrar</button>
       </div>
     `;
   });
@@ -449,10 +453,10 @@ async function cargarVideos() {
   lista.innerHTML = "";
   data.forEach(video => {
     lista.innerHTML += `
-      <div class="item">
-        <p>${video.Titulo || ""}</p>
-        <video controls><source src="${video.Url}"></video>
-        <button class="borrar" onclick="borrarVideo(${video.id})">Borrar</button>
+      <div class="item" style="background:#222; padding:10px; border-radius:4px; margin-bottom:8px;">
+        <p style="margin:0 0 5px 0;">${video.Titulo || ""}</p>
+        <video controls style="max-width:100%; height:150px;"><source src="${video.Url}"></video>
+        <button class="borrar" onclick="borrarVideo(${video.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; display:block; margin-top:5px;">Borrar</button>
       </div>
     `;
   });
@@ -489,13 +493,13 @@ async function cargarTestimonios() {
   lista.innerHTML = "";
   data.forEach(testimonio => {
     lista.innerHTML += `
-      <div class="item">
-        <h3>${testimonio.nombre}</h3>
-        <p>${testimonio.evento || ""}</p>
-        <p>${testimonio.comentario}</p>
-        <p>Estado: ${testimonio.aprobado ? "✅ Publicado" : "⏳ Pendiente"}</p>
-        ${!testimonio.aprobado ? `<button onclick="aprobarTestimonio(${testimonio.id})">✅ Aprobar</button>` : ""}
-        <button class="borrar" onclick="borrarTestimonio(${testimonio.id})">🗑️ Borrar</button>
+      <div class="item" style="background:#222; padding:10px; border-radius:4px; margin-bottom:10px;">
+        <h3 style="margin:0; font-size:15px; color:#f5b400;">${testimonio.nombre}</h3>
+        <p style="margin:2px 0; font-size:12px; color:#aaa;">${testimonio.evento || ""}</p>
+        <p style="margin:5px 0; font-size:13px;">"${testimonio.comentario}"</p>
+        <p style="font-size:12px;">Estado: ${testimonio.aprobado ? "✅ Publicado" : "⏳ Pendiente"}</p>
+        ${!testimonio.aprobado ? `<button onclick="aprobarTestimonio(${testimonio.id})" style="font-size:11px; padding:4px 8px;">✅ Aprobar</button>` : ""}
+        <button class="borrar" onclick="borrarTestimonio(${testimonio.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer;">🗑️ Borrar</button>
       </div>
     `;
   });
@@ -547,14 +551,12 @@ async function cargarReservas() {
   lista.innerHTML = "";
   data.forEach(reserva => {
     lista.innerHTML += `
-      <div class="item">
-        <h3>${reserva.nombre}</h3>
-        <p>📞 ${reserva.telefono}</p>
-        <p>📍 ${reserva.localidad}</p>
-        <p>🎉 Evento: ${reserva.evento}</p>
-        <p>📅 Fecha: ${reserva.fecha}</p>
-        <p>📝 ${reserva.comentarios || ""}</p>
-        <p>Estado: ${reserva.estado || "Pendiente"}</p>
+      <div class="item" style="background:#1e1e1e; padding:15px; border-radius:6px; margin-bottom:12px; border:1px solid #333;">
+        <h3 style="margin:0; color:#f5b400;">${reserva.nombre}</h3>
+        <p style="margin:4px 0; font-size:13px;">📞 ${reserva.telefono} | 📍 ${reserva.localidad}</p>
+        <p style="margin:4px 0; font-size:13px;">🎉 Evento: ${reserva.evento} | 📅 Fecha: ${reserva.fecha}</p>
+        <p style="margin:4px 0; font-size:13px;">📝 ${reserva.comentarios || ""}</p>
+        <p style="margin:4px 0; font-size:13px; font-weight:bold;">Estado: ${reserva.estado || "Pendiente"}</p>
 
         <div style="margin: 12px 0; background: #111; padding: 12px; border-radius: 8px; font-size: 13px; border: 1px solid #f5b400; text-align: left;">
           <strong style="color: #f5b400; font-size: 14px; display: block; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 4px;">
@@ -565,9 +567,9 @@ async function cargarReservas() {
           <p style="margin: 6px 0; white-space: pre-line;"><strong>🚫 Prohibidos:</strong><br>${reserva.playlist_prohibidos || 'Sin restricciones'}</p>
         </div>
 
-        <button onclick="confirmarReserva(${reserva.id})">Confirmar</button>
-        <button onclick="emitirRecibo(${reserva.id})">🧾 Emitir recibo</button>
-        <button class="borrar" onclick="borrarReserva(${reserva.id})">Borrar</button>
+        <button onclick="confirmarReserva(${reserva.id})" style="font-size:12px; padding:6px 12px;">Confirmar</button>
+        <button onclick="emitirRecibo(${reserva.id})" style="font-size:12px; padding:6px 12px;">🧾 Emitir recibo</button>
+        <button class="borrar" onclick="borrarReserva(${reserva.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; cursor:pointer;">Borrar</button>
       </div>
     `;
   });
@@ -617,13 +619,13 @@ window.emitirRecibo = async function(id) {
   if (error) return alert(error.message);
 
   reservaSeleccionada = data;
-  alert("Reserva seleccionada para recibo");
+  alert("Reserva de " + data.nombre + " seleccionada para generar recibo.");
 };
 
 const botonCrearRecibo = document.getElementById("crearRecibo");
 if (botonCrearRecibo) {
   botonCrearRecibo.onclick = async () => {
-    if (!reservaSeleccionada) return alert("Primero seleccioná una reserva");
+    if (!reservaSeleccionada) return alert("Primero seleccioná una reserva de la lista");
 
     const total = Number(document.getElementById("reciboTotal")?.value || 0);
     const importe = Number(document.getElementById("reciboImporte")?.value || 0);
@@ -717,16 +719,14 @@ async function cargarRecibos() {
   lista.innerHTML = "";
   data.forEach(recibo => {
     lista.innerHTML += `
-      <div class="item">
-        <h3>🧾 ${recibo.numero_recibo}</h3>
-        <p>👤 ${recibo.nombre}</p>
-        <p>🎉 ${recibo.evento}</p>
-        <p>💰 Total: $${Number(recibo.total || 0).toLocaleString("es-AR")}</p>
-        <p>💵 Recibido: $${Number(recibo.importe || 0).toLocaleString("es-AR")}</p>
-        <p>📌 Saldo: $${Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR")}</p>
-        <p>📅 ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
-        <p><a href="../recibo.html?id=${recibo.id}" target="_blank">📄 Ver recibo</a></p>
-        <button class="borrar" onclick="borrarRecibo(${recibo.id})">🗑️ Borrar recibo</button>
+      <div class="item" style="background:#222; padding:12px; border-radius:6px; margin-bottom:10px;">
+        <h3 style="margin:0 0 5px 0; color:#f5b400;">🧾 ${recibo.numero_recibo}</h3>
+        <p style="margin:2px 0; font-size:13px;">👤 Client: ${recibo.nombre} | 🎉 Evento: ${recibo.evento}</p>
+        <p style="margin:2px 0; font-size:13px;">💰 Total: $${Number(recibo.total || 0).toLocaleString("es-AR")} | 💵 Recibido: $${Number(recibo.importe || 0).toLocaleString("es-AR")}</p>
+        <p style="margin:2px 0; font-size:13px; font-weight:bold; color:#f5b400;">📌 Saldo Pendiente: $${Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR")}</p>
+        <p style="margin:2px 0; font-size:12px; color:#aaa;">📅 Fecha de emisión: ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
+        <p style="margin:5px 0;"><a href="../recibo.html?id=${recibo.id}" target="_blank" style="color:#f5b400;">📄 Ver recibo en pantalla completa</a></p>
+        <button class="borrar" onclick="borrarRecibo(${recibo.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer;">🗑️ Borrar recibo</button>
       </div>
     `;
   });
