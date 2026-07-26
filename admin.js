@@ -22,6 +22,18 @@ if (!sesion.session) {
 const usuario = sesion.session.user;
 
 // ======================
+// BOTÓN MOSTRAR / OCULTAR CONFIGURACIÓN
+// ======================
+const btnToggleConfig = document.getElementById("btnToggleConfig");
+const seccionConfiguracion = document.getElementById("seccionConfiguracion");
+
+if (btnToggleConfig && seccionConfiguracion) {
+  btnToggleConfig.onclick = () => {
+    seccionConfiguracion.classList.toggle("oculto");
+  };
+}
+
+// ======================
 // RESUMEN DEL NEGOCIO (DASHBOARD & ANALÍTICA)
 // ======================
 async function cargarResumenNegocio() {
@@ -125,7 +137,7 @@ async function cargarResumenNegocio() {
   if (elemEventosSemana) elemEventosSemana.innerText = eventosSemana;
   if (elemPendienteCobro) elemPendienteCobro.innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
 
-  // RENDERIZAR BARRAS DE MESES (2026)
+  // RENDERIZAR BARRAS DE MESES
   const maxReservasMes = Math.max(...reservasPorMes, 1);
   const contMeses = document.getElementById("contenedorMeses");
 
