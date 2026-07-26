@@ -18,7 +18,7 @@
         .btn-danger:hover { background: #c82333; }
         .hidden { display: none !important; }
         .error-msg { color: #ff6b6b; text-align: center; margin-bottom: 10px; font-size: 0.9rem; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .stat-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; }
         .stat-box h3 { font-size: 1.8rem; color: #ffc107; margin-top: 5px; }
     </style>
@@ -26,7 +26,7 @@
 <body>
 
     <div class="container">
-        <!-- SECCIÓN DE LOGIN (Se muestra si no hay sesión) -->
+        <!-- Sección de Login -->
         <div id="loginSection" class="card">
             <h2>🎧 Iniciar Sesión</h2>
             <div id="loginError" class="error-msg"></div>
@@ -37,28 +37,23 @@
             </form>
         </div>
 
-        <!-- SECCIÓN DEL PANEL (Se muestra una vez logueado) -->
+        <!-- Panel de Control (Privado) -->
         <div id="adminSection" class="card hidden">
-            <h1>Panel de Administración</h1>
+            <h1>Panel de Control</h1>
             <button id="btnLogout" class="btn-danger">Cerrar sesión</button>
 
             <div style="margin-top: 20px;">
-                <h2>📊 Resumen del Negocio</h2>
+                <h2>📊 Resumen de Actividad</h2>
                 <div class="stats-grid">
                     <div class="stat-box">
-                        <p>Total Reservas</p>
+                        <p>Total de Reservas Recibidas</p>
                         <h3 id="totalReservas">0</h3>
-                    </div>
-                    <div class="stat-box">
-                        <p>Estado</p>
-                        <h3 style="color: #28a745; font-size: 1.2rem; margin-top: 15px;">Activo</h3>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Lógica conectada a Supabase -->
     <script type="module">
         import { supabase } from "./supabase.js";
 
@@ -69,7 +64,6 @@
         const btnLogout = document.getElementById("btnLogout");
         const totalReservasEl = document.getElementById("totalReservas");
 
-        // 1. Verificar si ya hay una sesión activa al cargar la página
         async function checkSession() {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
@@ -79,14 +73,13 @@
             }
         }
 
-        // 2. Manejar el Login
         loginForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             loginError.textContent = "";
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
 
             if (error) {
                 loginError.textContent = "Error: " + error.message;
@@ -95,7 +88,6 @@
             }
         });
 
-        // 3. Manejar el Cerrar Sesión (Limpio y directo)
         btnLogout.addEventListener("click", async () => {
             await supabase.auth.signOut();
             localStorage.clear();
@@ -105,7 +97,7 @@
         function mostrarPanel() {
             loginSection.classList.add("hidden");
             adminSection.classList.remove("hidden");
-            cargarDatos();
+            cargarDatosAdmin();
         }
 
         function mostrarLogin() {
@@ -113,22 +105,20 @@
             loginSection.classList.remove("hidden");
         }
 
-        // 4. Cargar datos reales desde Supabase (ej: conteo de reservas)
-        async function cargarDatos() {
+        async function cargarDatosAdmin() {
             try {
                 const { count, error } = await supabase
-                    .from('reservas') // Asegúrate que tu tabla en Supabase se llame así
+                    .from('reservas')
                     .select('*', { count: 'exact', head: true });
 
                 if (!error) {
                     totalReservasEl.textContent = count || 0;
                 }
             } catch (err) {
-                console.log("No se pudieron cargar las reservas automáticamente:", err);
+                console.log("Error al cargar datos:", err);
             }
         }
 
-        // Ejecutar verificación al iniciar
         checkSession();
     </script>
 </body>
