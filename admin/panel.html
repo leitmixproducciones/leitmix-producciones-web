@@ -3,249 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración | Leitmix</title>
+    <title>Panel de Control | Leitmix Producciones</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #f1f1f1; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
-        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        h1, h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.4rem; text-align: center; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; }
+        h1 { color: #ffc107; margin-bottom: 15px; font-size: 1.8rem; }
+        h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.4rem; }
+        p { color: #aaa; margin-bottom: 15px; }
         input, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
         input { background: #2a2a2a; color: #fff; border: 1px solid #444; }
         button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
         button:hover { background: #e0a800; }
         .btn-danger { background: #dc3545; color: #fff; }
-        .btn-danger:hover { background: #c82333; }
-        .hidden { display: none !important; }
-        .error-msg { color: #ff6b6b; text-align: center; margin-bottom: 10px; font-size: 0.9rem; }
-        .success-msg { color: #28a745; text-align: center; margin-bottom: 10px; font-weight: bold; }
-        .stat-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
-        .stat-box h3 { font-size: 1.8rem; color: #ffc107; margin-top: 5px; }
-        .media-item { display: flex; align-items: center; justify-content: space-between; background: #2a2a2a; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
-        .media-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .btn-danger:hover { background: #bd2130; }
+        .btn-small { padding: 6px 12px; font-size: 0.85rem; width: auto; margin-top: 5px; }
+        .stat-number { font-size: 2.5rem; color: #ffc107; font-weight: bold; margin-bottom: 10px; }
+        .file-item { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 10px 15px; border-radius: 8px; margin-bottom: 8px; text-align: left; }
+        .file-name { font-size: 0.9rem; word-break: break-all; margin-right: 10px; color: #fff; }
+        .success-msg { color: #28a745; margin-bottom: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Sección de Login -->
-        <div id="loginSection" class="card">
-            <h2>🎧 Iniciar Sesión</h2>
-            <div id="loginError" class="error-msg"></div>
-            <form id="loginForm">
-                <input type="email" id="email" placeholder="Correo electrónico" required>
-                <input type="password" id="password" placeholder="Contraseña" required>
-                <button type="submit">Ingresar</button>
-            </form>
-        </div>
-
-        <!-- Panel de Control (Privado) -->
-        <div id="adminSection" class="card hidden">
+        <!-- Panel Principal -->
+        <div class="card">
             <h1>Panel de Control</h1>
             <button id="btnLogout" class="btn-danger">Cerrar sesión</button>
+        </div>
 
-            <!-- Resumen de Reservas -->
-            <div style="margin-top: 20px;">
-                <h2>📊 Resumen</h2>
-                <div class="stat-box">
-                    <p>Total de Reservas Recibidas</p>
-                    <h3 id="totalReservas">0</h3>
-                </div>
-            </div>
+        <!-- Resumen -->
+        <div class="card">
+            <h2>📊 Resumen</h2>
+            <p>Total de Reservas Recibidas</p>
+            <div id="totalReservas" class="stat-number">0</div>
+        </div>
 
-            <!-- Gestión de Galería -->
-            <div style="margin-top: 20px;">
-                <h2>📸 Gestión de Fotos y Videos</h2>
-                <div id="uploadMsg" class="success-msg"></div>
-                <input type="file" id="mediaFile" accept="image/*,video/*">
-                <button id="btnUpload">Subir Archivo</button>
-
-                <div style="margin-top: 15px;">
-                    <h3>Archivos subidos:</h3>
-                    <div id="mediaList">Cargando archivos...</div>
-                </div>
-            </div>
-
-            <!-- Configuración de Usuario -->
-            <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
-                <h2>⚙️ Configuración de Cuenta</h2>
-                <div id="userMsg" class="success-msg"></div>
-                <form id="updateUserForm">
-                    <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 8px;">Actualizar contraseña:</p>
-                    <input type="password" id="newPassword" placeholder="Nueva contraseña (opcional)">
-                    <button type="submit">Guardar Cambios</button>
-                </form>
-            </div>
+        <!-- Gestión de Fotos y Videos -->
+        <div class="card">
+            <h2>📸 Gestión de Fotos y Videos</h2>
+            <div id="uploadMsg" class="success-msg"></div>
+            <input type="file" id="fileInput" accept="image/*,video/*">
+            <button id="btnUpload">Subir Archivo</button>
+            <p style="margin-top: 15px; font-weight: bold; color: #fff; text-align: left;">Archivos subidos:</p>
+            <div id="fileList">Cargando archivos...</div>
         </div>
     </div>
 
     <script type="module">
-        import { supabase } from "../supabase.js";
+        import { supabase } from "./supabase.js";
 
-        const loginSection = document.getElementById("loginSection");
-        const adminSection = document.getElementById("adminSection");
-        const loginForm = document.getElementById("loginForm");
-        const loginError = document.getElementById("loginError");
-        const btnLogout = document.getElementById("btnLogout");
-        const totalReservasEl = document.getElementById("totalReservas");
-        const btnUpload = document.getElementById("btnUpload");
-        const mediaFile = document.getElementById("mediaFile");
-        const uploadMsg = document.getElementById("uploadMsg");
-        const mediaList = document.getElementById("mediaList");
-        const updateUserForm = document.getElementById("updateUserForm");
-        const userMsg = document.getElementById("userMsg");
-        const newPasswordInput = document.getElementById("newPassword");
-
-        async function checkSession() {
+        // 1. Verificar Autenticación (si no está logueado, vuelve al login)
+        const checkAuth = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                mostrarPanel();
-            } else {
-                mostrarLogin();
+            if (!session) {
+                window.location.href = "login.html";
             }
-        }
+        };
+        checkAuth();
 
-        loginForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            loginError.textContent = "";
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                loginError.textContent = "Error: " + error.message;
-            } else {
-                mostrarPanel();
-            }
-        });
-
-        btnLogout.addEventListener("click", async () => {
+        // 2. Cerrar Sesión
+        document.getElementById("btnLogout").addEventListener("click", async () => {
             await supabase.auth.signOut();
-            location.reload();
+            window.location.href = "login.html";
         });
 
-        function mostrarPanel() {
-            loginSection.classList.add("hidden");
-            adminSection.classList.remove("hidden");
-            cargarDatosAdmin();
-            cargarMedia();
-        }
+        // 3. Cargar Resumen de Reservas
+        async function cargarResumen() {
+            try {
+                const { count, error } = await supabase
+                    .from('reservas')
+                    .select('*', { count: 'exact', head: true });
 
-        function mostrarLogin() {
-            adminSection.classList.add("hidden");
-            loginSection.classList.remove("hidden");
-        }
-
-        async function cargarDatosAdmin() {
-            const { count, error } = await supabase
-                .from('reservas')
-                .select('*', { count: 'exact', head: true });
-
-            if (!error) {
-                totalReservasEl.textContent = count || 0;
+                if (!error && count !== null) {
+                    document.getElementById("totalReservas").textContent = count;
+                }
+            } catch (err) {
+                console.error("Error cargando reservas:", err);
             }
         }
+        cargarResumen();
 
-        // Subir archivo a Supabase Storage
+        // 4. Listar Archivos del bucket Media (incluyendo carpetas)
+        const fileList = document.getElementById("fileList");
+
+        async function cargarArchivosAdmin() {
+            try {
+                fileList.innerHTML = "<p style='color: #aaa;'>Cargando archivos...</p>";
+                let todosLosArchivos = [];
+
+                const { data: folders, error: folderError } = await supabase.storage
+                    .from('Media')
+                    .list('', { limit: 100 });
+
+                if (folderError) {
+                    fileList.innerHTML = `<p style='color: #ff6b6b;'>Error: ${folderError.message}</p>`;
+                    return;
+                }
+
+                for (const item of folders) {
+                    if (item.id === null) {
+                        const { data: subFiles } = await supabase.storage
+                            .from('Media')
+                            .list(item.name, { limit: 50 });
+                        
+                        if (subFiles) {
+                            subFiles.forEach(subFile => {
+                                if (subFile.name !== '.emptyFolderPlaceholder') {
+                                    todosLosArchivos.push({
+                                        name: `${item.name}/${subFile.name}`,
+                                        originalName: subFile.name
+                                    });
+                                }
+                            });
+                        }
+                    } else if (item.name !== '.emptyFolderPlaceholder') {
+                        todosLosArchivos.push({
+                            name: item.name,
+                            originalName: item.name
+                        });
+                    }
+                }
+
+                if (todosLosArchivos.length === 0) {
+                    fileList.innerHTML = "<p style='color: #aaa;'>No hay archivos subidos.</p>";
+                    return;
+                }
+
+                fileList.innerHTML = "";
+                todosLosArchivos.forEach(file => {
+                    const itemDiv = document.createElement("div");
+                    itemDiv.className = "file-item";
+
+                    const nameSpan = document.createElement("span");
+                    nameSpan.className = "file-name";
+                    nameSpan.textContent = file.name;
+
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.className = "btn-danger btn-small";
+                    deleteBtn.textContent = "Borrar";
+                    
+                    deleteBtn.onclick = async () => {
+                        if (confirm(`¿Estás seguro de borrar "${file.name}"?`)) {
+                            const { error } = await supabase.storage
+                                .from('Media')
+                                .remove([file.name]);
+
+                            if (error) {
+                                alert("Error al borrar: " + error.message);
+                            } else {
+                                cargarArchivosAdmin();
+                            }
+                        }
+                    };
+
+                    itemDiv.appendChild(nameSpan);
+                    itemDiv.appendChild(deleteBtn);
+                    fileList.appendChild(itemDiv);
+                });
+
+            } catch (err) {
+                fileList.innerHTML = "<p style='color: #ff6b6b;'>Error de conexión.</p>";
+            }
+        }
+        cargarArchivosAdmin();
+
+        // 5. Subir Archivos (Automáticamente los manda a la carpeta 'videos' si es video, o 'imagenes' si es foto)
+        const btnUpload = document.getElementById("btnUpload");
+        const fileInput = document.getElementById("fileInput");
+        const uploadMsg = document.getElementById("uploadMsg");
+
         btnUpload.addEventListener("click", async () => {
-            const file = mediaFile.files[0];
+            const file = fileInput.files[0];
             if (!file) {
-                alert("Seleccioná un archivo primero.");
+                alert("Por favor selecciona un archivo.");
                 return;
             }
 
             uploadMsg.textContent = "Subiendo archivo...";
-            const fileName = `${Date.now()}_${file.name}`;
+            btnUpload.disabled = true;
+
+            const fileNameLower = file.name.toLowerCase();
+            const isVideo = fileNameLower.endsWith('.mp4') || fileNameLower.endsWith('.webm') || fileNameLower.endsWith('.mov');
+            
+            // Definimos la carpeta de destino automáticamente
+            const folder = isVideo ? 'videos' : 'imagenes';
+            const filePath = `${folder}/${Date.now()}_${file.name}`;
 
             const { error } = await supabase.storage
-                .from('galeria')
-                .upload(fileName, file);
+                .from('Media')
+                .upload(filePath, file);
+
+            btnUpload.disabled = false;
+            fileInput.value = "";
 
             if (error) {
-                alert("Error al subir: " + error.message);
-                uploadMsg.textContent = "";
+                uploadMsg.style.color = "#dc3545";
+                uploadMsg.textContent = "Error: " + error.message;
             } else {
+                uploadMsg.style.color = "#28a745";
                 uploadMsg.textContent = "¡Archivo subido con éxito!";
-                mediaFile.value = "";
-                cargarMedia();
-                setTimeout(() => uploadMsg.textContent = "", 3000);
+                cargarArchivosAdmin();
+                setTimeout(() => { uploadMsg.textContent = ""; }, 3000);
             }
         });
-
-        // Cargar lista de archivos en el panel
-        async function cargarMedia() {
-            const { data, error } = await supabase.storage
-                .from('galeria')
-                .list('', { limit: 20, sortBy: { column: 'created_at', order: 'desc' } });
-
-            if (error) {
-                mediaList.textContent = "Error al cargar galería.";
-                return;
-            }
-
-            if (!data || data.length === 0) {
-                mediaList.innerHTML = "<p style='color: #aaa; text-align:center;'>No hay archivos subidos.</p>";
-                return;
-            }
-
-            mediaList.innerHTML = "";
-            data.forEach(file => {
-                const { data: publicUrlData } = supabase.storage
-                    .from('galeria')
-                    .getPublicUrl(file.name);
-
-                const item = document.createElement("div");
-                item.className = "media-item";
-                item.innerHTML = `
-                    <img src="${publicUrlData.publicUrl}" alt="Preview" onerror="this.src='https://via.placeholder.com/50?text=Media'">
-                    <span style="font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">${file.name}</span>
-                    <button class="btn-danger" style="width: auto; padding: 6px 12px; margin:0;" onclick="window.eliminarArchivo('${file.name}')">Borrar</button>
-                `;
-                mediaList.appendChild(item);
-            });
-        }
-
-        // Borrar archivo
-        window.eliminarArchivo = async function(fileName) {
-            if (!confirm("¿Estás seguro de borrar este archivo?")) return;
-
-            const { error } = await supabase.storage
-                .from('galeria')
-                .remove([fileName]);
-
-            if (error) {
-                alert("Error al borrar: " + error.message);
-            } else {
-                cargarMedia();
-            }
-        }
-
-        // Actualizar contraseña del usuario administrador
-        updateUserForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            userMsg.textContent = "";
-            const newPassword = newPasswordInput.value;
-
-            if (!newPassword) {
-                alert("Ingresá una nueva contraseña.");
-                return;
-            }
-
-            const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-            if (error) {
-                userMsg.style.color = "#ff6b6b";
-                userMsg.textContent = "Error: " + error.message;
-            } else {
-                userMsg.style.color = "#28a745";
-                userMsg.textContent = "¡Contraseña actualizada con éxito!";
-                newPasswordInput.value = "";
-                setTimeout(() => userMsg.textContent = "", 3000);
-            }
-        });
-
-        checkSession();
     </script>
 </body>
 </html>
