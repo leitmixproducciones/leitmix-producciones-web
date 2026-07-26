@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html> 
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -383,6 +383,20 @@
     </div>
 
     <script type="module">
+        // Función para evitar el corrimiento de zona horaria (UTC -> Local)
+        function formatearFecha(fechaStr) {
+            if (!fechaStr) return "-";
+            if (fechaStr.includes("T")) {
+                fechaStr = fechaStr.split("T")[0];
+            }
+            const partes = fechaStr.split("-");
+            if (partes.length === 3) {
+                const [anio, mes, dia] = partes;
+                return `${dia}/${mes}/${anio}`;
+            }
+            return fechaStr;
+        }
+
         async function obtenerSupabase() {
             try {
                 const mod = await import("./admin/supabase.js");
@@ -484,9 +498,10 @@
             const numReciboLimpio = recibo.numero_recibo || `#${recibo.id}`;
             document.getElementById("reciboNumero").innerText = numReciboLimpio;
 
-            const fechaEmision = recibo.fecha_pago ? new Date(recibo.fecha_pago).toLocaleDateString("es-AR") : new Date().toLocaleDateString("es-AR");
+            // Uso de la nueva función para evitar que reste un día
+            const fechaEmision = recibo.fecha_pago ? formatearFecha(recibo.fecha_pago) : formatearFecha(new Date().toISOString());
             document.getElementById("reciboFechaPago").innerText = fechaEmision;
-            document.getElementById("reciboFechaEvento").innerText = recibo.fecha_evento || "-";
+            document.getElementById("reciboFechaEvento").innerText = formatearFecha(recibo.fecha_evento);
 
             document.getElementById("reciboConcepto").innerText = recibo.concepto || "Seña / Servicio de Dj & Ambientación";
             document.getElementById("reciboFormaPago").innerText = recibo.forma_pago || "Transferencia / Efectivo";
