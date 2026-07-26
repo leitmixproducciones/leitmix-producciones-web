@@ -22,6 +22,28 @@ if (!sesion || !sesion.session) {
 const usuario = sesion.session.user;
 
 // ======================
+// MOSTRAR / OCULTAR CONFIGURACIÓN DEL NEGOCIO
+// ======================
+const btnToggleConfig = document.getElementById("btnToggleConfig");
+const seccionConfiguracion = document.getElementById("seccionConfiguracion");
+
+if (btnToggleConfig && seccionConfiguracion) {
+  btnToggleConfig.onclick = () => {
+    const estaOculto = seccionConfiguracion.style.display === "none" || seccionConfiguracion.classList.contains("oculto");
+
+    if (estaOculto) {
+      seccionConfiguracion.style.display = "block";
+      seccionConfiguracion.classList.remove("oculto");
+      btnToggleConfig.innerHTML = "⚙️ Ocultar Configuración del Negocio ▲";
+    } else {
+      seccionConfiguracion.style.display = "none";
+      seccionConfiguracion.classList.add("oculto");
+      btnToggleConfig.innerHTML = "⚙️ Mostrar Configuración del Negocio ▼";
+    }
+  };
+}
+
+// ======================
 // RESUMEN DEL NEGOCIO (DASHBOARD & ANALÍTICA)
 // ======================
 async function cargarResumenNegocio() {
@@ -114,7 +136,7 @@ async function cargarResumenNegocio() {
     if (elemEventosSemana) elemEventosSemana.innerText = eventosSemana;
     if (elemPendienteCobro) elemPendienteCobro.innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
 
-    // Gráfico de reservas por mes
+    // Gráfico por meses
     const maxReservasMes = Math.max(...reservasPorMes, 1);
     const contGrafico = document.getElementById("graficoReservasMes");
 
@@ -233,7 +255,7 @@ if (botonConfiguracion) {
       .upsert(configuracion, { onConflict: "user_id" });
 
     botonConfiguracion.disabled = false;
-    botonConfiguracion.innerText = "Guardar configuración";
+    botonConfiguracion.innerText = "💾 Guardar Configuración";
 
     if (error) {
       alert("Error al guardar: " + error.message);
