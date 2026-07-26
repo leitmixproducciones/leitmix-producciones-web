@@ -22,7 +22,7 @@ if (!sesion || !sesion.session) {
 const usuario = sesion.session.user;
 
 // ======================
-// MOSTRAR / OCULTAR CONFIGURACIÓN DEL NEGOCIO
+// BOTÓN MOSTRAR / OCULTAR CONFIGURACIÓN (Opcional y seguro)
 // ======================
 const btnToggleConfig = document.getElementById("btnToggleConfig");
 const seccionConfiguracion = document.getElementById("seccionConfiguracion");
@@ -30,26 +30,24 @@ const seccionConfiguracion = document.getElementById("seccionConfiguracion");
 if (btnToggleConfig && seccionConfiguracion) {
   btnToggleConfig.onclick = () => {
     const estaOculto = seccionConfiguracion.style.display === "none" || seccionConfiguracion.classList.contains("oculto");
-
     if (estaOculto) {
       seccionConfiguracion.style.display = "block";
       seccionConfiguracion.classList.remove("oculto");
-      btnToggleConfig.innerHTML = "⚙️ Ocultar Configuración del Negocio ▲";
+      btnToggleConfig.innerText = "⚙️ Ocultar Configuración del Negocio ▲";
     } else {
       seccionConfiguracion.style.display = "none";
       seccionConfiguracion.classList.add("oculto");
-      btnToggleConfig.innerHTML = "⚙️ Mostrar Configuración del Negocio ▼";
+      btnToggleConfig.innerText = "⚙️ Mostrar Configuración del Negocio ▼";
     }
   };
 }
 
 // ======================
-// RESUMEN DEL NEGOCIO (DASHBOARD & ANALÍTICA)
+// RESUMEN DEL NEGOCIO (DASHBOARD)
 // ======================
 async function cargarResumenNegocio() {
   try {
     const { data: reservas } = await supabase.from("reservas").select("*").eq("user_id", usuario.id);
-    const { data: testimonios } = await supabase.from("testimonios").select("id").eq("user_id", usuario.id);
     const { data: recibos } = await supabase.from("recibos").select("importe, total, saldo_pendiente").eq("user_id", usuario.id);
 
     let totalReservas = 0;
@@ -71,12 +69,7 @@ async function cargarResumenNegocio() {
 
     if (reservas && reservas.length > 0) {
       totalReservas = reservas.length;
-
-      const confirmadasLista = reservas.filter(
-        r => r.estado === "Confirmada" || r.estado === "Confirmado"
-      );
-
-      confirmadas = confirmadasLista.length;
+      confirmadas = reservas.filter(r => r.estado === "Confirmada" || r.estado === "Confirmado").length;
       pendientes = reservas.filter(r => !r.estado || r.estado === "Pendiente").length;
 
       const fechasFuturas = [];
@@ -88,18 +81,13 @@ async function cargarResumenNegocio() {
         let fechaObj = null;
         if (r.fecha) {
           const partes = r.fecha.split("-");
-          if (partes.length === 3) {
-            fechaObj = new Date(partes[0], partes[1] - 1, partes[2]);
-          }
+          if (partes.length === 3) fechaObj = new Date(partes[0], partes[1] - 1, partes[2]);
         } else if (r.created_at) {
           fechaObj = new Date(r.created_at);
         }
 
         if (fechaObj) {
-          if (fechaObj.getFullYear() === anioActual) {
-            reservasPorMes[fechaObj.getMonth()] += 1;
-          }
-
+          if (fechaObj.getFullYear() === anioActual) reservasPorMes[fechaObj.getMonth()] += 1;
           if ((r.estado === "Confirmada" || r.estado === "Confirmado") && fechaObj >= hoy) {
             fechasFuturas.push({ ...r, fechaObj });
           }
@@ -115,9 +103,7 @@ async function cargarResumenNegocio() {
         proximoEventoStr = `<b>${dia}/${mes}</b> - ${prox.nombre || prox.evento || 'Evento'}`;
       }
 
-      eventosSemana = fechasFuturas.filter(
-        r => r.fechaObj >= hoy && r.fechaObj <= dentroDeSieteDias
-      ).length;
+      eventosSemana = fechasFuturas.filter(r => r.fechaObj >= hoy && r.fechaObj <= dentroDeSieteDias).length;
     }
 
     const totalPendienteCobro = recibos ? recibos.reduce((sum, r) => sum + Number(r.saldo_pendiente || 0), 0) : 0;
@@ -136,7 +122,6 @@ async function cargarResumenNegocio() {
     if (elemEventosSemana) elemEventosSemana.innerText = eventosSemana;
     if (elemPendienteCobro) elemPendienteCobro.innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
 
-    // Gráfico por meses
     const maxReservasMes = Math.max(...reservasPorMes, 1);
     const contGrafico = document.getElementById("graficoReservasMes");
 
@@ -148,7 +133,7 @@ async function cargarResumenNegocio() {
           <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #fff; margin-bottom: 4px;">
             <span style="width: 35px; font-weight: bold;">${mes}</span>
             <div style="flex: 1; background: #222; height: 10px; border-radius: 5px; overflow: hidden;">
-              <div style="width: ${porcentaje}%; background: #f5b400; height: 100%; transition: width 0.3s ease;"></div>
+              <div style="width: ${porcentaje}%; background: #f5b400; height: 100%;"></div>
             </div>
             <span style="width: 25px; text-align: right; font-weight: bold; color: #f5b400;">${cantidad}</span>
           </div>
@@ -156,12 +141,9 @@ async function cargarResumenNegocio() {
       }).join("");
     }
 
-    // Servicios populares
     const contServicios = document.getElementById("dashServiciosPopulares");
-
     if (contServicios) {
       const serviciosOrdenados = Object.entries(serviciosContador).sort((a, b) => b[1] - a[1]);
-
       if (serviciosOrdenados.length === 0) {
         contServicios.innerHTML = `<li style="color: #888; font-size: 14px;">No hay registros de servicios aún.</li>`;
       } else {
@@ -174,7 +156,7 @@ async function cargarResumenNegocio() {
       }
     }
   } catch (err) {
-    console.error("Error cargando resumen:", err);
+    console.error("Error en Resumen:", err);
   }
 }
 
@@ -182,51 +164,33 @@ async function cargarResumenNegocio() {
 // CONFIGURACIÓN DEL NEGOCIO
 // ======================
 async function cargarConfiguracion() {
-  let linkPublico = `${window.location.origin}/index.html?dj=${usuario.id}`;
+  try {
+    let linkPublico = `${window.location.origin}/index.html?dj=${usuario.id}`;
 
-  const { data, error } = await supabase
-    .from("configuracion")
-    .select("*")
-    .eq("user_id", usuario.id)
-    .maybeSingle();
+    const { data } = await supabase.from("configuracion").select("*").eq("user_id", usuario.id).maybeSingle();
 
-  if (error) {
-    console.log("Sin configuración todavía:", error.message);
-  }
+    if (data) {
+      if (document.getElementById("configNombre")) document.getElementById("configNombre").value = data.nombre_fantasia || data.nombre_negocio || data.nombre || "";
+      if (document.getElementById("configSubtitulo")) document.getElementById("configSubtitulo").value = data.subtitulo || "";
+      if (document.getElementById("configWhatsapp")) document.getElementById("configWhatsapp").value = data.telefono_whatsapp || data.whatsapp || "";
+      if (document.getElementById("configAlias")) document.getElementById("configAlias").value = data.alias_pago || "";
+      if (document.getElementById("configInstagram")) document.getElementById("configInstagram").value = data.instagram_url || data.instagram || "";
+      if (document.getElementById("configTiktok")) document.getElementById("configTiktok").value = data.tiktok_url || "";
+      if (document.getElementById("configYoutube")) document.getElementById("configYoutube").value = data.youtube_url || "";
+    }
 
-  if (data) {
-    if (document.getElementById("configNombre")) {
-      document.getElementById("configNombre").value = data.nombre_fantasia || data.nombre_negocio || data.nombre || "";
-    }
-    if (document.getElementById("configSubtitulo")) {
-      document.getElementById("configSubtitulo").value = data.subtitulo || "";
-    }
-    if (document.getElementById("configWhatsapp")) {
-      document.getElementById("configWhatsapp").value = data.telefono_whatsapp || data.whatsapp || "";
-    }
-    if (document.getElementById("configAlias")) {
-      document.getElementById("configAlias").value = data.alias_pago || "";
-    }
-    if (document.getElementById("configInstagram")) {
-      document.getElementById("configInstagram").value = data.instagram_url || data.instagram || "";
-    }
-    if (document.getElementById("configTiktok")) {
-      document.getElementById("configTiktok").value = data.tiktok_url || "";
-    }
-    if (document.getElementById("configYoutube")) {
-      document.getElementById("configYoutube").value = data.youtube_url || "";
-    }
-  }
+    const elemLink = document.getElementById("textoLinkPublico");
+    if (elemLink) elemLink.textContent = linkPublico;
 
-  const elemLink = document.getElementById("textoLinkPublico");
-  if (elemLink) elemLink.textContent = linkPublico;
-
-  const btnCopiar = document.getElementById("copiarLinkPublico");
-  if (btnCopiar) {
-    btnCopiar.onclick = () => {
-      navigator.clipboard.writeText(linkPublico);
-      alert("¡Enlace copiado al portapapeles!");
-    };
+    const btnCopiar = document.getElementById("copiarLinkPublico");
+    if (btnCopiar) {
+      btnCopiar.onclick = () => {
+        navigator.clipboard.writeText(linkPublico);
+        alert("¡Enlace copiado al portapapeles!");
+      };
+    }
+  } catch (err) {
+    console.error("Error en Configuración:", err);
   }
 }
 
@@ -250,18 +214,12 @@ if (botonConfiguracion) {
       instagram: document.getElementById("configInstagram")?.value.trim() || null
     };
 
-    const { error } = await supabase
-      .from("configuracion")
-      .upsert(configuracion, { onConflict: "user_id" });
+    const { error } = await supabase.from("configuracion").upsert(configuracion, { onConflict: "user_id" });
 
     botonConfiguracion.disabled = false;
-    botonConfiguracion.innerText = "💾 Guardar Configuración";
+    botonConfiguracion.innerText = "Guardar configuración";
 
-    if (error) {
-      alert("Error al guardar: " + error.message);
-      return;
-    }
-
+    if (error) return alert("Error al guardar: " + error.message);
     alert("¡Configuración guardada correctamente!");
     cargarConfiguracion();
   };
@@ -271,17 +229,14 @@ if (botonConfiguracion) {
 // LOGO
 // ======================
 async function cargarLogo() {
-  const { data, error } = await supabase
-    .from("configuracion")
-    .select("logo")
-    .eq("user_id", usuario.id)
-    .maybeSingle();
-
-  if (error) return;
-
-  if (data && data.logo) {
-    const logo = document.getElementById("logoNegocio");
-    if (logo) logo.src = data.logo;
+  try {
+    const { data } = await supabase.from("configuracion").select("logo").eq("user_id", usuario.id).maybeSingle();
+    if (data && data.logo) {
+      const logo = document.getElementById("logoNegocio");
+      if (logo) logo.src = data.logo;
+    }
+  } catch (err) {
+    console.error("Error cargando Logo:", err);
   }
 }
 
@@ -292,23 +247,13 @@ if (botonLogo) {
     if (!archivo) return alert("Elegí un logo");
 
     const nombreArchivo = `logo-${usuario.id}-${Date.now()}-${archivo.name}`;
-
-    const { error } = await supabase.storage
-      .from("Media")
-      .upload(`logo/${nombreArchivo}`, archivo);
-
+    const { error } = await supabase.storage.from("Media").upload(`logo/${nombreArchivo}`, archivo);
     if (error) return alert(error.message);
 
-    const { data } = supabase.storage
-      .from("Media")
-      .getPublicUrl(`logo/${nombreArchivo}`);
-
-    const { error: updateError } = await supabase
-      .from("configuracion")
-      .upsert({ user_id: usuario.id, logo: data.publicUrl }, { onConflict: "user_id" });
+    const { data } = supabase.storage.from("Media").getPublicUrl(`logo/${nombreArchivo}`);
+    const { error: updateError } = await supabase.from("configuracion").upsert({ user_id: usuario.id, logo: data.publicUrl }, { onConflict: "user_id" });
 
     if (updateError) return alert(updateError.message);
-
     alert("Logo guardado correctamente");
     cargarLogo();
   };
@@ -327,27 +272,13 @@ if (botonImagen) {
     if (!archivo) return alert("Elegí una imagen");
 
     const nombreArchivo = `${Date.now()}-${archivo.name}`;
-
-    const { error } = await supabase.storage
-      .from("Media")
-      .upload(`imagenes/${usuario.id}/${nombreArchivo}`, archivo);
-
+    const { error } = await supabase.storage.from("Media").upload(`imagenes/${usuario.id}/${nombreArchivo}`, archivo);
     if (error) return alert(error.message);
 
-    const { data } = supabase.storage
-      .from("Media")
-      .getPublicUrl(`imagenes/${usuario.id}/${nombreArchivo}`);
-
-    const { error: errorDB } = await supabase
-      .from("galeria")
-      .insert([{
-        user_id: usuario.id,
-        Imagen: data.publicUrl,
-        Titulo: tituloImagen?.value || ""
-      }]);
+    const { data } = supabase.storage.from("Media").getPublicUrl(`imagenes/${usuario.id}/${nombreArchivo}`);
+    const { error: errorDB } = await supabase.from("galeria").insert([{ user_id: usuario.id, Imagen: data.publicUrl, Titulo: tituloImagen?.value || "" }]);
 
     if (errorDB) return alert(errorDB.message);
-
     alert("Imagen subida correctamente");
     if (archivoImagen) archivoImagen.value = "";
     if (tituloImagen) tituloImagen.value = "";
@@ -356,38 +287,31 @@ if (botonImagen) {
 }
 
 async function cargarImagenes() {
-  const lista = document.getElementById("listaImagenes");
-  if (!lista) return;
+  try {
+    const lista = document.getElementById("listaImagenes");
+    if (!lista) return;
 
-  const { data, error } = await supabase
-    .from("galeria")
-    .select("*")
-    .eq("user_id", usuario.id)
-    .order("id", { ascending: false });
+    const { data, error } = await supabase.from("galeria").select("*").eq("user_id", usuario.id).order("id", { ascending: false });
+    if (error) return;
 
-  if (error) return;
-
-  lista.innerHTML = "";
-  data.forEach(imagen => {
-    lista.innerHTML += `
-      <div class="item" style="background:#222; padding:8px; border-radius:8px; margin-top:10px;">
-        <img src="${imagen.Imagen}" style="max-width:120px; display:block; border-radius:8px;">
-        <p style="font-size:12px; margin:5px 0;">${imagen.Titulo || ""}</p>
-        <button class="borrar" onclick="borrarImagen(${imagen.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
-      </div>
-    `;
-  });
+    lista.innerHTML = "";
+    data.forEach(imagen => {
+      lista.innerHTML += `
+        <div class="item" style="background:#222; padding:8px; border-radius:8px; margin-top:10px; display:inline-block; margin-right:10px;">
+          <img src="${imagen.Imagen}" style="max-width:120px; display:block; border-radius:8px;">
+          <p style="font-size:12px; margin:5px 0; color:#fff;">${imagen.Titulo || ""}</p>
+          <button class="borrar" onclick="borrarImagen(${imagen.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
+        </div>
+      `;
+    });
+  } catch (err) {
+    console.error("Error cargando Imágenes:", err);
+  }
 }
 
 window.borrarImagen = async function(id) {
   if (!confirm("¿Borrar imagen?")) return;
-
-  const { error } = await supabase
-    .from("galeria")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", usuario.id);
-
+  const { error } = await supabase.from("galeria").delete().eq("id", id).eq("user_id", usuario.id);
   if (error) return alert(error.message);
   cargarImagenes();
 };
@@ -405,27 +329,13 @@ if (botonVideo) {
     if (!archivo) return alert("Elegí un video");
 
     const nombreArchivo = `${Date.now()}-${archivo.name}`;
-
-    const { error } = await supabase.storage
-      .from("Media")
-      .upload(`videos/${usuario.id}/${nombreArchivo}`, archivo);
-
+    const { error } = await supabase.storage.from("Media").upload(`videos/${usuario.id}/${nombreArchivo}`, archivo);
     if (error) return alert(error.message);
 
-    const { data } = supabase.storage
-      .from("Media")
-      .getPublicUrl(`videos/${usuario.id}/${nombreArchivo}`);
-
-    const { error: errorDB } = await supabase
-      .from("videos")
-      .insert([{
-        user_id: usuario.id,
-        Titulo: tituloVideo?.value || "",
-        Url: data.publicUrl
-      }]);
+    const { data } = supabase.storage.from("Media").getPublicUrl(`videos/${usuario.id}/${nombreArchivo}`);
+    const { error: errorDB } = await supabase.from("videos").insert([{ user_id: usuario.id, Titulo: tituloVideo?.value || "", Url: data.publicUrl }]);
 
     if (errorDB) return alert(errorDB.message);
-
     alert("Video subido correctamente");
     if (archivoVideo) archivoVideo.value = "";
     if (tituloVideo) tituloVideo.value = "";
@@ -434,38 +344,31 @@ if (botonVideo) {
 }
 
 async function cargarVideos() {
-  const lista = document.getElementById("listaVideos");
-  if (!lista) return;
+  try {
+    const lista = document.getElementById("listaVideos");
+    if (!lista) return;
 
-  const { data, error } = await supabase
-    .from("videos")
-    .select("*")
-    .eq("user_id", usuario.id)
-    .order("id", { ascending: false });
+    const { data, error } = await supabase.from("videos").select("*").eq("user_id", usuario.id).order("id", { ascending: false });
+    if (error) return;
 
-  if (error) return;
-
-  lista.innerHTML = "";
-  data.forEach(video => {
-    lista.innerHTML += `
-      <div class="item" style="background:#222; padding:10px; border-radius:8px; margin-bottom:8px;">
-        <p style="margin:0 0 5px 0;">${video.Titulo || ""}</p>
-        <video controls style="max-width:100%; height:150px; border-radius:8px;"><source src="${video.Url}"></video>
-        <button class="borrar" onclick="borrarVideo(${video.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer; display:block; margin-top:5px;">Borrar</button>
-      </div>
-    `;
-  });
+    lista.innerHTML = "";
+    data.forEach(video => {
+      lista.innerHTML += `
+        <div class="item" style="background:#222; padding:10px; border-radius:8px; margin-bottom:8px;">
+          <p style="margin:0 0 5px 0; color:#fff;">${video.Titulo || ""}</p>
+          <video controls style="max-width:100%; height:150px; border-radius:8px;"><source src="${video.Url}"></video>
+          <button class="borrar" onclick="borrarVideo(${video.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer; display:block; margin-top:5px;">Borrar</button>
+        </div>
+      `;
+    });
+  } catch (err) {
+    console.error("Error cargando Videos:", err);
+  }
 }
 
 window.borrarVideo = async function(id) {
   if (!confirm("¿Borrar video?")) return;
-
-  const { error } = await supabase
-    .from("videos")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", usuario.id);
-
+  const { error } = await supabase.from("videos").delete().eq("id", id).eq("user_id", usuario.id);
   if (error) return alert(error.message);
   cargarVideos();
 };
@@ -474,41 +377,33 @@ window.borrarVideo = async function(id) {
 // TESTIMONIOS
 // ======================
 async function cargarTestimonios() {
-  const lista = document.getElementById("listaTestimonios");
-  if (!lista) return;
+  try {
+    const lista = document.getElementById("listaTestimonios");
+    if (!lista) return;
 
-  const { data, error } = await supabase
-    .from("testimonios")
-    .select("*")
-    .eq("user_id", usuario.id)
-    .order("id", { ascending: false });
+    const { data, error } = await supabase.from("testimonios").select("*").eq("user_id", usuario.id).order("id", { ascending: false });
+    if (error) return;
 
-  if (error) return;
-
-  lista.innerHTML = "";
-  data.forEach(testimonio => {
-    lista.innerHTML += `
-      <div class="item" style="background:#222; padding:10px; border-radius:8px; margin-bottom:10px;">
-        <h3 style="margin:0; font-size:15px; color:#f5b400;">${testimonio.nombre}</h3>
-        <p style="margin:2px 0; font-size:12px; color:#aaa;">${testimonio.evento || ""}</p>
-        <p style="margin:5px 0; font-size:13px;">"${testimonio.comentario}"</p>
-        <p style="font-size:12px;">Estado: ${testimonio.aprobado ? "✅ Publicado" : "⏳ Pendiente"}</p>
-        ${!testimonio.aprobado ? `<button onclick="aprobarTestimonio(${testimonio.id})" style="font-size:11px; padding:4px 8px; margin-bottom:5px;">✅ Aprobar</button>` : ""}
-        <button class="borrar" onclick="borrarTestimonio(${testimonio.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar</button>
-      </div>
-    `;
-  });
-
-  cargarResumenNegocio();
+    lista.innerHTML = "";
+    data.forEach(testimonio => {
+      lista.innerHTML += `
+        <div class="item" style="background:#222; padding:10px; border-radius:8px; margin-bottom:10px;">
+          <h3 style="margin:0; font-size:15px; color:#f5b400;">${testimonio.nombre}</h3>
+          <p style="margin:2px 0; font-size:12px; color:#aaa;">${testimonio.evento || ""}</p>
+          <p style="margin:5px 0; font-size:13px; color:#fff;">"${testimonio.comentario}"</p>
+          <p style="font-size:12px; color:#fff;">Estado: ${testimonio.aprobado ? "✅ Publicado" : "⏳ Pendiente"}</p>
+          ${!testimonio.aprobado ? `<button onclick="aprobarTestimonio(${testimonio.id})" style="font-size:11px; padding:4px 8px; margin-bottom:5px;">✅ Aprobar</button>` : ""}
+          <button class="borrar" onclick="borrarTestimonio(${testimonio.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar</button>
+        </div>
+      `;
+    });
+  } catch (err) {
+    console.error("Error en Testimonios:", err);
+  }
 }
 
 window.aprobarTestimonio = async function(id) {
-  const { error } = await supabase
-    .from("testimonios")
-    .update({ aprobado: true })
-    .eq("id", id)
-    .eq("user_id", usuario.id);
-
+  const { error } = await supabase.from("testimonios").update({ aprobado: true }).eq("id", id).eq("user_id", usuario.id);
   if (error) return alert(error.message);
   alert("Testimonio publicado");
   cargarTestimonios();
@@ -516,13 +411,7 @@ window.aprobarTestimonio = async function(id) {
 
 window.borrarTestimonio = async function(id) {
   if (!confirm("¿Borrar testimonio?")) return;
-
-  const { error } = await supabase
-    .from("testimonios")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", usuario.id);
-
+  const { error } = await supabase.from("testimonios").delete().eq("id", id).eq("user_id", usuario.id);
   if (error) return alert(error.message);
   alert("Testimonio eliminado");
   cargarTestimonios();
@@ -532,53 +421,45 @@ window.borrarTestimonio = async function(id) {
 // RESERVAS
 // ======================
 async function cargarReservas() {
-  const lista = document.getElementById("listaReservas");
-  if (!lista) return;
+  try {
+    const lista = document.getElementById("listaReservas");
+    if (!lista) return;
 
-  const { data, error } = await supabase
-    .from("reservas")
-    .select("*")
-    .eq("user_id", usuario.id)
-    .order("id", { ascending: false });
+    const { data, error } = await supabase.from("reservas").select("*").eq("user_id", usuario.id).order("id", { ascending: false });
+    if (error) return;
 
-  if (error) return;
+    lista.innerHTML = "";
+    data.forEach(reserva => {
+      lista.innerHTML += `
+        <div class="item" style="background:#1e1e1e; padding:15px; border-radius:8px; margin-bottom:12px; border:1px solid #333; color:#fff;">
+          <h3 style="margin:0; color:#f5b400;">${reserva.nombre}</h3>
+          <p style="margin:4px 0; font-size:13px;">📞 ${reserva.telefono} | 📍 ${reserva.localidad || ''}</p>
+          <p style="margin:4px 0; font-size:13px;">🎉 Evento: ${reserva.evento || ''} | 📅 Fecha: ${reserva.fecha || ''}</p>
+          <p style="margin:4px 0; font-size:13px;">📝 ${reserva.comentarios || ""}</p>
+          <p style="margin:4px 0; font-size:13px; font-weight:bold;">Estado: ${reserva.estado || "Pendiente"}</p>
 
-  lista.innerHTML = "";
-  data.forEach(reserva => {
-    lista.innerHTML += `
-      <div class="item" style="background:#1e1e1e; padding:15px; border-radius:8px; margin-bottom:12px; border:1px solid #333;">
-        <h3 style="margin:0; color:#f5b400;">${reserva.nombre}</h3>
-        <p style="margin:4px 0; font-size:13px;">📞 ${reserva.telefono} | 📍 ${reserva.localidad || ''}</p>
-        <p style="margin:4px 0; font-size:13px;">🎉 Evento: ${reserva.evento || ''} | 📅 Fecha: ${reserva.fecha || ''}</p>
-        <p style="margin:4px 0; font-size:13px;">📝 ${reserva.comentarios || ""}</p>
-        <p style="margin:4px 0; font-size:13px; font-weight:bold;">Estado: ${reserva.estado || "Pendiente"}</p>
+          <div style="margin: 12px 0; background: #111; padding: 12px; border-radius: 8px; font-size: 13px; border: 1px solid #f5b400; text-align: left;">
+            <strong style="color: #f5b400; font-size: 14px; display: block; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 4px;">
+              🎧 HOJA DE RUTA DEL EVENTO
+            </strong>
+            <p style="margin: 6px 0; white-space: pre-line;"><strong>⏰ Cronograma & Momentos:</strong><br>${reserva.cronograma || 'A definir'}</p>
+            <p style="margin: 6px 0; white-space: pre-line;"><strong>🔥 Tandas & Infaltables:</strong><br>${reserva.playlist_infaltables || 'A definir'}</p>
+            <p style="margin: 6px 0; white-space: pre-line;"><strong>🚫 Prohibidos:</strong><br>${reserva.playlist_prohibidos || 'Sin restricciones'}</p>
+          </div>
 
-        <div style="margin: 12px 0; background: #111; padding: 12px; border-radius: 8px; font-size: 13px; border: 1px solid #f5b400; text-align: left;">
-          <strong style="color: #f5b400; font-size: 14px; display: block; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 4px;">
-            🎧 HOJA DE RUTA DEL EVENTO
-          </strong>
-          <p style="margin: 6px 0; white-space: pre-line;"><strong>⏰ Cronograma & Momentos:</strong><br>${reserva.cronograma || 'A definir'}</p>
-          <p style="margin: 6px 0; white-space: pre-line;"><strong>🔥 Tandas & Infaltables:</strong><br>${reserva.playlist_infaltables || 'A definir'}</p>
-          <p style="margin: 6px 0; white-space: pre-line;"><strong>🚫 Prohibidos:</strong><br>${reserva.playlist_prohibidos || 'Sin restricciones'}</p>
+          <button onclick="confirmarReserva(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">Confirmar</button>
+          <button onclick="emitirRecibo(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">🧾 Emitir recibo</button>
+          <button class="borrar" onclick="borrarReserva(${reserva.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
         </div>
-
-        <button onclick="confirmarReserva(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">Confirmar</button>
-        <button onclick="emitirRecibo(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">🧾 Emitir recibo</button>
-        <button class="borrar" onclick="borrarReserva(${reserva.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
-      </div>
-    `;
-  });
-
-  cargarResumenNegocio();
+      `;
+    });
+  } catch (err) {
+    console.error("Error en Reservas:", err);
+  }
 }
 
 window.confirmarReserva = async function(id) {
-  const { error } = await supabase
-    .from("reservas")
-    .update({ estado: "Confirmada" })
-    .eq("id", id)
-    .eq("user_id", usuario.id);
-
+  const { error } = await supabase.from("reservas").update({ estado: "Confirmada" }).eq("id", id).eq("user_id", usuario.id);
   if (error) return alert(error.message);
   alert("Reserva confirmada");
   cargarReservas();
@@ -586,13 +467,7 @@ window.confirmarReserva = async function(id) {
 
 window.borrarReserva = async function(id) {
   if (!confirm("¿Borrar reserva?")) return;
-
-  const { error } = await supabase
-    .from("reservas")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", usuario.id);
-
+  const { error } = await supabase.from("reservas").delete().eq("id", id).eq("user_id", usuario.id);
   if (error) return alert(error.message);
   alert("Reserva borrada");
   cargarReservas();
@@ -604,15 +479,8 @@ window.borrarReserva = async function(id) {
 let reservaSeleccionada = null;
 
 window.emitirRecibo = async function(id) {
-  const { data, error } = await supabase
-    .from("reservas")
-    .select("*")
-    .eq("id", id)
-    .eq("user_id", usuario.id)
-    .single();
-
+  const { data, error } = await supabase.from("reservas").select("*").eq("id", id).eq("user_id", usuario.id).single();
   if (error) return alert(error.message);
-
   reservaSeleccionada = data;
   alert("Reserva de " + data.nombre + " seleccionada para generar recibo.");
 };
@@ -624,33 +492,29 @@ if (botonCrearRecibo) {
 
     const total = Number(document.getElementById("reciboTotal")?.value || 0);
     const importe = Number(document.getElementById("reciboImporte")?.value || 0);
-
     if (!total || !importe) return alert("Completá los importes");
 
     const saldo_pendiente = total - importe;
     const numero = `REC-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
 
-    const { error } = await supabase
-      .from("recibos")
-      .insert([{
-        user_id: usuario.id,
-        numero_recibo: numero,
-        reserva_id: reservaSeleccionada.id,
-        nombre: reservaSeleccionada.nombre,
-        telefono: reservaSeleccionada.telefono,
-        evento: reservaSeleccionada.evento,
-        fecha_evento: reservaSeleccionada.fecha,
-        total: total,
-        importe: importe,
-        concepto: document.getElementById("reciboConcepto")?.value || "",
-        forma_pago: document.getElementById("reciboFormaPago")?.value || "",
-        saldo_pendiente: saldo_pendiente,
-        observaciones: document.getElementById("reciboObservaciones")?.value || "",
-        fecha_pago: new Date()
-      }]);
+    const { error } = await supabase.from("recibos").insert([{
+      user_id: usuario.id,
+      numero_recibo: numero,
+      reserva_id: reservaSeleccionada.id,
+      nombre: reservaSeleccionada.nombre,
+      telefono: reservaSeleccionada.telefono,
+      evento: reservaSeleccionada.evento,
+      fecha_evento: reservaSeleccionada.fecha,
+      total: total,
+      importe: importe,
+      concepto: document.getElementById("reciboConcepto")?.value || "",
+      forma_pago: document.getElementById("reciboFormaPago")?.value || "",
+      saldo_pendiente: saldo_pendiente,
+      observaciones: document.getElementById("reciboObservaciones")?.value || "",
+      fecha_pago: new Date()
+    }]);
 
     if (error) return alert(error.message);
-
     alert("Recibo creado: " + numero);
     cargarRecibos();
   };
@@ -666,96 +530,82 @@ if (botonReciboManual) {
     const total = Number(document.getElementById("manualTotal")?.value || 0);
     const importe = Number(document.getElementById("manualImporte")?.value || 0);
 
-    if (!nombre || !evento || !total || !importe) {
-      return alert("Completá los datos obligatorios");
-    }
+    if (!nombre || !evento || !total || !importe) return alert("Completá los datos obligatorios");
 
     const saldo_pendiente = total - importe;
     const numero = `REC-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
 
-    const { error } = await supabase
-      .from("recibos")
-      .insert([{
-        user_id: usuario.id,
-        numero_recibo: numero,
-        reserva_id: null,
-        nombre: nombre,
-        telefono: telefono,
-        evento: evento,
-        fecha_evento: fecha,
-        total: total,
-        importe: importe,
-        concepto: document.getElementById("manualConcepto")?.value || "",
-        forma_pago: document.getElementById("manualFormaPago")?.value || "",
-        saldo_pendiente: saldo_pendiente,
-        observaciones: document.getElementById("manualObservaciones")?.value || "",
-        fecha_pago: new Date()
-      }]);
+    const { error } = await supabase.from("recibos").insert([{
+      user_id: usuario.id,
+      numero_recibo: numero,
+      reserva_id: null,
+      nombre: nombre,
+      telefono: telefono,
+      evento: evento,
+      fecha_evento: fecha,
+      total: total,
+      importe: importe,
+      concepto: document.getElementById("manualConcepto")?.value || "",
+      forma_pago: document.getElementById("manualFormaPago")?.value || "",
+      saldo_pendiente: saldo_pendiente,
+      observaciones: document.getElementById("manualObservaciones")?.value || "",
+      fecha_pago: new Date()
+    }]);
 
     if (error) return alert(error.message);
-
     alert("Recibo manual creado: " + numero);
     cargarRecibos();
   };
 }
 
 async function cargarRecibos() {
-  const lista = document.getElementById("listaRecibos");
-  if (!lista) return;
+  try {
+    const lista = document.getElementById("listaRecibos");
+    if (!lista) return;
 
-  const { data, error } = await supabase
-    .from("recibos")
-    .select("*")
-    .eq("user_id", usuario.id)
-    .order("id", { ascending: false });
+    const { data, error } = await supabase.from("recibos").select("*").eq("user_id", usuario.id).order("id", { ascending: false });
+    if (error) return;
 
-  if (error) return;
-
-  lista.innerHTML = "";
-  data.forEach(recibo => {
-    lista.innerHTML += `
-      <div class="item" style="background:#222; padding:12px; border-radius:8px; margin-bottom:10px;">
-        <h3 style="margin:0 0 5px 0; color:#f5b400;">🧾 ${recibo.numero_recibo}</h3>
-        <p style="margin:2px 0; font-size:13px;">👤 Cliente: ${recibo.nombre} | 🎉 Evento: ${recibo.evento}</p>
-        <p style="margin:2px 0; font-size:13px;">💰 Total: $${Number(recibo.total || 0).toLocaleString("es-AR")} | 💵 Recibido: $${Number(recibo.importe || 0).toLocaleString("es-AR")}</p>
-        <p style="margin:2px 0; font-size:13px; font-weight:bold; color:#f5b400;">📌 Saldo Pendiente: $${Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR")}</p>
-        <p style="margin:2px 0; font-size:12px; color:#aaa;">📅 Fecha de emisión: ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
-        <p style="margin:5px 0;"><a href="../recibo.html?id=${recibo.id}" target="_blank" style="color:#f5b400;">📄 Ver recibo en pantalla completa</a></p>
-        <button class="borrar" onclick="borrarRecibo(${recibo.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar recibo</button>
-      </div>
-    `;
-  });
-
-  cargarResumenNegocio();
+    lista.innerHTML = "";
+    data.forEach(recibo => {
+      lista.innerHTML += `
+        <div class="item" style="background:#222; padding:12px; border-radius:8px; margin-bottom:10px; color:#fff;">
+          <h3 style="margin:0 0 5px 0; color:#f5b400;">🧾 ${recibo.numero_recibo}</h3>
+          <p style="margin:2px 0; font-size:13px;">👤 Cliente: ${recibo.nombre} | 🎉 Evento: ${recibo.evento}</p>
+          <p style="margin:2px 0; font-size:13px;">💰 Total: $${Number(recibo.total || 0).toLocaleString("es-AR")} | 💵 Recibido: $${Number(recibo.importe || 0).toLocaleString("es-AR")}</p>
+          <p style="margin:2px 0; font-size:13px; font-weight:bold; color:#f5b400;">📌 Saldo Pendiente: $${Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR")}</p>
+          <p style="margin:2px 0; font-size:12px; color:#aaa;">📅 Fecha de emisión: ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
+          <p style="margin:5px 0;"><a href="../recibo.html?id=${recibo.id}" target="_blank" style="color:#f5b400;">📄 Ver recibo en pantalla completa</a></p>
+          <button class="borrar" onclick="borrarRecibo(${recibo.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar recibo</button>
+        </div>
+      `;
+    });
+  } catch (err) {
+    console.error("Error en Recibos:", err);
+  }
 }
 
 window.borrarRecibo = async function(id) {
   if (!confirm("¿Borrar este recibo?")) return;
-
-  const { error } = await supabase
-    .from("recibos")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", usuario.id);
-
+  const { error } = await supabase.from("recibos").delete().eq("id", id).eq("user_id", usuario.id);
   if (error) return alert(error.message);
-
   alert("Recibo borrado correctamente");
   cargarRecibos();
 };
 
 // ======================
-// INICIALIZACIÓN SECUENCIAL
+// INICIALIZACIÓN PARALELA Y SEGURA
 // ======================
-async function inicializarPanel() {
-  await cargarConfiguracion();
-  await cargarLogo();
-  await cargarImagenes();
-  await cargarVideos();
-  await cargarTestimonios();
-  await cargarReservas();
-  await cargarRecibos();
-  await cargarResumenNegocio();
+function inicializarPanel() {
+  // Se ejecutan de manera independiente para que si falla uno, no detenga a los demás
+  cargarConfiguracion();
+  cargarLogo();
+  cargarImagenes();
+  cargarVideos();
+  cargarTestimonios();
+  cargarReservas();
+  cargarRecibos();
+  cargarResumenNegocio();
 }
 
 inicializarPanel();
