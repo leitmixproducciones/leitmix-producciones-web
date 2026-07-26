@@ -8,14 +8,14 @@ const botonCerrarSesion = document.getElementById("cerrarSesion");
 if (botonCerrarSesion) {
   botonCerrarSesion.onclick = async () => {
     await supabase.auth.signOut();
-    window.location.href = "admin/login.html"; // Apunta a la carpeta admin
+    window.location.href = "login.html"; // CORREGIDO: Ya estás en /admin/, así que va directo a login.html
   };
 }
 
 const { data: sesion } = await supabase.auth.getSession();
 
 if (!sesion || !sesion.session) {
-  window.location.href = "admin/login.html"; // Apunta a la carpeta admin
+  window.location.href = "login.html"; // CORREGIDO: Ya estás en /admin/, así que va directo a login.html
   throw new Error("Sin sesión");
 }
 
@@ -716,7 +716,7 @@ async function cargarRecibos() {
         <p>💵 Recibido: $${Number(recibo.importe || 0).toLocaleString("es-AR")}</p>
         <p>📌 Saldo: $${Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR")}</p>
         <p>📅 ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
-        <p><a href="recibo.html?id=${recibo.id}" target="_blank">📄 Ver recibo</a></p>
+        <p><a href="../recibo.html?id=${recibo.id}" target="_blank">📄 Ver recibo</a></p>
         <button class="borrar" onclick="borrarRecibo(${recibo.id})">🗑️ Borrar recibo</button>
       </div>
     `;
