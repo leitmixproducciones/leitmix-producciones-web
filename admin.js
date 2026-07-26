@@ -8,14 +8,14 @@ const botonCerrarSesion = document.getElementById("cerrarSesion");
 if (botonCerrarSesion) {
   botonCerrarSesion.onclick = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/leitmix-producciones-web/admin/login.html";
+    window.location.href = "admin/login.html"; // Apunta a la carpeta admin
   };
 }
 
 const { data: sesion } = await supabase.auth.getSession();
 
-if (!sesion.session) {
-  window.location.href = "/leitmix-producciones-web/admin/login.html";
+if (!sesion || !sesion.session) {
+  window.location.href = "admin/login.html"; // Apunta a la carpeta admin
   throw new Error("Sin sesión");
 }
 
@@ -55,7 +55,6 @@ async function cargarResumenNegocio() {
   const dentroDeSieteDias = new Date(hoy);
   dentroDeSieteDias.setDate(hoy.getDate() + 7);
 
-  // Variables para analítica de barras y servicios
   const anioActual = new Date().getFullYear();
   const nombresMeses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
   const reservasPorMes = Array(12).fill(0);
@@ -71,15 +70,12 @@ async function cargarResumenNegocio() {
     confirmadas = confirmadasLista.length;
     pendientes = reservas.filter(r => !r.estado || r.estado === "Pendiente").length;
 
-    // Procesamiento de fechas y analítica
     const fechasFuturas = [];
 
     reservas.forEach(r => {
-      // 1. Contador por servicios/eventos
       const servicio = r.evento || r.tipo_evento || "Sin Especificar";
       serviciosContador[servicio] = (serviciosContador[servicio] || 0) + 1;
 
-      // 2. Extracción de fecha para calendario y gráfico por meses
       let fechaObj = null;
       if (r.fecha) {
         const partes = r.fecha.split("-");
@@ -91,12 +87,10 @@ async function cargarResumenNegocio() {
       }
 
       if (fechaObj) {
-        // Conteo por mes del año actual
         if (fechaObj.getFullYear() === anioActual) {
           reservasPorMes[fechaObj.getMonth()] += 1;
         }
 
-        // Si es una reserva confirmada y futura
         if ((r.estado === "Confirmada" || r.estado === "Confirmado") && fechaObj >= hoy) {
           fechasFuturas.push({ ...r, fechaObj });
         }
@@ -105,7 +99,6 @@ async function cargarResumenNegocio() {
 
     fechasFuturas.sort((a, b) => a.fechaObj - b.fechaObj);
 
-    // Próximo evento
     if (fechasFuturas.length > 0) {
       const prox = fechasFuturas[0];
       const dia = String(prox.fechaObj.getDate()).padStart(2, "0");
@@ -113,16 +106,13 @@ async function cargarResumenNegocio() {
       proximoEventoStr = `<b>${dia}/${mes}</b> - ${prox.nombre || prox.evento || 'Evento'}`;
     }
 
-    // Eventos esta semana
     eventosSemana = fechasFuturas.filter(
       r => r.fechaObj >= hoy && r.fechaObj <= dentroDeSieteDias
     ).length;
   }
 
-  // Pendiente de cobro
   const totalPendienteCobro = recibos ? recibos.reduce((sum, r) => sum + Number(r.saldo_pendiente || 0), 0) : 0;
 
-  // Renderizar tarjetas de métricas
   const elemTotalReservas = document.getElementById("totalReservasDash");
   const elemPendientes = document.getElementById("pendientesDash");
   const elemConfirmadas = document.getElementById("confirmadasDash");
@@ -137,7 +127,6 @@ async function cargarResumenNegocio() {
   if (elemEventosSemana) elemEventosSemana.innerText = eventosSemana;
   if (elemPendienteCobro) elemPendienteCobro.innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
 
-  // RENDERIZAR BARRAS DE MESES
   const maxReservasMes = Math.max(...reservasPorMes, 1);
   const contMeses = document.getElementById("contenedorMeses");
 
@@ -157,7 +146,6 @@ async function cargarResumenNegocio() {
     }).join("");
   }
 
-  // RENDERIZAR SERVICIOS MÁS CONTRATADOS
   const contServicios = document.getElementById("contenedorServicios");
 
   if (contServicios) {
@@ -181,13 +169,7 @@ async function cargarResumenNegocio() {
 // CONFIGURACIÓN DEL NEGOCIO
 // ======================
 async function cargarConfiguracion() {
-  const pathActual = window.location.pathname;
-  const baseRepo = pathActual.includes("/admin") 
-    ? pathActual.substring(0, pathActual.indexOf("/admin")) 
-    : "";
-  
-  // Link por defecto generado para el sistema
-  let linkPublico = `${window.location.origin}${baseRepo}/index.html?dj=${usuario.id}`;
+  let linkPublico = `${window.location.origin}/index.html?dj=${usuario.id}`;
 
   const { data, error } = await supabase
     .from("configuracion")
@@ -200,7 +182,6 @@ async function cargarConfiguracion() {
   }
 
   if (data) {
-    // Si el usuario configuró una URL web propia, la asignamos al link
     if (data.url_web) {
       linkPublico = data.url_web;
       if (document.getElementById("configUrlWeb")) {
@@ -230,7 +211,6 @@ async function cargarConfiguracion() {
     }
   }
 
-  // Mostrar el link público actualizado
   const elemLink = document.getElementById("textoLinkPublico");
   if (elemLink) elemLink.textContent = linkPublico;
 
@@ -271,7 +251,7 @@ if (botonConfiguracion) {
     }
 
     alert("¡Configuración guardada correctamente!");
-    cargarConfiguracion(); // Recargar el bloque para refrescar el enlace mostrado
+    cargarConfiguracion();
   };
 }
 
@@ -300,7 +280,7 @@ cargarLogo();
 const botonLogo = document.getElementById("guardarLogo");
 if (botonLogo) {
   botonLogo.onclick = async () => {
-    const archivo = document.getElementById("configLogo").files[0];
+    const archivo = document.getElementById("configLogo")?.files[0];
     if (!archivo) return alert("Elegí un logo");
 
     const nombreArchivo = `logo-${usuario.id}-${Date.now()}-${archivo.name}`;
@@ -335,7 +315,7 @@ const botonImagen = document.getElementById("guardarImagen");
 
 if (botonImagen) {
   botonImagen.onclick = async () => {
-    const archivo = archivoImagen.files[0];
+    const archivo = archivoImagen?.files[0];
     if (!archivo) return alert("Elegí una imagen");
 
     const nombreArchivo = `${Date.now()}-${archivo.name}`;
@@ -355,14 +335,14 @@ if (botonImagen) {
       .insert([{
         user_id: usuario.id,
         Imagen: data.publicUrl,
-        Titulo: tituloImagen.value
+        Titulo: tituloImagen?.value || ""
       }]);
 
     if (errorDB) return alert(errorDB.message);
 
     alert("Imagen subida correctamente");
-    archivoImagen.value = "";
-    tituloImagen.value = "";
+    if (archivoImagen) archivoImagen.value = "";
+    if (tituloImagen) tituloImagen.value = "";
     cargarImagenes();
   };
 }
@@ -384,7 +364,7 @@ async function cargarImagenes() {
     lista.innerHTML += `
       <div class="item">
         <img src="${imagen.Imagen}">
-        <p>${imagen.Titulo}</p>
+        <p>${imagen.Titulo || ""}</p>
         <button class="borrar" onclick="borrarImagen(${imagen.id})">Borrar</button>
       </div>
     `;
@@ -413,7 +393,7 @@ const botonVideo = document.getElementById("guardarVideo");
 
 if (botonVideo) {
   botonVideo.onclick = async () => {
-    const archivo = archivoVideo.files[0];
+    const archivo = archivoVideo?.files[0];
     if (!archivo) return alert("Elegí un video");
 
     const nombreArchivo = `${Date.now()}-${archivo.name}`;
@@ -432,15 +412,15 @@ if (botonVideo) {
       .from("videos")
       .insert([{
         user_id: usuario.id,
-        Titulo: tituloVideo.value,
+        Titulo: tituloVideo?.value || "",
         Url: data.publicUrl
       }]);
 
     if (errorDB) return alert(errorDB.message);
 
     alert("Video subido correctamente");
-    archivoVideo.value = "";
-    tituloVideo.value = "";
+    if (archivoVideo) archivoVideo.value = "";
+    if (tituloVideo) tituloVideo.value = "";
     cargarVideos();
   };
 }
@@ -461,7 +441,7 @@ async function cargarVideos() {
   data.forEach(video => {
     lista.innerHTML += `
       <div class="item">
-        <p>${video.Titulo}</p>
+        <p>${video.Titulo || ""}</p>
         <video controls><source src="${video.Url}"></video>
         <button class="borrar" onclick="borrarVideo(${video.id})">Borrar</button>
       </div>
@@ -636,8 +616,8 @@ if (botonCrearRecibo) {
   botonCrearRecibo.onclick = async () => {
     if (!reservaSeleccionada) return alert("Primero seleccioná una reserva");
 
-    const total = Number(document.getElementById("reciboTotal").value);
-    const importe = Number(document.getElementById("reciboImporte").value);
+    const total = Number(document.getElementById("reciboTotal")?.value || 0);
+    const importe = Number(document.getElementById("reciboImporte")?.value || 0);
 
     if (!total || !importe) return alert("Completá los importes");
 
@@ -656,10 +636,10 @@ if (botonCrearRecibo) {
         fecha_evento: reservaSeleccionada.fecha,
         total: total,
         importe: importe,
-        concepto: document.getElementById("reciboConcepto").value,
-        forma_pago: document.getElementById("reciboFormaPago").value,
+        concepto: document.getElementById("reciboConcepto")?.value || "",
+        forma_pago: document.getElementById("reciboFormaPago")?.value || "",
         saldo_pendiente: saldo_pendiente,
-        observaciones: document.getElementById("reciboObservaciones").value,
+        observaciones: document.getElementById("reciboObservaciones")?.value || "",
         fecha_pago: new Date()
       }]);
 
@@ -673,12 +653,12 @@ if (botonCrearRecibo) {
 const botonReciboManual = document.getElementById("crearReciboManual");
 if (botonReciboManual) {
   botonReciboManual.onclick = async () => {
-    const nombre = document.getElementById("manualNombre").value;
-    const telefono = document.getElementById("manualTelefono").value;
-    const evento = document.getElementById("manualEvento").value;
-    const fecha = document.getElementById("manualFecha").value;
-    const total = Number(document.getElementById("manualTotal").value);
-    const importe = Number(document.getElementById("manualImporte").value);
+    const nombre = document.getElementById("manualNombre")?.value;
+    const telefono = document.getElementById("manualTelefono")?.value;
+    const evento = document.getElementById("manualEvento")?.value;
+    const fecha = document.getElementById("manualFecha")?.value;
+    const total = Number(document.getElementById("manualTotal")?.value || 0);
+    const importe = Number(document.getElementById("manualImporte")?.value || 0);
 
     if (!nombre || !evento || !total || !importe) {
       return alert("Completá los datos obligatorios");
@@ -699,10 +679,10 @@ if (botonReciboManual) {
         fecha_evento: fecha,
         total: total,
         importe: importe,
-        concepto: document.getElementById("manualConcepto").value,
-        forma_pago: document.getElementById("manualFormaPago").value,
+        concepto: document.getElementById("manualConcepto")?.value || "",
+        forma_pago: document.getElementById("manualFormaPago")?.value || "",
         saldo_pendiente: saldo_pendiente,
-        observaciones: document.getElementById("manualObservaciones").value,
+        observaciones: document.getElementById("manualObservaciones")?.value || "",
         fecha_pago: new Date()
       }]);
 
@@ -736,7 +716,7 @@ async function cargarRecibos() {
         <p>💵 Recibido: $${Number(recibo.importe || 0).toLocaleString("es-AR")}</p>
         <p>📌 Saldo: $${Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR")}</p>
         <p>📅 ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
-        <p><a href="../recibo.html?id=${recibo.id}" target="_blank">📄 Ver recibo</a></p>
+        <p><a href="recibo.html?id=${recibo.id}" target="_blank">📄 Ver recibo</a></p>
         <button class="borrar" onclick="borrarRecibo(${recibo.id})">🗑️ Borrar recibo</button>
       </div>
     `;
