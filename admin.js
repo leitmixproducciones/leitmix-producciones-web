@@ -22,7 +22,7 @@ if (!sesion || !sesion.session) {
 const usuario = sesion.session.user;
 
 // ======================
-// BOTÓN MOSTRAR / OCULTAR CONFIGURACIÓN (Opcional y seguro)
+// MOSTRAR / OCULTAR CONFIGURACIÓN (Seguro)
 // ======================
 const btnToggleConfig = document.getElementById("btnToggleConfig");
 const seccionConfiguracion = document.getElementById("seccionConfiguracion");
@@ -594,10 +594,9 @@ window.borrarRecibo = async function(id) {
 };
 
 // ======================
-// INICIALIZACIÓN PARALELA Y SEGURA
+// INICIALIZACIÓN PARALELA
 // ======================
 function inicializarPanel() {
-  // Se ejecutan de manera independiente para que si falla uno, no detenga a los demás
   cargarConfiguracion();
   cargarLogo();
   cargarImagenes();
