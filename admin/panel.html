@@ -53,9 +53,9 @@
     </div>
 
     <script type="module">
-        import { supabase } from "./supabase.js";
+        import { supabase } from "../supabase.js";
 
-        // 1. Verificar sesión
+        // 1. Verificar sesión de seguridad
         const checkAuth = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -70,7 +70,7 @@
             window.location.href = "login.html";
         });
 
-        // 3. Resumen de reservas
+        // 3. Cargar Resumen de Reservas
         async function cargarResumen() {
             try {
                 const { count } = await supabase
@@ -85,7 +85,7 @@
         }
         cargarResumen();
 
-        // 4. Listar archivos dentro de las carpetas de forma segura
+        // 4. Listar Archivos de forma directa y limpia
         const fileList = document.getElementById("fileList");
 
         async function cargarArchivosAdmin() {
@@ -93,7 +93,6 @@
                 fileList.innerHTML = "<p style='color: #aaa;'>Cargando archivos...</p>";
                 let listaFinal = [];
 
-                // Listar carpetas imagenes y videos
                 for (let carpeta of ['imagenes', 'videos']) {
                     const { data: files, error } = await supabase.storage
                         .from('Media')
@@ -130,7 +129,7 @@
                     deleteBtn.textContent = "Borrar";
                     
                     deleteBtn.onclick = async () => {
-                        if (confirm(`¿Borrar "${file.name}"?`)) {
+                        if (confirm(`¿Estás seguro de borrar "${file.name}"?`)) {
                             const { error: errDel } = await supabase.storage
                                 .from('Media')
                                 .remove([file.path]);
@@ -154,7 +153,7 @@
         }
         cargarArchivosAdmin();
 
-        // 5. Subir archivos
+        // 5. Subir Archivos inteligentemente
         const btnUpload = document.getElementById("btnUpload");
         const fileInput = document.getElementById("fileInput");
         const uploadMsg = document.getElementById("uploadMsg");
@@ -162,14 +161,14 @@
         btnUpload.addEventListener("click", async () => {
             const file = fileInput.files[0];
             if (!file) {
-                alert("Selecciona un archivo primero.");
+                alert("Por favor selecciona un archivo primero.");
                 return;
             }
 
-            uploadMsg.textContent = "Subiendo...";
+            uploadMsg.textContent = "Subiendo archivo...";
             btnUpload.disabled = true;
 
-            const isVideo = file.type.includes('video') || file.name.toLowerCase().endsWith('.mp4');
+            const isVideo = file.type.includes('video') || file.name.toLowerCase().endsWith('.mp4') || file.name.toLowerCase().endsWith('.mov');
             const folder = isVideo ? 'videos' : 'imagenes';
             const filePath = `${folder}/${Date.now()}_${file.name}`;
 
