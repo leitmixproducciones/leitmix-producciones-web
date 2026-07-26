@@ -22,156 +22,137 @@ if (!sesion || !sesion.session) {
 const usuario = sesion.session.user;
 
 // ======================
-// BOTÓN MOSTRAR / OCULTAR CONFIGURACIÓN (DESPLEGABLE)
-// ======================
-const btnToggleConfig = document.getElementById("btnToggleConfig");
-const seccionConfiguracion = document.getElementById("seccionConfiguracion");
-
-if (btnToggleConfig && seccionConfiguracion) {
-  btnToggleConfig.onclick = () => {
-    const estáOculto = seccionConfiguracion.style.display === "none" || seccionConfiguracion.classList.contains("oculto");
-
-    if (estáOculto) {
-      seccionConfiguracion.style.display = "block";
-      seccionConfiguracion.classList.remove("oculto");
-      btnToggleConfig.innerHTML = "⚙️ Ocultar Configuración del Negocio ▲";
-    } else {
-      seccionConfiguracion.style.display = "none";
-      seccionConfiguracion.classList.add("oculto");
-      btnToggleConfig.innerHTML = "⚙️ Mostrar Configuración del Negocio ▼";
-    }
-  };
-}
-
-// ======================
 // RESUMEN DEL NEGOCIO (DASHBOARD & ANALÍTICA)
 // ======================
 async function cargarResumenNegocio() {
-  const [{ data: reservas }, { data: testimonios }, { data: recibos }] = await Promise.all([
-    supabase.from("reservas").select("*").eq("user_id", usuario.id),
-    supabase.from("testimonios").select("id").eq("user_id", usuario.id),
-    supabase.from("recibos").select("importe, total, saldo_pendiente").eq("user_id", usuario.id)
-  ]);
+  try {
+    const { data: reservas } = await supabase.from("reservas").select("*").eq("user_id", usuario.id);
+    const { data: testimonios } = await supabase.from("testimonios").select("id").eq("user_id", usuario.id);
+    const { data: recibos } = await supabase.from("recibos").select("importe, total, saldo_pendiente").eq("user_id", usuario.id);
 
-  let totalReservas = 0;
-  let confirmadas = 0;
-  let pendientes = 0;
-  let proximoEventoStr = "Sin eventos próximos";
-  let eventosSemana = 0;
+    let totalReservas = 0;
+    let confirmadas = 0;
+    let pendientes = 0;
+    let proximoEventoStr = "Sin eventos próximos";
+    let eventosSemana = 0;
 
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
 
-  const dentroDeSieteDias = new Date(hoy);
-  dentroDeSieteDias.setDate(hoy.getDate() + 7);
+    const dentroDeSieteDias = new Date(hoy);
+    dentroDeSieteDias.setDate(hoy.getDate() + 7);
 
-  const anioActual = new Date().getFullYear();
-  const nombresMeses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-  const reservasPorMes = Array(12).fill(0);
-  const serviciosContador = {};
+    const anioActual = new Date().getFullYear();
+    const nombresMeses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const reservasPorMes = Array(12).fill(0);
+    const serviciosContador = {};
 
-  if (reservas && reservas.length > 0) {
-    totalReservas = reservas.length;
+    if (reservas && reservas.length > 0) {
+      totalReservas = reservas.length;
 
-    const confirmadasLista = reservas.filter(
-      r => r.estado === "Confirmada" || r.estado === "Confirmado"
-    );
+      const confirmadasLista = reservas.filter(
+        r => r.estado === "Confirmada" || r.estado === "Confirmado"
+      );
 
-    confirmadas = confirmadasLista.length;
-    pendientes = reservas.filter(r => !r.estado || r.estado === "Pendiente").length;
+      confirmadas = confirmadasLista.length;
+      pendientes = reservas.filter(r => !r.estado || r.estado === "Pendiente").length;
 
-    const fechasFuturas = [];
+      const fechasFuturas = [];
 
-    reservas.forEach(r => {
-      const servicio = r.evento || r.tipo_evento || "Sin Especificar";
-      serviciosContador[servicio] = (serviciosContador[servicio] || 0) + 1;
+      reservas.forEach(r => {
+        const servicio = r.evento || r.tipo_evento || "Sin Especificar";
+        serviciosContador[servicio] = (serviciosContador[servicio] || 0) + 1;
 
-      let fechaObj = null;
-      if (r.fecha) {
-        const partes = r.fecha.split("-");
-        if (partes.length === 3) {
-          fechaObj = new Date(partes[0], partes[1] - 1, partes[2]);
+        let fechaObj = null;
+        if (r.fecha) {
+          const partes = r.fecha.split("-");
+          if (partes.length === 3) {
+            fechaObj = new Date(partes[0], partes[1] - 1, partes[2]);
+          }
+        } else if (r.created_at) {
+          fechaObj = new Date(r.created_at);
         }
-      } else if (r.created_at) {
-        fechaObj = new Date(r.created_at);
+
+        if (fechaObj) {
+          if (fechaObj.getFullYear() === anioActual) {
+            reservasPorMes[fechaObj.getMonth()] += 1;
+          }
+
+          if ((r.estado === "Confirmada" || r.estado === "Confirmado") && fechaObj >= hoy) {
+            fechasFuturas.push({ ...r, fechaObj });
+          }
+        }
+      });
+
+      fechasFuturas.sort((a, b) => a.fechaObj - b.fechaObj);
+
+      if (fechasFuturas.length > 0) {
+        const prox = fechasFuturas[0];
+        const dia = String(prox.fechaObj.getDate()).padStart(2, "0");
+        const mes = String(prox.fechaObj.getMonth() + 1).padStart(2, "0");
+        proximoEventoStr = `<b>${dia}/${mes}</b> - ${prox.nombre || prox.evento || 'Evento'}`;
       }
 
-      if (fechaObj) {
-        if (fechaObj.getFullYear() === anioActual) {
-          reservasPorMes[fechaObj.getMonth()] += 1;
-        }
-
-        if ((r.estado === "Confirmada" || r.estado === "Confirmado") && fechaObj >= hoy) {
-          fechasFuturas.push({ ...r, fechaObj });
-        }
-      }
-    });
-
-    fechasFuturas.sort((a, b) => a.fechaObj - b.fechaObj);
-
-    if (fechasFuturas.length > 0) {
-      const prox = fechasFuturas[0];
-      const dia = String(prox.fechaObj.getDate()).padStart(2, "0");
-      const mes = String(prox.fechaObj.getMonth() + 1).padStart(2, "0");
-      proximoEventoStr = `<b>${dia}/${mes}</b> - ${prox.nombre || prox.evento || 'Evento'}`;
+      eventosSemana = fechasFuturas.filter(
+        r => r.fechaObj >= hoy && r.fechaObj <= dentroDeSieteDias
+      ).length;
     }
 
-    eventosSemana = fechasFuturas.filter(
-      r => r.fechaObj >= hoy && r.fechaObj <= dentroDeSieteDias
-    ).length;
-  }
+    const totalPendienteCobro = recibos ? recibos.reduce((sum, r) => sum + Number(r.saldo_pendiente || 0), 0) : 0;
 
-  const totalPendienteCobro = recibos ? recibos.reduce((sum, r) => sum + Number(r.saldo_pendiente || 0), 0) : 0;
+    const elemTotalReservas = document.getElementById("totalReservasDash");
+    const elemPendientes = document.getElementById("pendientesDash");
+    const elemConfirmadas = document.getElementById("confirmadasDash");
+    const elemProximo = document.getElementById("dashProximoEvento");
+    const elemEventosSemana = document.getElementById("dashEventosSemana");
+    const elemPendienteCobro = document.getElementById("dashPendienteCobro");
 
-  const elemTotalReservas = document.getElementById("totalReservasDash");
-  const elemPendientes = document.getElementById("pendientesDash");
-  const elemConfirmadas = document.getElementById("confirmadasDash");
-  const elemProximo = document.getElementById("dashProximoEvento");
-  const elemEventosSemana = document.getElementById("dashEventosSemana");
-  const elemPendienteCobro = document.getElementById("dashPendienteCobro");
+    if (elemTotalReservas) elemTotalReservas.innerText = totalReservas;
+    if (elemPendientes) elemPendientes.innerText = pendientes;
+    if (elemConfirmadas) elemConfirmadas.innerText = confirmadas;
+    if (elemProximo) elemProximo.innerHTML = proximoEventoStr;
+    if (elemEventosSemana) elemEventosSemana.innerText = eventosSemana;
+    if (elemPendienteCobro) elemPendienteCobro.innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
 
-  if (elemTotalReservas) elemTotalReservas.innerText = totalReservas;
-  if (elemPendientes) elemPendientes.innerText = pendientes;
-  if (elemConfirmadas) elemConfirmadas.innerText = confirmadas;
-  if (elemProximo) elemProximo.innerHTML = proximoEventoStr;
-  if (elemEventosSemana) elemEventosSemana.innerText = eventosSemana;
-  if (elemPendienteCobro) elemPendienteCobro.innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
+    // Gráfico de reservas por mes
+    const maxReservasMes = Math.max(...reservasPorMes, 1);
+    const contGrafico = document.getElementById("graficoReservasMes");
 
-  const maxReservasMes = Math.max(...reservasPorMes, 1);
-  const contMeses = document.getElementById("contenedorMeses");
-
-  if (contMeses) {
-    contMeses.innerHTML = nombresMeses.map((mes, idx) => {
-      const cantidad = reservasPorMes[idx];
-      const porcentaje = (cantidad / maxReservasMes) * 100;
-      return `
-        <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #fff;">
-          <span style="width: 35px; font-weight: bold;">${mes}</span>
-          <div style="flex: 1; background: #222; height: 10px; border-radius: 5px; overflow: hidden;">
-            <div style="width: ${porcentaje}%; background: #f5b400; height: 100%; transition: width 0.3s ease;"></div>
+    if (contGrafico) {
+      contGrafico.innerHTML = nombresMeses.map((mes, idx) => {
+        const cantidad = reservasPorMes[idx];
+        const porcentaje = (cantidad / maxReservasMes) * 100;
+        return `
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #fff; margin-bottom: 4px;">
+            <span style="width: 35px; font-weight: bold;">${mes}</span>
+            <div style="flex: 1; background: #222; height: 10px; border-radius: 5px; overflow: hidden;">
+              <div style="width: ${porcentaje}%; background: #f5b400; height: 100%; transition: width 0.3s ease;"></div>
+            </div>
+            <span style="width: 25px; text-align: right; font-weight: bold; color: #f5b400;">${cantidad}</span>
           </div>
-          <span style="width: 25px; text-align: right; font-weight: bold; color: #f5b400;">${cantidad}</span>
-        </div>
-      `;
-    }).join("");
-  }
-
-  const contServicios = document.getElementById("contenedorServicios");
-
-  if (contServicios) {
-    const serviciosOrdenados = Object.entries(serviciosContador)
-      .sort((a, b) => b[1] - a[1]);
-
-    if (serviciosOrdenados.length === 0) {
-      contServicios.innerHTML = `<p style="color: #888; font-size: 14px;">No hay registros de servicios aún.</p>`;
-    } else {
-      contServicios.innerHTML = serviciosOrdenados.map(([servicio, cantidad]) => `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px 14px; border-radius: 6px; color: #fff; margin-bottom: 6px; border: 1px solid #2a2a2a;">
-          <span style="font-size: 14px; font-weight: 500;">${servicio}</span>
-          <span style="background: #f5b400; color: #000; padding: 2px 10px; border-radius: 12px; font-weight: bold; font-size: 13px;">${cantidad}</span>
-        </div>
-      `).join("");
+        `;
+      }).join("");
     }
+
+    // Servicios populares
+    const contServicios = document.getElementById("dashServiciosPopulares");
+
+    if (contServicios) {
+      const serviciosOrdenados = Object.entries(serviciosContador).sort((a, b) => b[1] - a[1]);
+
+      if (serviciosOrdenados.length === 0) {
+        contServicios.innerHTML = `<li style="color: #888; font-size: 14px;">No hay registros de servicios aún.</li>`;
+      } else {
+        contServicios.innerHTML = serviciosOrdenados.map(([servicio, cantidad]) => `
+          <li style="display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 8px 12px; border-radius: 6px; color: #fff; margin-bottom: 6px; border: 1px solid #2a2a2a;">
+            <span style="font-size: 14px;">${servicio}</span>
+            <span style="background: #f5b400; color: #000; padding: 2px 8px; border-radius: 12px; font-weight: bold; font-size: 12px;">${cantidad}</span>
+          </li>
+        `).join("");
+      }
+    }
+  } catch (err) {
+    console.error("Error cargando resumen:", err);
   }
 }
 
@@ -192,12 +173,6 @@ async function cargarConfiguracion() {
   }
 
   if (data) {
-    if (data.url_web) {
-      linkPublico = data.url_web;
-      if (document.getElementById("configUrlWeb")) {
-        document.getElementById("configUrlWeb").value = data.url_web;
-      }
-    }
     if (document.getElementById("configNombre")) {
       document.getElementById("configNombre").value = data.nombre_fantasia || data.nombre_negocio || data.nombre || "";
     }
@@ -241,7 +216,6 @@ if (botonConfiguracion) {
 
     const configuracion = {
       user_id: usuario.id,
-      url_web: document.getElementById("configUrlWeb")?.value.trim() || null,
       nombre_fantasia: document.getElementById("configNombre")?.value.trim() || null,
       subtitulo: document.getElementById("configSubtitulo")?.value.trim() || null,
       telefono_whatsapp: document.getElementById("configWhatsapp")?.value.trim() || null,
@@ -259,7 +233,7 @@ if (botonConfiguracion) {
       .upsert(configuracion, { onConflict: "user_id" });
 
     botonConfiguracion.disabled = false;
-    botonConfiguracion.innerText = "💾 Guardar Configuración";
+    botonConfiguracion.innerText = "Guardar configuración";
 
     if (error) {
       alert("Error al guardar: " + error.message);
@@ -279,7 +253,7 @@ async function cargarLogo() {
     .from("configuracion")
     .select("logo")
     .eq("user_id", usuario.id)
-    .single();
+    .maybeSingle();
 
   if (error) return;
 
@@ -309,8 +283,7 @@ if (botonLogo) {
 
     const { error: updateError } = await supabase
       .from("configuracion")
-      .update({ logo: data.publicUrl })
-      .eq("user_id", usuario.id);
+      .upsert({ user_id: usuario.id, logo: data.publicUrl }, { onConflict: "user_id" });
 
     if (updateError) return alert(updateError.message);
 
@@ -375,10 +348,10 @@ async function cargarImagenes() {
   lista.innerHTML = "";
   data.forEach(imagen => {
     lista.innerHTML += `
-      <div class="item" style="background:#222; padding:8px; border-radius:4px;">
-        <img src="${imagen.Imagen}" style="max-width:120px; display:block; border-radius:4px;">
+      <div class="item" style="background:#222; padding:8px; border-radius:8px; margin-top:10px;">
+        <img src="${imagen.Imagen}" style="max-width:120px; display:block; border-radius:8px;">
         <p style="font-size:12px; margin:5px 0;">${imagen.Titulo || ""}</p>
-        <button class="borrar" onclick="borrarImagen(${imagen.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer;">Borrar</button>
+        <button class="borrar" onclick="borrarImagen(${imagen.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
       </div>
     `;
   });
@@ -453,10 +426,10 @@ async function cargarVideos() {
   lista.innerHTML = "";
   data.forEach(video => {
     lista.innerHTML += `
-      <div class="item" style="background:#222; padding:10px; border-radius:4px; margin-bottom:8px;">
+      <div class="item" style="background:#222; padding:10px; border-radius:8px; margin-bottom:8px;">
         <p style="margin:0 0 5px 0;">${video.Titulo || ""}</p>
-        <video controls style="max-width:100%; height:150px;"><source src="${video.Url}"></video>
-        <button class="borrar" onclick="borrarVideo(${video.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; display:block; margin-top:5px;">Borrar</button>
+        <video controls style="max-width:100%; height:150px; border-radius:8px;"><source src="${video.Url}"></video>
+        <button class="borrar" onclick="borrarVideo(${video.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer; display:block; margin-top:5px;">Borrar</button>
       </div>
     `;
   });
@@ -493,13 +466,13 @@ async function cargarTestimonios() {
   lista.innerHTML = "";
   data.forEach(testimonio => {
     lista.innerHTML += `
-      <div class="item" style="background:#222; padding:10px; border-radius:4px; margin-bottom:10px;">
+      <div class="item" style="background:#222; padding:10px; border-radius:8px; margin-bottom:10px;">
         <h3 style="margin:0; font-size:15px; color:#f5b400;">${testimonio.nombre}</h3>
         <p style="margin:2px 0; font-size:12px; color:#aaa;">${testimonio.evento || ""}</p>
         <p style="margin:5px 0; font-size:13px;">"${testimonio.comentario}"</p>
         <p style="font-size:12px;">Estado: ${testimonio.aprobado ? "✅ Publicado" : "⏳ Pendiente"}</p>
-        ${!testimonio.aprobado ? `<button onclick="aprobarTestimonio(${testimonio.id})" style="font-size:11px; padding:4px 8px;">✅ Aprobar</button>` : ""}
-        <button class="borrar" onclick="borrarTestimonio(${testimonio.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer;">🗑️ Borrar</button>
+        ${!testimonio.aprobado ? `<button onclick="aprobarTestimonio(${testimonio.id})" style="font-size:11px; padding:4px 8px; margin-bottom:5px;">✅ Aprobar</button>` : ""}
+        <button class="borrar" onclick="borrarTestimonio(${testimonio.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar</button>
       </div>
     `;
   });
@@ -551,10 +524,10 @@ async function cargarReservas() {
   lista.innerHTML = "";
   data.forEach(reserva => {
     lista.innerHTML += `
-      <div class="item" style="background:#1e1e1e; padding:15px; border-radius:6px; margin-bottom:12px; border:1px solid #333;">
+      <div class="item" style="background:#1e1e1e; padding:15px; border-radius:8px; margin-bottom:12px; border:1px solid #333;">
         <h3 style="margin:0; color:#f5b400;">${reserva.nombre}</h3>
-        <p style="margin:4px 0; font-size:13px;">📞 ${reserva.telefono} | 📍 ${reserva.localidad}</p>
-        <p style="margin:4px 0; font-size:13px;">🎉 Evento: ${reserva.evento} | 📅 Fecha: ${reserva.fecha}</p>
+        <p style="margin:4px 0; font-size:13px;">📞 ${reserva.telefono} | 📍 ${reserva.localidad || ''}</p>
+        <p style="margin:4px 0; font-size:13px;">🎉 Evento: ${reserva.evento || ''} | 📅 Fecha: ${reserva.fecha || ''}</p>
         <p style="margin:4px 0; font-size:13px;">📝 ${reserva.comentarios || ""}</p>
         <p style="margin:4px 0; font-size:13px; font-weight:bold;">Estado: ${reserva.estado || "Pendiente"}</p>
 
@@ -567,9 +540,9 @@ async function cargarReservas() {
           <p style="margin: 6px 0; white-space: pre-line;"><strong>🚫 Prohibidos:</strong><br>${reserva.playlist_prohibidos || 'Sin restricciones'}</p>
         </div>
 
-        <button onclick="confirmarReserva(${reserva.id})" style="font-size:12px; padding:6px 12px;">Confirmar</button>
-        <button onclick="emitirRecibo(${reserva.id})" style="font-size:12px; padding:6px 12px;">🧾 Emitir recibo</button>
-        <button class="borrar" onclick="borrarReserva(${reserva.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; cursor:pointer;">Borrar</button>
+        <button onclick="confirmarReserva(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">Confirmar</button>
+        <button onclick="emitirRecibo(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">🧾 Emitir recibo</button>
+        <button class="borrar" onclick="borrarReserva(${reserva.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
       </div>
     `;
   });
@@ -719,14 +692,14 @@ async function cargarRecibos() {
   lista.innerHTML = "";
   data.forEach(recibo => {
     lista.innerHTML += `
-      <div class="item" style="background:#222; padding:12px; border-radius:6px; margin-bottom:10px;">
+      <div class="item" style="background:#222; padding:12px; border-radius:8px; margin-bottom:10px;">
         <h3 style="margin:0 0 5px 0; color:#f5b400;">🧾 ${recibo.numero_recibo}</h3>
-        <p style="margin:2px 0; font-size:13px;">👤 Client: ${recibo.nombre} | 🎉 Evento: ${recibo.evento}</p>
+        <p style="margin:2px 0; font-size:13px;">👤 Cliente: ${recibo.nombre} | 🎉 Evento: ${recibo.evento}</p>
         <p style="margin:2px 0; font-size:13px;">💰 Total: $${Number(recibo.total || 0).toLocaleString("es-AR")} | 💵 Recibido: $${Number(recibo.importe || 0).toLocaleString("es-AR")}</p>
         <p style="margin:2px 0; font-size:13px; font-weight:bold; color:#f5b400;">📌 Saldo Pendiente: $${Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR")}</p>
         <p style="margin:2px 0; font-size:12px; color:#aaa;">📅 Fecha de emisión: ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
         <p style="margin:5px 0;"><a href="../recibo.html?id=${recibo.id}" target="_blank" style="color:#f5b400;">📄 Ver recibo en pantalla completa</a></p>
-        <button class="borrar" onclick="borrarRecibo(${recibo.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer;">🗑️ Borrar recibo</button>
+        <button class="borrar" onclick="borrarRecibo(${recibo.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar recibo</button>
       </div>
     `;
   });
@@ -750,13 +723,17 @@ window.borrarRecibo = async function(id) {
 };
 
 // ======================
-// INICIALIZACIÓN
+// INICIALIZACIÓN SECUENCIAL
 // ======================
-cargarResumenNegocio();
-cargarConfiguracion();
-cargarLogo();
-cargarImagenes();
-cargarVideos();
-cargarTestimonios();
-cargarReservas();
-cargarRecibos();
+async function inicializarPanel() {
+  await cargarConfiguracion();
+  await cargarLogo();
+  await cargarImagenes();
+  await cargarVideos();
+  await cargarTestimonios();
+  await cargarReservas();
+  await cargarRecibos();
+  await cargarResumenNegocio();
+}
+
+inicializarPanel();
