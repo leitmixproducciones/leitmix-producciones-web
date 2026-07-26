@@ -59,36 +59,63 @@
 
         async function cargarGaleriaPublica() {
             try {
-                const { data, error } = await supabase.storage
-                    .from('Media')
-                    .list('', { limit: 20, sortBy: { column: 'created_at', order: 'desc' } });
+                publicGallery.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>Cargando archivos...</p>";
+                let todosLosArchivos = [];
 
-                if (error) {
-                    publicGallery.innerHTML = `<p style='color: #ff6b6b; grid-column: span 2; font-size: 0.85rem;'>Error: ${error.message}</p>`;
+                // 1. Listar las carpetas principales del bucket Media
+                const { data: folders, error: folderError } = await supabase.storage
+                    .from('Media')
+                    .list('', { limit: 100 });
+
+                if (folderError) {
+                    publicGallery.innerHTML = `<p style='color: #ff6b6b; grid-column: span 2;'>Error: ${folderError.message}</p>`;
                     return;
                 }
 
-                if (!data || data.length === 0) {
+                // 2. Buscar archivos dentro de las carpetas (imagenes, videos, logo) o sueltos
+                for (const item of folders) {
+                    if (item.id === null) {
+                        // Es una carpeta, entramos a buscar adentro
+                        const { data: subFiles } = await supabase.storage
+                            .from('Media')
+                            .list(item.name, { limit: 50 });
+                        
+                        if (subFiles) {
+                            subFiles.forEach(subFile => {
+                                if (subFile.name !== '.emptyFolderPlaceholder') {
+                                    todosLosArchivos.push({
+                                        name: `${item.name}/${subFile.name}`,
+                                        created_at: subFile.created_at
+                                    });
+                                }
+                            });
+                        }
+                    } else if (item.name !== '.emptyFolderPlaceholder') {
+                        // Es un archivo suelto en la raíz
+                        todosLosArchivos.push(item);
+                    }
+                }
+
+                if (todosLosArchivos.length === 0) {
                     publicGallery.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>No hay archivos en la galería todavía.</p>";
                     return;
                 }
 
                 publicGallery.innerHTML = "";
-                data.forEach(file => {
-                    if (file.name === '.emptyFolderPlaceholder') return;
-
+                todosLosArchivos.forEach(file => {
                     const { data: publicUrlData } = supabase.storage
                         .from('Media')
                         .getPublicUrl(file.name);
 
-                    const isVideo = file.name.endsWith('.mp4') || file.name.endsWith('.webm') || file.name.endsWith('.mov');
+                    const fileNameLower = file.name.toLowerCase();
+                    const isVideo = fileNameLower.endsWith('.mp4') || fileNameLower.endsWith('.webm') || fileNameLower.endsWith('.mov');
                     
                     if (isVideo) {
                         const video = document.createElement("video");
                         video.src = publicUrlData.publicUrl;
                         video.controls = true;
                         publicGallery.appendChild(video);
-                    } else {
+                    } else if (fileNameLower.endsWith('.jpg') || fileNameLower.endsWith('.jpeg') || fileNameLower.endsWith('.png') || fileNameLower.endsWith('.webp')) {
                         const img = document.createElement("img");
                         img.src = publicUrlData.publicUrl;
                         img.alt = "Evento Leitmix";
@@ -133,3 +160,4 @@
     </script>
 </body>
 </html>
+
