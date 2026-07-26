@@ -28,11 +28,11 @@
         .success-msg { color: #28a745; margin-bottom: 15px; font-weight: bold; }
         .section-title { color: #ffc107; text-align: left; margin: 15px 0 8px 0; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        /* Estilos del Recibo Integrado con Logo y Redes */
+        /* Estilos del Recibo Integrado */
         #reciboPreview { display: none; background: #fff; color: #333; padding: 25px; border-radius: 10px; text-align: left; margin-top: 15px; border: 2px solid #ffc107; }
         .recibo-header { text-align: center; border-bottom: 2px solid #ffc107; padding-bottom: 12px; margin-bottom: 15px; }
         .recibo-logo { max-width: 90px; height: auto; margin-bottom: 8px; border-radius: 50%; }
-        .recibo-header h3 { color: #121212; margin: 0; font-size: 1.4rem; font-weight: 800; letter-spacing: 0.5px; }
+        .recibo-header h3 { color: #121212; margin: 0; font-size: 1.4rem; font-weight: 800; }
         .recibo-header p { color: #555; font-size: 0.85rem; margin: 3px 0 0 0; }
         .recibo-details table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .recibo-details th, .recibo-details td { border: 1px solid #ddd; padding: 8px; font-size: 0.9rem; text-align: left; }
@@ -77,9 +77,8 @@
             <!-- Vista Previa del Recibo -->
             <div id="reciboPreview">
                 <div class="recibo-header">
-                    <!-- ACÁ PODÉS CAMBIAR LA URL DE TU LOGO -->
-                    <img src="https://tu-sitio.com/tu-logo.png" alt="Logo Leitmix" class="recibo-logo" onerror="this.style.display='none'">
-                    <h3>LEITMIX PRODUCCIONES</h3>
+                    <img id="lblLogo" src="" alt="Logo" class="recibo-logo" style="display:none;">
+                    <h3 id="lblEmpresa">LEITMIX PRODUCCIONES</h3>
                     <p>Comprobante Oficial de Reserva y Pagos</p>
                 </div>
                 <div class="recibo-details">
@@ -106,10 +105,9 @@
                     <p style="color:#333;"><strong>Resto a Abonar:</strong> <span id="lblResto" style="color: #d9534f; font-weight: bold;">$0</span></p>
                 </div>
                 <div class="recibo-footer">
-                    <p>¡Gracias por confiar en Leitmix Producciones!</p>
+                    <p>¡Gracias por confiar en nuestros servicios!</p>
                     <p>Este comprobante es válido como constancia de seña.</p>
-                    <!-- TUS REDES SOCIALES -->
-                    <p class="redes">📸 Instagram: @leitmixproducciones | 📞 WhatsApp: +54 9 XX XXXX-XXXX</p>
+                    <p class="redes"><span id="lblInstagram"></span> <span id="lblWhatsapp"></span></p>
                 </div>
                 <button id="btnPrintRecibo" style="background: #28a745; color: #fff; margin-top: 15px;">🖨️ Imprimir / Guardar como PDF</button>
             </div>
@@ -141,14 +139,36 @@
     <script type="module">
         import { supabase } from "../supabase.js";
 
-        // 1. Verificar sesión
-        const checkAuth = async () => {
+        let datosPerfil = {};
+
+        // 1. Verificar sesión y cargar datos del perfil del usuario actual
+        const initAuthAndProfile = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 window.location.href = "login.html";
+                return;
+            }
+
+            // Buscar el perfil asociado al usuario autenticado actual (asumiendo columna 'id' o 'user_id')
+            try {
+                const userId = session.user.id;
+                // Intentamos buscar por 'id' o 'user_id' según cómo hayas estructurado tu tabla perfiles
+                let { data, error } = await supabase.from('perfiles').select('*').eq('id', userId).single();
+                
+                if (error || !data) {
+                    // Plan B por si la columna se llama user_id
+                    const res = await supabase.from('perfiles').select('*').eq('user_id', userId).single();
+                    data = res.data;
+                }
+
+                if (data) {
+                    datosPerfil = data;
+                }
+            } catch (err) {
+                console.log("No se pudo cargar el perfil específico del usuario.");
             }
         };
-        checkAuth();
+        initAuthAndProfile();
 
         // 2. Cerrar sesión
         document.getElementById("btnLogout").addEventListener("click", async () => {
@@ -186,7 +206,7 @@
         inputTotal.addEventListener("input", calcularRestoAutomatico);
         inputSenia.addEventListener("input", calcularRestoAutomatico);
 
-        // 5. Generar recibo visualmente en la misma pantalla
+        // 5. Generar recibo inyectando los datos del DJ logueado
         document.getElementById("btnGenerarRecibo").addEventListener("click", () => {
             const cliente = document.getElementById("reciboCliente").value.trim();
             const servicio = document.getElementById("reciboServicio").value.trim();
@@ -198,6 +218,24 @@
                 alert("Por favor completa el nombre del cliente, el servicio y el precio total.");
                 return;
             }
+
+            // Inyectar datos específicos del perfil del DJ actual
+            document.getElementById("lblEmpresa").textContent = datosPerfil.nombre || datosPerfil.Nombre || datosPerfil.empresa || "LEITMIX PRODUCCIONES";
+            
+            const logoUrl = datosPerfil.logo || datosPerfil.Logo || datosPerfil.imagen;
+            const imgLogo = document.getElementById("lblLogo");
+            if (logoUrl) {
+                imgLogo.src = logoUrl;
+                imgLogo.style.display = "inline-block";
+            } else {
+                imgLogo.style.display = "none";
+            }
+
+            const ig = datosPerfil.instagram || datosPerfil.Instagram || "";
+            const wa = datosPerfil.whatsapp || datosPerfil.Whatsapp || datosPerfil.telefono || "";
+            
+            document.getElementById("lblInstagram").textContent = ig ? `📸 ${ig}` : "";
+            document.getElementById("lblWhatsapp").textContent = wa ? ` | 📞 WhatsApp: ${wa}` : "";
 
             document.getElementById("lblFecha").textContent = new Date().toLocaleDateString();
             document.getElementById("lblCliente").textContent = cliente;
