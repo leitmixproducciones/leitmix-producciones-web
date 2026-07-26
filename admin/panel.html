@@ -45,6 +45,23 @@
             <div id="totalReservas" class="stat-number">0</div>
         </div>
 
+        <!-- Generador de Recibos -->
+        <div class="card">
+            <h2>🧾 Generar Recibo de Seña / Pago</h2>
+            <p>Calcula automáticamente y genera el comprobante con el logo.</p>
+            
+            <input type="text" id="reciboCliente" placeholder="Nombre del Cliente">
+            <input type="text" id="reciboServicio" placeholder="Tipo de Servicio (Ej: DJ + Iluminación)">
+            <input type="number" id="reciboTotal" placeholder="Precio Total ($)">
+            <input type="number" id="reciboSenia" placeholder="Seña / Anticipo pagado ($)">
+            
+            <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; margin-bottom: 12px; text-align: left; border: 1px solid #444;">
+                <p style="margin: 0; font-size: 0.95rem; color: #ffc107;">Resto a Pagar: <span id="reciboResto" style="font-weight: bold; color: #fff;">$0</span></p>
+            </div>
+
+            <button id="btnGenerarRecibo">Generar / Imprimir Recibo</button>
+        </div>
+
         <!-- Gestión de Fotos y Videos -->
         <div class="card">
             <h2>📸 Gestión de Contenido</h2>
@@ -101,7 +118,100 @@
         }
         cargarResumen();
 
-        // 4. Cargar tabla 'galeria' y tabla 'videos' por separado
+        // 4. Cálculo automático en tiempo real para el Recibo
+        const inputTotal = document.getElementById("reciboTotal");
+        const inputSenia = document.getElementById("reciboSenia");
+        const spanResto = document.getElementById("reciboResto");
+
+        function calcularRestoAutomatico() {
+            const total = parseFloat(inputTotal.value) || 0;
+            const senia = parseFloat(inputSenia.value) || 0;
+            const resto = total - senia;
+            spanResto.textContent = "$" + (resto > 0 ? resto : 0);
+        }
+
+        inputTotal.addEventListener("input", calcularRestoAutomatico);
+        inputSenia.addEventListener("input", calcularRestoAutomatico);
+
+        // 5. Botón para generar e imprimir el recibo profesional
+        document.getElementById("btnGenerarRecibo").addEventListener("click", () => {
+            const cliente = document.getElementById("reciboCliente").value.trim();
+            const servicio = document.getElementById("reciboServicio").value.trim();
+            const total = parseFloat(inputTotal.value) || 0;
+            const senia = parseFloat(inputSenia.value) || 0;
+            const resto = total - senia;
+
+            if (!cliente || !servicio || total <= 0) {
+                alert("Por favor completa el nombre del cliente, el servicio y el precio total.");
+                return;
+            }
+
+            // Ventana para imprimir o guardar PDF
+            const ventanaRecibo = window.open('', '_blank');
+            ventanaRecibo.document.write(`
+                <html>
+                <head>
+                    <title>Recibo - Leitmix Producciones</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; }
+                        .recibo-container { max-width: 600px; margin: 0 auto; border: 2px solid #333; padding: 30px; border-radius: 10px; }
+                        .header { text-align: center; border-bottom: 2px solid #ffc107; padding-bottom: 15px; margin-bottom: 20px; }
+                        .header h1 { color: #121212; margin: 5px 0; font-size: 1.6rem; }
+                        .header p { color: #666; font-size: 0.9rem; margin: 0; }
+                        .details { margin-bottom: 20px; font-size: 0.95rem; }
+                        .details p { margin: 8px 0; }
+                        .details table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                        .details th, .details td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                        .details th { background: #f4f4f4; }
+                        .totals { text-align: right; margin-top: 20px; font-size: 1.1rem; }
+                        .totals p { margin: 5px 0; }
+                        .footer { text-align: center; margin-top: 40px; font-size: 0.8rem; color: #777; border-top: 1px solid #eee; padding-top: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="recibo-container">
+                        <div class="header">
+                            <h1>LEITMIX PRODUCCIONES</h1>
+                            <p>Comprobante Oficial de Reserva y Pagos</p>
+                        </div>
+                        <div class="details">
+                            <p><strong>Fecha de emisión:</strong> ${new Date().toLocaleDateString()}</p>
+                            <p><strong>Cliente:</strong> ${cliente}</p>
+                            <p><strong>Servicio Contratado:</strong> ${servicio}</p>
+                            
+                            <table>
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th>Monto</th>
+                                </tr>
+                                <tr>
+                                    <td>Valor Total del Servicio</td>
+                                    <td>$${total}</td>
+                                </tr>
+                                <tr>
+                                    <td>Seña / Anticipo Abonado</td>
+                                    <td>-$${senia}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="totals">
+                            <p><strong>Resto a Abonar:</strong> <span style="color: #d9534f;">$${resto > 0 ? resto : 0}</span></p>
+                        </div>
+                        <div class="footer">
+                            <p>¡Gracias por confiar en Leitmix Producciones!</p>
+                            <p>Este comprobante es válido como constancia de seña.</p>
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    </script>
+                </body>
+                </html>
+            `);
+            ventanaRecibo.document.close();
+        });
+
+        // 6. Cargar tabla 'galeria' y tabla 'videos'
         const galeriaList = document.getElementById("galeriaList");
         const videosList = document.getElementById("videosList");
 
@@ -139,7 +249,6 @@
                 } else {
                     videosList.innerHTML = "";
                     videos.forEach(item => {
-                        // Ajustá 'item.url' o 'item.Video' o 'item.Imagen' según cómo se llame la columna en tu tabla 'videos'
                         const url = item.url || item.Video || item.video || item.Imagen;
                         const itemDiv = crearItemUI(item.id, item.Titulo || item.titulo || 'Sin título', url, 'videos');
                         videosList.appendChild(itemDiv);
@@ -150,7 +259,7 @@
             }
         }
 
-        // Función auxiliar para armar el diseño de cada fila
+        // Función auxiliar para armar la interfaz de cada elemento
         function crearItemUI(id, titulo, url, tabla) {
             const itemDiv = document.createElement("div");
             itemDiv.className = "file-item";
@@ -202,7 +311,7 @@
 
         cargarContenidoAdmin();
 
-        // 5. Subir Archivo y registrarlo en la tabla elegida
+        // 7. Subir Archivo y registrarlo en la tabla elegida
         const btnUpload = document.getElementById("btnUpload");
         const fileInput = document.getElementById("fileInput");
         const tituloInput = document.getElementById("tituloInput");
@@ -212,7 +321,7 @@
         btnUpload.addEventListener("click", async () => {
             const file = fileInput.files[0];
             const titulo = tituloInput.value.trim();
-            const tablaDestino = tipoSelect.value; // 'galeria' o 'videos'
+            const tablaDestino = tipoSelect.value;
 
             if (!file || !titulo) {
                 alert("Por favor completa el título y selecciona un archivo.");
@@ -225,7 +334,6 @@
             const folder = tablaDestino === 'videos' ? 'videos' : 'imagenes';
             const filePath = `${folder}/${Date.now()}_${file.name}`;
 
-            // 1. Subir al Storage de Supabase
             const { error: uploadError } = await supabase.storage
                 .from('Media')
                 .upload(filePath, file);
@@ -237,16 +345,13 @@
                 return;
             }
 
-            // 2. Obtener URL pública
             const { data: publicUrlData } = supabase.storage
                 .from('Media')
                 .getPublicUrl(filePath);
 
-            // 3. Guardar en la tabla correspondiente (galeria o videos)
-            // Nota: Si tu columna en la tabla videos se llama 'url' o 'Video', ajustala acá si hiciera falta.
             const datosInserta = tablaDestino === 'galeria' 
                 ? { Titulo: titulo, Imagen: publicUrlData.publicUrl }
-                : { Titulo: titulo, url: publicUrlData.publicUrl }; // Cambiar 'url' por 'Video' si tu columna se llama así en la tabla videos
+                : { Titulo: titulo, url: publicUrlData.publicUrl };
 
             const { error: dbError } = await supabase
                 .from(tablaDestino)
