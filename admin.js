@@ -8,28 +8,35 @@ const botonCerrarSesion = document.getElementById("cerrarSesion");
 if (botonCerrarSesion) {
   botonCerrarSesion.onclick = async () => {
     await supabase.auth.signOut();
-    window.location.href = "login.html"; // CORREGIDO: Ya estás en /admin/, así que va directo a login.html
+    window.location.href = "login.html";
   };
 }
 
 const { data: sesion } = await supabase.auth.getSession();
 
 if (!sesion || !sesion.session) {
-  window.location.href = "login.html"; // CORREGIDO: Ya estás en /admin/, así que va directo a login.html
+  window.location.href = "login.html";
   throw new Error("Sin sesión");
 }
 
 const usuario = sesion.session.user;
 
 // ======================
-// BOTÓN MOSTRAR / OCULTAR CONFIGURACIÓN
+// BOTÓN MOSTRAR / OCULTAR CONFIGURACIÓN (DESPLEGABLE)
 // ======================
 const btnToggleConfig = document.getElementById("btnToggleConfig");
 const seccionConfiguracion = document.getElementById("seccionConfiguracion");
 
 if (btnToggleConfig && seccionConfiguracion) {
   btnToggleConfig.onclick = () => {
+    // Alterna la visibilidad de la tarjeta
     seccionConfiguracion.classList.toggle("oculto");
+
+    // Cambia dinámicamente el texto del botón según el estado
+    const estaOculto = seccionConfiguracion.classList.contains("oculto");
+    btnToggleConfig.innerHTML = estaOculto
+      ? "⚙️ Mostrar Configuración del Negocio ▼"
+      : "⚙️ Ocultar Configuración del Negocio ▲";
   };
 }
 
@@ -226,6 +233,9 @@ async function cargarConfiguracion() {
 const botonConfiguracion = document.getElementById("guardarConfiguracion");
 if (botonConfiguracion) {
   botonConfiguracion.onclick = async () => {
+    botonConfiguracion.disabled = true;
+    botonConfiguracion.innerText = "⏳ Guardando...";
+
     const configuracion = {
       user_id: usuario.id,
       url_web: document.getElementById("configUrlWeb")?.value.trim() || null,
@@ -245,6 +255,9 @@ if (botonConfiguracion) {
       .from("configuracion")
       .upsert(configuracion, { onConflict: "user_id" });
 
+    botonConfiguracion.disabled = false;
+    botonConfiguracion.innerText = "💾 Guardar Configuración";
+
     if (error) {
       alert("Error al guardar: " + error.message);
       return;
@@ -254,8 +267,6 @@ if (botonConfiguracion) {
     cargarConfiguracion();
   };
 }
-
-cargarConfiguracion();
 
 // ======================
 // LOGO
@@ -274,8 +285,6 @@ async function cargarLogo() {
     if (logo) logo.src = data.logo;
   }
 }
-
-cargarLogo();
 
 const botonLogo = document.getElementById("guardarLogo");
 if (botonLogo) {
@@ -744,6 +753,8 @@ window.borrarRecibo = async function(id) {
 // INICIALIZACIÓN
 // ======================
 cargarResumenNegocio();
+cargarConfiguracion();
+cargarLogo();
 cargarImagenes();
 cargarVideos();
 cargarTestimonios();
