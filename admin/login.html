@@ -19,22 +19,24 @@
     <h2>🎧 Iniciar Sesión</h2>
     <input type="email" id="email" placeholder="Tu Email">
     <input type="password" id="password" placeholder="Tu Contraseña">
-    <button id="btnLogin">Ingresar</button>
+    <button id="btnLogin" type="button">Ingresar</button>
     <div id="errorMsg" class="error"></div>
   </div>
 
   <script type="module">
-    // IMPORTANTE: Busca supabase.js en la carpeta raíz (../)
     import { supabase } from "../supabase.js";
 
-    document.getElementById("btnLogin").onclick = async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const errorMsg = document.getElementById("errorMsg");
-      errorMsg.innerText = "Cargando...";
+    const btn = document.getElementById("btnLogin");
+    const errorMsg = document.getElementById("errorMsg");
+
+    btn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      errorMsg.innerText = "Conectando...";
 
       if (!email || !password) {
-        errorMsg.innerText = "Por favor completá todos los campos.";
+        errorMsg.innerText = "Completá email y contraseña.";
         return;
       }
 
@@ -44,13 +46,13 @@
         if (error) {
           errorMsg.innerText = "Error: " + error.message;
         } else {
-          // Redirige al panel que está dentro de la misma carpeta
+          errorMsg.innerText = "¡Éxito! Redirigiendo...";
           window.location.href = "panel.html";
         }
       } catch (err) {
-        errorMsg.innerText = "Error de conexión: " + err.message;
+        errorMsg.innerText = "Falla de script: " + err.message;
       }
-    };
+    });
   </script>
 </body>
 </html>
