@@ -12,8 +12,8 @@
         h1 { color: #ffc107; margin-bottom: 15px; font-size: 1.8rem; }
         h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.4rem; }
         p { color: #aaa; margin-bottom: 15px; }
-        input, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
-        input { background: #2a2a2a; color: #fff; border: 1px solid #444; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
+        input, select { background: #2a2a2a; color: #fff; border: 1px solid #444; }
         button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
         button:hover { background: #e0a800; }
         .btn-danger { background: #dc3545; color: #fff; }
@@ -21,12 +21,12 @@
         .btn-small { padding: 6px 12px; font-size: 0.85rem; width: auto; }
         .stat-number { font-size: 2.5rem; color: #ffc107; font-weight: bold; margin-bottom: 10px; }
         
-        /* Estilos para la lista con miniatura */
         .file-item { display: flex; align-items: center; justify-content: space-between; background: #2a2a2a; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: left; }
         .file-info { display: flex; align-items: center; gap: 10px; overflow: hidden; margin-right: 10px; }
         .file-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #000; }
-        .file-name { font-size: 0.85rem; color: #fff; word-break: break-all; }
+        .file-title { font-size: 0.9rem; color: #fff; font-weight: bold; word-break: break-all; }
         .success-msg { color: #28a745; margin-bottom: 15px; font-weight: bold; }
+        .section-title { color: #ffc107; text-align: left; margin: 15px 0 8px 0; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -47,12 +47,24 @@
 
         <!-- Gestión de Fotos y Videos -->
         <div class="card">
-            <h2>📸 Gestión de Fotos y Videos</h2>
+            <h2>📸 Gestión de Contenido</h2>
             <div id="uploadMsg" class="success-msg"></div>
+            
+            <input type="text" id="tituloInput" placeholder="Título del archivo (Ej: Video Show)">
+            <select id="tipoSelect">
+                <option value="galeria">Tabla: Galería (Fotos)</option>
+                <option value="videos">Tabla: Videos</option>
+            </select>
             <input type="file" id="fileInput" accept="image/*,video/*">
-            <button id="btnUpload">Subir Archivo</button>
-            <p style="margin-top: 15px; font-weight: bold; color: #fff; text-align: left;">Archivos subidos:</p>
-            <div id="fileList">Cargando archivos...</div>
+            <button id="btnUpload">Subir y Registrar</button>
+
+            <!-- Listado de Galería -->
+            <div class="section-title">🖼️ Elementos en Tabla 'galeria'</div>
+            <div id="galeriaList">Cargando fotos...</div>
+
+            <!-- Listado de Videos -->
+            <div class="section-title">🎬 Elementos en Tabla 'videos'</div>
+            <div id="videosList">Cargando videos...</div>
         </div>
     </div>
 
@@ -89,131 +101,168 @@
         }
         cargarResumen();
 
-        // 4. Listar Archivos con Miniaturas
-        const fileList = document.getElementById("fileList");
+        // 4. Cargar tabla 'galeria' y tabla 'videos' por separado
+        const galeriaList = document.getElementById("galeriaList");
+        const videosList = document.getElementById("videosList");
 
-        async function cargarArchivosAdmin() {
+        async function cargarContenidoAdmin() {
+            // Cargar Galería
             try {
-                fileList.innerHTML = "<p style='color: #aaa;'>Cargando archivos...</p>";
-                let listaFinal = [];
-
-                for (let carpeta of ['imagenes', 'videos']) {
-                    const { data: files, error } = await supabase.storage
-                        .from('Media')
-                        .list(carpeta, { limit: 50 });
-
-                    if (!error && files) {
-                        files.forEach(file => {
-                            if (file.name !== '.emptyFolderPlaceholder') {
-                                listaFinal.push({
-                                    name: `${carpeta}/${file.name}`,
-                                    path: `${carpeta}/${file.name}`
-                                });
-                            }
-                        });
-                    }
+                galeriaList.innerHTML = "<p style='color: #aaa;'>Cargando...</p>";
+                const { data: galeria, error } = await supabase.from('galeria').select('*');
+                
+                if (error) {
+                    galeriaList.innerHTML = `<p style='color: #ff6b6b;'>Error: ${error.message}</p>`;
+                } else if (!galeria || galeria.length === 0) {
+                    galeriaList.innerHTML = "<p style='color: #aaa;'>No hay fotos en galería.</p>";
+                } else {
+                    galeriaList.innerHTML = "";
+                    galeria.forEach(item => {
+                        const url = item.Imagen || item.url || item.imagen;
+                        const itemDiv = crearItemUI(item.id, item.Titulo || 'Sin título', url, 'galeria');
+                        galeriaList.appendChild(itemDiv);
+                    });
                 }
+            } catch (e) {
+                galeriaList.innerHTML = "<p style='color: #ff6b6b;'>Error al cargar galería.</p>";
+            }
 
-                if (listaFinal.length === 0) {
-                    fileList.innerHTML = "<p style='color: #aaa;'>No hay archivos subidos.</p>";
-                    return;
+            // Cargar Videos
+            try {
+                videosList.innerHTML = "<p style='color: #aaa;'>Cargando...</p>";
+                const { data: videos, error } = await supabase.from('videos').select('*');
+                
+                if (error) {
+                    videosList.innerHTML = `<p style='color: #ff6b6b;'>Error: ${error.message}</p>`;
+                } else if (!videos || videos.length === 0) {
+                    videosList.innerHTML = "<p style='color: #aaa;'>No hay videos registrados.</p>";
+                } else {
+                    videosList.innerHTML = "";
+                    videos.forEach(item => {
+                        // Ajustá 'item.url' o 'item.Video' o 'item.Imagen' según cómo se llame la columna en tu tabla 'videos'
+                        const url = item.url || item.Video || item.video || item.Imagen;
+                        const itemDiv = crearItemUI(item.id, item.Titulo || item.titulo || 'Sin título', url, 'videos');
+                        videosList.appendChild(itemDiv);
+                    });
                 }
-
-                fileList.innerHTML = "";
-                listaFinal.forEach(file => {
-                    const { data: publicUrlData } = supabase.storage
-                        .from('Media')
-                        .getPublicUrl(file.name);
-
-                    const itemDiv = document.createElement("div");
-                    itemDiv.className = "file-item";
-
-                    const infoDiv = document.createElement("div");
-                    infoDiv.className = "file-info";
-
-                    const fileNameLower = file.name.toLowerCase();
-                    const isVideo = fileNameLower.endsWith('.mp4') || fileNameLower.endsWith('.webm') || fileNameLower.endsWith('.mov');
-
-                    if (isVideo) {
-                        const videoThumb = document.createElement("video");
-                        videoThumb.className = "file-thumb";
-                        videoThumb.src = publicUrlData.publicUrl;
-                        infoDiv.appendChild(videoThumb);
-                    } else {
-                        const imgThumb = document.createElement("img");
-                        imgThumb.className = "file-thumb";
-                        imgThumb.src = publicUrlData.publicUrl;
-                        imgThumb.alt = "Miniatura";
-                        infoDiv.appendChild(imgThumb);
-                    }
-
-                    const nameSpan = document.createElement("span");
-                    nameSpan.className = "file-name";
-                    nameSpan.textContent = file.name;
-                    infoDiv.appendChild(nameSpan);
-
-                    const deleteBtn = document.createElement("button");
-                    deleteBtn.className = "btn-danger btn-small";
-                    deleteBtn.textContent = "Borrar";
-                    
-                    deleteBtn.onclick = async () => {
-                        if (confirm(`¿Estás seguro de borrar este archivo?`)) {
-                            const { error: errDel } = await supabase.storage
-                                .from('Media')
-                                .remove([file.path]);
-
-                            if (errDel) {
-                                alert("Error al borrar: " + errDel.message);
-                            } else {
-                                cargarArchivosAdmin();
-                            }
-                        }
-                    };
-
-                    itemDiv.appendChild(infoDiv);
-                    itemDiv.appendChild(deleteBtn);
-                    fileList.appendChild(itemDiv);
-                });
-
-            } catch (err) {
-                fileList.innerHTML = "<p style='color: #ff6b6b;'>Error al conectar con el bucket.</p>";
+            } catch (e) {
+                videosList.innerHTML = "<p style='color: #ff6b6b;'>Error al cargar videos.</p>";
             }
         }
-        cargarArchivosAdmin();
 
-        // 5. Subir Archivos
+        // Función auxiliar para armar el diseño de cada fila
+        function crearItemUI(id, titulo, url, tabla) {
+            const itemDiv = document.createElement("div");
+            itemDiv.className = "file-item";
+
+            const infoDiv = document.createElement("div");
+            infoDiv.className = "file-info";
+
+            if (url && (url.endsWith('.mp4') || url.endsWith('.mov') || tabla === 'videos')) {
+                const videoThumb = document.createElement("video");
+                videoThumb.className = "file-thumb";
+                videoThumb.src = url;
+                infoDiv.appendChild(videoThumb);
+            } else if (url) {
+                const imgThumb = document.createElement("img");
+                imgThumb.className = "file-thumb";
+                imgThumb.src = url;
+                imgThumb.alt = "Miniatura";
+                infoDiv.appendChild(imgThumb);
+            }
+
+            const titleSpan = document.createElement("span");
+            titleSpan.className = "file-title";
+            titleSpan.textContent = titulo;
+            infoDiv.appendChild(titleSpan);
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "btn-danger btn-small";
+            deleteBtn.textContent = "Borrar";
+            
+            deleteBtn.onclick = async () => {
+                if (confirm(`¿Borrar "${titulo}" de la tabla ${tabla}?`)) {
+                    const { error: errDel } = await supabase
+                        .from(tabla)
+                        .delete()
+                        .eq('id', id);
+
+                    if (errDel) {
+                        alert("Error al borrar: " + errDel.message);
+                    } else {
+                        cargarContenidoAdmin();
+                    }
+                }
+            };
+
+            itemDiv.appendChild(infoDiv);
+            itemDiv.appendChild(deleteBtn);
+            return itemDiv;
+        }
+
+        cargarContenidoAdmin();
+
+        // 5. Subir Archivo y registrarlo en la tabla elegida
         const btnUpload = document.getElementById("btnUpload");
         const fileInput = document.getElementById("fileInput");
+        const tituloInput = document.getElementById("tituloInput");
+        const tipoSelect = document.getElementById("tipoSelect");
         const uploadMsg = document.getElementById("uploadMsg");
 
         btnUpload.addEventListener("click", async () => {
             const file = fileInput.files[0];
-            if (!file) {
-                alert("Por favor selecciona un archivo primero.");
+            const titulo = tituloInput.value.trim();
+            const tablaDestino = tipoSelect.value; // 'galeria' o 'videos'
+
+            if (!file || !titulo) {
+                alert("Por favor completa el título y selecciona un archivo.");
                 return;
             }
 
             uploadMsg.textContent = "Subiendo archivo...";
             btnUpload.disabled = true;
 
-            const isVideo = file.type.includes('video') || file.name.toLowerCase().endsWith('.mp4') || file.name.toLowerCase().endsWith('.mov');
-            const folder = isVideo ? 'videos' : 'imagenes';
+            const folder = tablaDestino === 'videos' ? 'videos' : 'imagenes';
             const filePath = `${folder}/${Date.now()}_${file.name}`;
 
-            const { error } = await supabase.storage
+            // 1. Subir al Storage de Supabase
+            const { error: uploadError } = await supabase.storage
                 .from('Media')
                 .upload(filePath, file);
 
+            if (uploadError) {
+                uploadMsg.style.color = "#dc3545";
+                uploadMsg.textContent = "Error al subir: " + uploadError.message;
+                btnUpload.disabled = false;
+                return;
+            }
+
+            // 2. Obtener URL pública
+            const { data: publicUrlData } = supabase.storage
+                .from('Media')
+                .getPublicUrl(filePath);
+
+            // 3. Guardar en la tabla correspondiente (galeria o videos)
+            // Nota: Si tu columna en la tabla videos se llama 'url' o 'Video', ajustala acá si hiciera falta.
+            const datosInserta = tablaDestino === 'galeria' 
+                ? { Titulo: titulo, Imagen: publicUrlData.publicUrl }
+                : { Titulo: titulo, url: publicUrlData.publicUrl }; // Cambiar 'url' por 'Video' si tu columna se llama así en la tabla videos
+
+            const { error: dbError } = await supabase
+                .from(tablaDestino)
+                .insert([datosInserta]);
+
             btnUpload.disabled = false;
             fileInput.value = "";
+            tituloInput.value = "";
 
-            if (error) {
+            if (dbError) {
                 uploadMsg.style.color = "#dc3545";
-                uploadMsg.textContent = "Error: " + error.message;
+                uploadMsg.textContent = "Error en base de datos: " + dbError.message;
             } else {
                 uploadMsg.style.color = "#28a745";
-                uploadMsg.textContent = "¡Subido con éxito!";
-                cargarArchivosAdmin();
+                uploadMsg.textContent = "¡Agregado con éxito!";
+                cargarContenidoAdmin();
                 setTimeout(() => { uploadMsg.textContent = ""; }, 3000);
             }
         });
