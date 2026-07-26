@@ -10,6 +10,7 @@
         .container { max-width: 600px; margin: 0 auto; }
         .card { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; }
         h1 { color: #ffc107; margin-bottom: 10px; font-size: 1.8rem; }
+        h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.4rem; }
         p { color: #aaa; margin-bottom: 15px; }
         input, textarea, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
         input, textarea { background: #2a2a2a; color: #fff; border: 1px solid #444; }
@@ -30,10 +31,16 @@
             <p>Música, sonido e iluminación profesional.</p>
         </div>
 
-        <!-- Galería de Eventos -->
+        <!-- Galería de Fotos -->
         <div class="card">
-            <h2>📸 Galería de Eventos</h2>
-            <div id="publicGallery" class="gallery-grid">Cargando galería...</div>
+            <h2>📸 Galería de Fotos</h2>
+            <div id="galeriaFotos" class="gallery-grid">Cargando fotos...</div>
+        </div>
+
+        <!-- Galería de Videos -->
+        <div class="card">
+            <h2>🎥 Galería de Videos</h2>
+            <div id="galeriaVideos" class="gallery-grid">Cargando videos...</div>
         </div>
 
         <!-- Hoja de Ruta / Reserva -->
@@ -55,11 +62,14 @@
         import { supabase } from "./supabase.js";
 
         const telefonoDj = "5491150480339"; 
-        const publicGallery = document.getElementById("publicGallery");
+        const contenedorFotos = document.getElementById("galeriaFotos");
+        const contenedorVideos = document.getElementById("galeriaVideos");
 
-        async function cargarGaleriaPublica() {
+        async function cargarGaleriasSeparadas() {
             try {
-                publicGallery.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>Cargando archivos...</p>";
+                contenedorFotos.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>Cargando...</p>";
+                contenedorVideos.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>Cargando...</p>";
+                
                 let todosLosArchivos = [];
 
                 // 1. Listar las carpetas principales del bucket Media
@@ -68,14 +78,14 @@
                     .list('', { limit: 100 });
 
                 if (folderError) {
-                    publicGallery.innerHTML = `<p style='color: #ff6b6b; grid-column: span 2;'>Error: ${folderError.message}</p>`;
+                    contenedorFotos.innerHTML = `<p style='color: #ff6b6b; grid-column: span 2;'>Error: ${folderError.message}</p>`;
+                    contenedorVideos.innerHTML = `<p style='color: #ff6b6b; grid-column: span 2;'>Error: ${folderError.message}</p>`;
                     return;
                 }
 
-                // 2. Buscar archivos dentro de las carpetas (imagenes, videos, logo) o sueltos
+                // 2. Buscar archivos dentro de las carpetas o sueltos
                 for (const item of folders) {
                     if (item.id === null) {
-                        // Es una carpeta, entramos a buscar adentro
                         const { data: subFiles } = await supabase.storage
                             .from('Media')
                             .list(item.name, { limit: 50 });
@@ -91,17 +101,22 @@
                             });
                         }
                     } else if (item.name !== '.emptyFolderPlaceholder') {
-                        // Es un archivo suelto en la raíz
                         todosLosArchivos.push(item);
                     }
                 }
 
                 if (todosLosArchivos.length === 0) {
-                    publicGallery.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>No hay archivos en la galería todavía.</p>";
+                    contenedorFotos.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>No hay fotos todavía.</p>";
+                    contenedorVideos.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>No hay videos todavía.</p>";
                     return;
                 }
 
-                publicGallery.innerHTML = "";
+                contenedorFotos.innerHTML = "";
+                contenedorVideos.innerHTML = "";
+
+                let contadorFotos = 0;
+                let contadorVideos = 0;
+
                 todosLosArchivos.forEach(file => {
                     const { data: publicUrlData } = supabase.storage
                         .from('Media')
@@ -109,21 +124,33 @@
 
                     const fileNameLower = file.name.toLowerCase();
                     const isVideo = fileNameLower.endsWith('.mp4') || fileNameLower.endsWith('.webm') || fileNameLower.endsWith('.mov');
-                    
+                    const isPhoto = fileNameLower.endsWith('.jpg') || fileNameLower.endsWith('.jpeg') || fileNameLower.endsWith('.png') || fileNameLower.endsWith('.webp');
+
                     if (isVideo) {
                         const video = document.createElement("video");
                         video.src = publicUrlData.publicUrl;
                         video.controls = true;
-                        publicGallery.appendChild(video);
-                    } else if (fileNameLower.endsWith('.jpg') || fileNameLower.endsWith('.jpeg') || fileNameLower.endsWith('.png') || fileNameLower.endsWith('.webp')) {
+                        contenedorVideos.appendChild(video);
+                        contadorVideos++;
+                    } else if (isPhoto) {
                         const img = document.createElement("img");
                         img.src = publicUrlData.publicUrl;
-                        img.alt = "Evento Leitmix";
-                        publicGallery.appendChild(img);
+                        img.alt = "Foto Leitmix";
+                        contenedorFotos.appendChild(img);
+                        contadorFotos++;
                     }
                 });
+
+                if (contadorFotos === 0) {
+                    contenedorFotos.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>No hay fotos cargadas.</p>";
+                }
+                if (contadorVideos === 0) {
+                    contenedorVideos.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>No hay videos cargados.</p>";
+                }
+
             } catch (err) {
-                publicGallery.innerHTML = "<p style='color: #ff6b6b; grid-column: span 2;'>Error de conexión con la galería.</p>";
+                contenedorFotos.innerHTML = "<p style='color: #ff6b6b; grid-column: span 2;'>Error al cargar.</p>";
+                contenedorVideos.innerHTML = "<p style='color: #ff6b6b; grid-column: span 2;'>Error al cargar.</p>";
             }
         }
 
@@ -156,8 +183,7 @@
             }, 1000);
         });
 
-        cargarGaleriaPublica();
+        cargarGaleriasSeparadas();
     </script>
 </body>
 </html>
-
