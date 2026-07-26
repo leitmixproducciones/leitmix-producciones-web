@@ -30,7 +30,7 @@
             <p>Música, sonido e iluminación profesional.</p>
         </div>
 
-        <!-- Galería de Eventos (Se llena sola con lo que subas al panel) -->
+        <!-- Galería de Eventos -->
         <div class="card">
             <h2>📸 Galería de Eventos</h2>
             <div id="publicGallery" class="gallery-grid">Cargando galería...</div>
@@ -57,40 +57,49 @@
         const telefonoDj = "5491150480339"; 
         const publicGallery = document.getElementById("publicGallery");
 
-        // 1. Cargar la galería automáticamente desde Supabase Storage
         async function cargarGaleriaPublica() {
-            const { data, error } = await supabase.storage
-                .from('galeria')
-                .list('', { limit: 10, sortBy: { column: 'created_at', order: 'desc' } });
+            try {
+                const { data, error } = await supabase.storage
+                    .from('Media')
+                    .list('', { limit: 20, sortBy: { column: 'created_at', order: 'desc' } });
 
-            if (error || !data || data.length === 0) {
-                publicGallery.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>Pronto subiremos fotos y videos.</p>";
-                return;
-            }
-
-            publicGallery.innerHTML = "";
-            data.forEach(file => {
-                const { data: publicUrlData } = supabase.storage
-                    .from('galeria')
-                    .getPublicUrl(file.name);
-
-                const isVideo = file.name.endsWith('.mp4') || file.name.endsWith('.webm') || file.name.endsWith('.mov');
-                
-                if (isVideo) {
-                    const video = document.createElement("video");
-                    video.src = publicUrlData.publicUrl;
-                    video.controls = true;
-                    publicGallery.appendChild(video);
-                } else {
-                    const img = document.createElement("img");
-                    img.src = publicUrlData.publicUrl;
-                    img.alt = "Evento Leitmix";
-                    publicGallery.appendChild(img);
+                if (error) {
+                    publicGallery.innerHTML = `<p style='color: #ff6b6b; grid-column: span 2; font-size: 0.85rem;'>Error: ${error.message}</p>`;
+                    return;
                 }
-            });
+
+                if (!data || data.length === 0) {
+                    publicGallery.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>No hay archivos en la galería todavía.</p>";
+                    return;
+                }
+
+                publicGallery.innerHTML = "";
+                data.forEach(file => {
+                    if (file.name === '.emptyFolderPlaceholder') return;
+
+                    const { data: publicUrlData } = supabase.storage
+                        .from('Media')
+                        .getPublicUrl(file.name);
+
+                    const isVideo = file.name.endsWith('.mp4') || file.name.endsWith('.webm') || file.name.endsWith('.mov');
+                    
+                    if (isVideo) {
+                        const video = document.createElement("video");
+                        video.src = publicUrlData.publicUrl;
+                        video.controls = true;
+                        publicGallery.appendChild(video);
+                    } else {
+                        const img = document.createElement("img");
+                        img.src = publicUrlData.publicUrl;
+                        img.alt = "Evento Leitmix";
+                        publicGallery.appendChild(img);
+                    }
+                });
+            } catch (err) {
+                publicGallery.innerHTML = "<p style='color: #ff6b6b; grid-column: span 2;'>Error de conexión con la galería.</p>";
+            }
         }
 
-        // 2. Manejar envío de reservas a WhatsApp y Supabase
         const reservaForm = document.getElementById("reservaForm");
         const reservaMsg = document.getElementById("reservaMsg");
 
