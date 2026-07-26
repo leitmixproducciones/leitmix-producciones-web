@@ -3,117 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin | Leitmix Producciones</title>
-
+  <title>Panel Admin - Leitmix</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #080808;
-      color: white;
+      background-color: #0d0d0d;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
       padding: 20px;
     }
-
-    h1, h2, h3 {
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #222;
+      padding-bottom: 15px;
+    }
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .card {
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    h2, h3 {
       color: #f5b400;
       margin-top: 0;
     }
-
-    input, button {
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    input, select, textarea {
       width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 8px;
-      border: none;
+      padding: 10px;
+      margin-top: 5px;
+      background: #222;
+      border: 1px solid #333;
+      color: white;
+      border-radius: 4px;
       box-sizing: border-box;
     }
-
     button {
       background: #f5b400;
+      color: black;
       font-weight: bold;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 4px;
       cursor: pointer;
+      margin-top: 10px;
     }
-
-    .card {
-      background: #151515;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .item {
-      background: #222;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 15px;
-    }
-
-    .item img {
-      width: 120px;
-      border-radius: 10px;
-    }
-
-    .item video {
-      width: 100%;
-      max-width: 300px;
-      border-radius: 10px;
-    }
-
-    .borrar {
-      background: #d40000;
-      color: white;
-    }
-
-    .ayuda {
-      font-size: 12px;
-      color: #aaa;
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    /* Botón de configuración desplegable */
-    .btn-config-toggle {
+    .btn-toggle {
       background: #222;
       color: #f5b400;
       border: 1px solid #f5b400;
-      padding: 10px 15px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
       width: 100%;
-      margin-top: 10px;
+      padding: 12px;
+      font-size: 15px;
+      margin-bottom: 20px;
     }
-
-    .btn-config-toggle:hover {
-      background: #333;
+    .ayuda {
+      font-size: 11px;
+      color: #888;
+      display: block;
+      margin-top: 2px;
     }
-
-    /* Ocultar la sección por defecto */
+    /* REGLA CLAVE PARA OCULTAR LA CONFIGURACIÓN */
     .oculto {
-      display: none;
+      display: none !important;
+    }
+    .grid-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .dash-box {
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 6px;
+      text-align: center;
+      border: 1px solid #2d2d2d;
+    }
+    .dash-box span {
+      display: block;
+      font-size: 24px;
+      font-weight: bold;
+      color: #f5b400;
+      margin-top: 5px;
     }
   </style>
 </head>
-
 <body>
 
-  <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <h1 style="margin: 0;">Panel Leitmix Producciones</h1>
-      <button id="cerrarSesion" style="width: auto; background: #333; color: #fff; padding: 6px 12px; margin: 0; font-size: 12px;">🚪 Cerrar Sesión</button>
-    </div>
-
-    <!-- Botón para mostrar/ocultar configuración -->
-    <button type="button" id="btnToggleConfig" class="btn-config-toggle">
-      ⚙️ Mostrar / Ocultar Configuración del Negocio
-    </button>
+<div class="container">
+  <div class="header">
+    <h1>Panel de Control</h1>
+    <button id="cerrarSesion" class="btn-danger">Cerrar Sesión</button>
   </div>
 
-  <!-- SECCIÓN DE CONFIGURACIÓN (Oculta hasta tocar el botón) -->
-  <div id="seccionConfiguracion" class="card oculto">
+  <!-- RESUMEN DASHBOARD -->
+  <div class="card">
+    <h2>📊 Resumen del Negocio</h2>
+    <div class="grid-dashboard">
+      <div class="dash-box">Total Reservas <span id="totalReservasDash">0</span></div>
+      <div class="dash-box">Pendientes <span id="pendientesDash">0</span></div>
+      <div class="dash-box">Confirmadas <span id="confirmadasDash">0</span></div>
+      <div class="dash-box">Próximo Evento <span id="dashProximoEvento" style="font-size:14px; margin-top:10px;">-</span></div>
+      <div class="dash-box">Eventos esta semana <span id="dashEventosSemana">0</span></div>
+      <div class="dash-box">Pendiente de Cobro <span id="dashPendienteCobro">$0</span></div>
+    </div>
+
+    <h3>📅 Reservas por Mes</h3>
+    <div id="contenedorMeses" style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;"></div>
+
+    <h3>🎵 Servicios Solicitados</h3>
+    <div id="contenedorServicios"></div>
+  </div>
+
+  <!-- BOTÓN DESPLEGABLE -->
+  <button id="btnToggleConfig" type="button" class="btn-toggle">
+    ⚙️ Mostrar Configuración del Negocio ▼
+  </button>
+
+  <!-- SECCIÓN DE CONFIGURACIÓN (Oculta por defecto con estilo) -->
+  <div id="seccionConfiguracion" class="card oculto" style="display: none;">
     <h2>⚙️ Configuración del negocio</h2>
 
     <label for="configUrlWeb"><b>🌐 Dirección de tu Página Web (URL):</b></label>
@@ -127,7 +156,7 @@
     <input id="configSubtitulo" type="text" placeholder="Sonido profesional • Iluminación • Efectos">
 
     <label for="configWhatsapp"><b>WhatsApp para reservas (con código de país sin +):</b></label>
-    <input id="configWhatsapp" type="tel" placeholder="11 5048-0339">
+    <input id="configWhatsapp" type="tel" placeholder="541150480339">
 
     <label for="configAlias"><b>Alias de Pago (MercadoPago / CBU):</b></label>
     <input id="configAlias" type="text" placeholder="Leitmix.nx">
@@ -143,37 +172,89 @@
     <label for="configYoutube"><b>Link de YouTube:</b></label>
     <input id="configYoutube" type="url" placeholder="https://www.youtube.com/@tu_canal">
 
-    <button id="guardarConfiguracion" style="margin-top: 15px;">
+    <button id="guardarConfiguracion" type="button" style="margin-top: 15px;">
       💾 Guardar Configuración
     </button>
+
+    <!-- BLOQUE MOSTRAR LINK PÚBLICO -->
+    <div style="margin-top: 20px; background: #111; padding: 12px; border-radius: 6px; border: 1px solid #333;">
+      <p style="margin: 0; font-size: 13px; color: #ccc;">Enlace Público de tu Página:</p>
+      <span id="textoLinkPublico" style="color: #f5b400; font-weight: bold; word-break: break-all;">-</span>
+      <br>
+      <button id="copiarLinkPublico" type="button" style="margin-top: 8px; font-size: 12px; padding: 6px 12px;">📋 Copiar Enlace Público</button>
+    </div>
   </div>
 
+  <!-- SECCIÓN LOGO Y CONTENIDOS MULTIMEDIA -->
   <div class="card">
-    <h2>Agregar imagen a Galería</h2>
-    <input id="imagenArchivo" type="file" accept="image/*">
-    <input id="imagenTitulo" placeholder="Título de imagen">
-    <button id="guardarImagen">Guardar imagen</button>
+    <h2>🖼️ Logo del Negocio</h2>
+    <div style="margin-bottom: 10px;">
+      <img id="logoNegocio" src="" alt="Sin Logo" style="max-height: 80px; display: block; margin-bottom: 10px;">
+    </div>
+    <input type="file" id="configLogo" accept="image/*">
+    <button id="guardarLogo">Subir Logo</button>
   </div>
 
+  <!-- GALERÍA DE IMÁGENES -->
   <div class="card">
-    <h2>Agregar video</h2>
-    <input id="videoArchivo" type="file" accept="video/*">
-    <input id="videoTitulo" placeholder="Título del video">
-    <button id="guardarVideo">Guardar video</button>
+    <h2>📸 Galería de Fotos</h2>
+    <input type="text" id="imagenTitulo" placeholder="Título o descripción de la foto">
+    <input type="file" id="imagenArchivo" accept="image/*">
+    <button id="guardarImagen">Subir Foto</button>
+    <div id="listaImagenes" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;"></div>
   </div>
 
+  <!-- VIDEOS -->
   <div class="card">
-    <h2>Imágenes subidas</h2>
-    <div id="listaImagenes"></div>
+    <h2>🎥 Videos</h2>
+    <input type="text" id="videoTitulo" placeholder="Título del video">
+    <input type="file" id="videoArchivo" accept="video/*">
+    <button id="guardarVideo">Subir Video</button>
+    <div id="listaVideos" style="margin-top:15px;"></div>
   </div>
 
+  <!-- TESTIMONIOS -->
   <div class="card">
-    <h2>Videos subidos</h2>
-    <div id="listaVideos"></div>
+    <h2>💬 Opiniones y Testimonios</h2>
+    <div id="listaTestimonios"></div>
   </div>
 
-  <!-- Inyección limpia del script apuntando a la raíz y forzando actualización de versión -->
-  <script type="module" src="admin.js?v=100"></script>
+  <!-- RESERVAS Y HOJAS DE RUTA -->
+  <div class="card">
+    <h2>📅 Reservas Recibidas</h2>
+    <div id="listaReservas"></div>
+  </div>
 
+  <!-- EMISIÓN DE RECIBOS -->
+  <div class="card">
+    <h2>🧾 Crear Recibo (Reserva Seleccionada)</h2>
+    <input type="number" id="reciboTotal" placeholder="Total del servicio ($)">
+    <input type="number" id="reciboImporte" placeholder="Monto abonado hoy ($)">
+    <input type="text" id="reciboConcepto" placeholder="Concepto (ej: Seña Reserva 50%)">
+    <input type="text" id="reciboFormaPago" placeholder="Forma de pago (ej: Transferencia)">
+    <textarea id="reciboObservaciones" placeholder="Observaciones extras"></textarea>
+    <button id="crearRecibo">Generar Recibo de Reserva</button>
+
+    <h3 style="margin-top: 25px;">🧾 O crear Recibo Manual</h3>
+    <input type="text" id="manualNombre" placeholder="Nombre del cliente">
+    <input type="tel" id="manualTelefono" placeholder="Teléfono">
+    <input type="text" id="manualEvento" placeholder="Tipo de evento">
+    <input type="date" id="manualFecha">
+    <input type="number" id="manualTotal" placeholder="Total ($)">
+    <input type="number" id="manualImporte" placeholder="Monto abonado hoy ($)">
+    <input type="text" id="manualConcepto" placeholder="Concepto">
+    <input type="text" id="manualFormaPago" placeholder="Forma de pago">
+    <textarea id="manualObservaciones" placeholder="Observaciones"></textarea>
+    <button id="crearReciboManual">Generar Recibo Manual</button>
+  </div>
+
+  <!-- LISTA DE RECIBOS -->
+  <div class="card">
+    <h2>📄 Recibos Emitidos</h2>
+    <div id="listaRecibos"></div>
+  </div>
+</div>
+
+<script type="module" src="./admin.js"></script>
 </body>
 </html>
