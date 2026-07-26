@@ -1,355 +1,125 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Leitmix Producciones</title>
-
-<link rel="manifest" href="../manifest.json">
-<meta name="theme-color" content="#f5b400">
-
-<style>
-*{
-box-sizing:border-box;
-}
-
-body{
-font-family:Arial,sans-serif;
-background:#050505;
-color:white;
-padding:15px;
-margin:0;
-overflow-x:hidden;
-}
-
-/* REGLA FUNDAMENTAL PARA OCULTAR/MOSTRAR SECCIONES */
-.oculto {
-display: none !important;
-}
-
-.logo-panel{
-width:100%;
-text-align:center;
-overflow:hidden;
-margin-bottom:20px;
-}
-
-.logo-panel img{
-width:180px;
-max-width:90%;
-height:auto;
-object-fit:contain;
-border-radius:15px;
-box-shadow:0 0 20px rgba(245,180,0,.35);
-}
-
-.logo-panel h1{
-font-size:24px;
-margin:15px 0 5px;
-}
-
-.logo-panel p{
-color:#ccc;
-font-size:16px;
-margin:0;
-}
-
-h1,h2,h3,h4{
-color:#f5b400;
-}
-
-h1{
-text-align:center;
-font-size:28px;
-}
-
-.card{
-background:#151515;
-border:1px solid #292929;
-padding:20px;
-border-radius:18px;
-margin-bottom:20px;
-box-shadow:0 5px 20px rgba(0,0,0,.5);
-}
-
-input,select{
-width:100%;
-padding:14px;
-margin:8px 0;
-border-radius:12px;
-border:none;
-background:#222;
-color:white;
-font-size:16px;
-}
-
-button{
-width:100%;
-padding:14px;
-margin-top:10px;
-border-radius:12px;
-border:none;
-background:#f5b400;
-color:#000;
-font-weight:bold;
-font-size:16px;
-cursor:pointer;
-transition:all .25s ease;
-}
-
-button:hover{
-background:#ffd84d;
-transform:translateY(-2px);
-box-shadow:0 4px 12px rgba(245,180,0,.35);
-}
-
-button:active{
-transform:scale(.98);
-background:#d89b00;
-}
-
-.borrar{
-background:#d40000;
-color:#fff;
-}
-
-.borrar:hover{
-background:#ff2d2d;
-}
-
-.item{
-background:#202020;
-padding:18px;
-border-radius:15px;
-margin-top:15px;
-border-left:4px solid #f5b400;
-}
-
-.item img{
-width:130px;
-border-radius:12px;
-}
-
-.item video{
-width:100%;
-max-width:350px;
-border-radius:12px;
-}
-
-a{
-color:#f5b400;
-font-weight:bold;
-text-decoration:none;
-}
-
-h2{
-border-bottom:1px solid #333;
-padding-bottom:10px;
-}
-
-.numero-destacado{
-font-size:26px;
-font-weight:bold;
-margin:10px 0 0 0;
-color:#fff;
-}
-
-.grid-dashboard{
-display:grid;
-grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-gap:15px;
-margin-top:15px;
-}
-
-.subtarjeta-dash{
-background:#202020;
-padding:15px;
-border-radius:12px;
-border-left:4px solid #f5b400;
-}
-
-.subtarjeta-dash h4{
-margin:0 0 8px 0;
-font-size:16px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración | Leitmix</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #121212; color: #f1f1f1; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h1, h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.5rem; text-align: center; }
+        input, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
+        input { background: #2a2a2a; color: #fff; border: 1px solid #444; }
+        button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #e0a800; }
+        .btn-danger { background: #dc3545; color: #fff; }
+        .btn-danger:hover { background: #c82333; }
+        .hidden { display: none !important; }
+        .error-msg { color: #ff6b6b; text-align: center; margin-bottom: 10px; font-size: 0.9rem; }
+        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .stat-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-box h3 { font-size: 1.8rem; color: #ffc107; margin-top: 5px; }
+    </style>
 </head>
-
 <body>
 
-<div class="logo-panel">
-  <img id="logoNegocio" src="../assets/img/leitmix-logo.jpeg" alt="Logo del negocio">
-  <h1>🎧 LEITMIX PRODUCCIONES</h1>
-  <p>Panel de Administración</p>
-  <button id="cerrarSesion">Cerrar sesión</button>
-</div>
+    <div class="container">
+        <!-- Sección de Login -->
+        <div id="loginSection" class="card">
+            <h2>🎧 Iniciar Sesión</h2>
+            <div id="loginError" class="error-msg"></div>
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Correo electrónico" required>
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <button type="submit">Ingresar</button>
+            </form>
+        </div>
 
-<div class="card">
-  <h2>🚀 Sistema de Gestión</h2>
-  <p style="text-align:center;color:#ccc;margin:0;">
-    Galería • Videos • Reservas • Recibos • Dashboard
-  </p>
-</div>
+        <!-- Panel de Control (Privado) -->
+        <div id="adminSection" class="card hidden">
+            <h1>Panel de Control</h1>
+            <button id="btnLogout" class="btn-danger">Cerrar sesión</button>
 
-<!-- DASHBOARD Y MÉTRICAS -->
-<div class="card">
-  <h2>📊 Resumen del Negocio</h2>
-  <div class="grid-dashboard">
-    <div class="subtarjeta-dash">
-      <h4>📅 Total reservas</h4>
-      <p id="totalReservasDash" class="numero-destacado">0</p>
+            <div style="margin-top: 20px;">
+                <h2>📊 Resumen de Actividad</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <p>Total de Reservas Recibidas</p>
+                        <h3 id="totalReservas">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="subtarjeta-dash">
-      <h4>⏳ Reservas pendientes</h4>
-      <p id="pendientesDash" class="numero-destacado">0</p>
-    </div>
-    <div class="subtarjeta-dash">
-      <h4>✅ Reservas confirmadas</h4>
-      <p id="confirmadasDash" class="numero-destacado">0</p>
-    </div>
-    <div class="subtarjeta-dash">
-      <h4>🎉 Próximo Evento</h4>
-      <div id="dashProximoEvento" style="color:#ccc; font-size:14px;">Cargando...</div>
-    </div>
-    <div class="subtarjeta-dash">
-      <h4>📅 Eventos esta semana</h4>
-      <p id="dashEventosSemana" class="numero-destacado">0</p>
-    </div>
-    <div class="subtarjeta-dash">
-      <h4>💰 Pendiente de Cobro</h4>
-      <p id="dashPendienteCobro" class="numero-destacado">$0</p>
-    </div>
-    <div class="subtarjeta-dash">
-      <h4>⭐ Últimos Testimonios</h4>
-      <div id="dashUltimosTestimonios" style="color:#ccc; font-size:13px;">Sin novedades</div>
-    </div>
-  </div>
 
-  <h2 style="margin-top:25px;">📈 Analítica</h2>
-  <div class="grid-dashboard">
-    <div class="subtarjeta-dash" style="grid-column: 1 / -1;">
-      <h4>📈 Reservas por Mes (Año Actual)</h4>
-      <div id="graficoReservasMes" style="margin-top:10px;"></div>
-    </div>
-    <div class="subtarjeta-dash" style="grid-column: 1 / -1;">
-      <h4>🔥 Servicios más contratados</h4>
-      <ul id="dashServiciosPopulares" style="list-style:none; padding:0; margin:10px 0 0 0; color:#ccc;">
-        <li>Cargando servicios...</li>
-      </ul>
-    </div>
-  </div>
-</div>
+    <script type="module">
+        import { supabase } from "./supabase.js";
 
-<!-- CONFIGURACIÓN DE NEGOCIO -->
-<div class="card" id="seccionConfiguracion">
-  <h2>⚙️ Configuración del negocio</h2>
+        const loginSection = document.getElementById("loginSection");
+        const adminSection = document.getElementById("adminSection");
+        const loginForm = document.getElementById("loginForm");
+        const loginError = document.getElementById("loginError");
+        const btnLogout = document.getElementById("btnLogout");
+        const totalReservasEl = document.getElementById("totalReservas");
 
-  <label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Nombre del DJ / Productora:</label>
-  <input id="configNombre" placeholder="Ej: Leitmix Producciones">
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                mostrarPanel();
+            } else {
+                mostrarLogin();
+            }
+        }
 
-  <label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Eslogan o Subtítulo:</label>
-  <input id="configSubtitulo" placeholder="Ej: Sonido profesional • Iluminación • Eventos">
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            loginError.textContent = "";
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
-  <label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">WhatsApp para reservas (con código de país sin +):</label>
-  <input id="configWhatsapp" placeholder="Ej: 5491150480339">
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  <label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Alias de Pago (MercadoPago / CBU):</label>
-  <input id="configAlias" placeholder="Ej: leitmix.mp">
+            if (error) {
+                loginError.textContent = "Error: " + error.message;
+            } else {
+                mostrarPanel();
+            }
+        });
 
-  <h3 style="margin-top:20px; font-size:18px;">🔗 Redes Sociales</h3>
+        btnLogout.addEventListener("click", async () => {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            mostrarLogin();
+        });
 
-  <label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Link de Instagram:</label>
-  <input id="configInstagram" placeholder="https://www.instagram.com/tu_usuario">
+        function mostrarPanel() {
+            loginSection.classList.add("hidden");
+            adminSection.classList.remove("hidden");
+            cargarDatosAdmin();
+        }
 
-  <label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Link de TikTok:</label>
-  <input id="configTiktok" placeholder="https://www.tiktok.com/@tu_usuario">
+        function mostrarLogin() {
+            adminSection.classList.add("hidden");
+            loginSection.classList.remove("hidden");
+        }
 
-  <label style="color:#ccc; font-size:14px; margin-top:5px; display:block;">Link de YouTube:</label>
-  <input id="configYoutube" placeholder="https://www.youtube.com/@tu_canal">
+        async function cargarDatosAdmin() {
+            try {
+                const { count, error } = await supabase
+                    .from('reservas')
+                    .select('*', { count: 'exact', head: true });
 
-  <h3 style="margin-top:20px; font-size:18px;">🖼️ Logo del Negocio</h3>
-  <input id="configLogo" type="file" accept="image/*">
+                if (!error) {
+                    totalReservasEl.textContent = count || 0;
+                }
+            } catch (err) {
+                console.log("Error al cargar datos:", err);
+            }
+        }
 
-  <button id="guardarLogo" style="margin-bottom: 10px;">Guardar logo</button>
-  <button id="guardarConfiguracion">Guardar configuración</button>
-
-  <div id="contenedorLinkDifusion" style="margin-top:20px; background:#202020; padding:15px; border-radius:12px; border-left:4px solid #f5b400;">
-    <h4 style="margin:0 0 5px 0; color:#f5b400;">🔗 Tu Link de Difusión Pública:</h4>
-    <p id="textoLinkPublico" style="word-break:break-all; font-size:13px; color:#fff; margin:5px 0;"></p>
-    <button id="copiarLinkPublico" style="background:#333; color:#fff; font-size:14px; padding:8px;">📋 Copiar Enlace</button>
-  </div>
-</div>
-
-<!-- SUBIR IMAGEN -->
-<div class="card">
-  <h2>🖼️ Subir imagen</h2>
-  <input id="imagenArchivo" type="file" accept="image/*">
-  <input id="imagenTitulo" placeholder="Título de la imagen">
-  <button id="guardarImagen">Guardar imagen</button>
-</div>
-
-<!-- SUBIR VIDEO -->
-<div class="card">
-  <h2>🎥 Subir video</h2>
-  <input id="videoArchivo" type="file" accept="video/*">
-  <input id="videoTitulo" placeholder="Título del video">
-  <button id="guardarVideo">Guardar video</button>
-</div>
-
-<!-- LISTADOS -->
-<div class="card">
-  <h2>🖼️ Imágenes subidas</h2>
-  <div id="listaImagenes"></div>
-</div>
-
-<div class="card">
-  <h2>🎥 Videos subidos</h2>
-  <div id="listaVideos"></div>
-</div>
-
-<div class="card">
-  <h2>⭐ Testimonios</h2>
-  <div id="listaTestimonios"></div>
-</div>
-
-<div class="card">
-  <h2>📅 Reservas</h2>
-  <div id="listaReservas"></div>
-</div>
-
-<!-- RECIBOS -->
-<div class="card">
-  <h2>🧾 Crear Recibo</h2>
-  <input id="reciboTotal" placeholder="Total del evento">
-  <input id="reciboImporte" placeholder="Importe recibido">
-  <input id="reciboConcepto" placeholder="Concepto (Seña / Pago parcial / Pago total)">
-  <input id="reciboFormaPago" placeholder="Forma de pago">
-  <input id="reciboObservaciones" placeholder="Observaciones">
-  <button id="crearRecibo">Crear recibo</button>
-</div>
-
-<div class="card">
-  <h2>🧾 Crear Recibo Manual</h2>
-  <input id="manualNombre" placeholder="Nombre del cliente">
-  <input id="manualTelefono" placeholder="Teléfono">
-  <input id="manualEvento" placeholder="Evento">
-  <input id="manualFecha" type="date">
-  <input id="manualTotal" placeholder="Total del evento">
-  <input id="manualImporte" placeholder="Importe recibido">
-  <input id="manualConcepto" placeholder="Concepto (Seña / Pago parcial / Pago total)">
-  <input id="manualFormaPago" placeholder="Forma de pago">
-  <input id="manualObservaciones" placeholder="Observaciones">
-  <button id="crearReciboManual">Crear recibo manual</button>
-</div>
-
-<div class="card">
-  <h2>🧾 Recibos emitidos</h2>
-  <div id="listaRecibos"></div>
-</div>
-
-<!-- SCRIPT DEL PANEL CON CACHÉ BUSTING Y RUTA RELATIVA DIRECTA -->
-<script type="module" src="./admin.js?v=2"></script>
-<script type="module" src="./dashboard.js?v=2"></script>
-
+        checkSession();
+    </script>
 </body>
 </html>
