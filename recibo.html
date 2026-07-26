@@ -42,7 +42,7 @@
             transform: translate(-50%, -50%);
             width: 80%;
             max-width: 420px;
-            opacity: 0.12; /* Ajuste suave pero claro */
+            opacity: 0.12;
             pointer-events: none;
             z-index: 0;
             object-fit: contain;
@@ -226,7 +226,7 @@
                 page-break-inside: avoid !important;
             }
             .marca-de-agua {
-                opacity: 0.14 !important; /* Claramente visible pero legible */
+                opacity: 0.14 !important;
                 filter: none !important;
             }
             .info-section, .totales-box, .observaciones-box {
@@ -384,18 +384,24 @@
 
     <script type="module">
         async function obtenerSupabase() {
-            try {
-                const mod = await import("./admin/supabase.js");
-                return mod.supabase;
-            } catch (e1) {
+            // Intenta importar supabase.js desde múltiples ubicaciones probables
+            const posiblesRutas = [
+                "./supabase.js",
+                "./admin/supabase.js",
+                "../supabase.js",
+                "/leitmix-producciones-web/supabase.js",
+                "/leitmix-producciones-web/admin/supabase.js"
+            ];
+
+            for (const ruta of posiblesRutas) {
                 try {
-                    const mod = await import("./supabase.js");
-                    return mod.supabase;
-                } catch (e2) {
-                    console.error("No se pudo cargar la librería de Supabase:", e2);
-                    return null;
+                    const mod = await import(ruta);
+                    if (mod && mod.supabase) return mod.supabase;
+                } catch (e) {
+                    // Continúa intentando con la siguiente ruta si falla
                 }
             }
+            return null;
         }
 
         async function cargarDatosRecibo() {
