@@ -40,6 +40,29 @@
         .recibo-totals { text-align: right; margin-top: 15px; font-size: 1rem; }
         .recibo-footer { text-align: center; margin-top: 20px; font-size: 0.8rem; color: #555; border-top: 1px solid #eee; padding-top: 10px; }
         .recibo-footer .redes { margin-top: 6px; font-weight: bold; color: #121212; font-size: 0.85rem; }
+
+        /* CONFIGURACIÓN EXCLUSIVA PARA IMPRESIÓN (OCULTA TODO EXCEPTO EL RECIBO) */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #reciboPreview, #reciboPreview * {
+                visibility: visible;
+            }
+            #reciboPreview {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none !important;
+                margin: 0;
+                padding: 10px;
+                box-shadow: none;
+            }
+            #btnPrintRecibo {
+                display: none !important; /* Oculta el botón de imprimir dentro del papel */
+            }
+        }
     </style>
 </head>
 <body>
@@ -141,7 +164,6 @@
 
         let datosPerfil = {};
 
-        // 1. Verificar sesión y cargar datos del perfil del usuario actual
         const initAuthAndProfile = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -149,14 +171,11 @@
                 return;
             }
 
-            // Buscar el perfil asociado al usuario autenticado actual (asumiendo columna 'id' o 'user_id')
             try {
                 const userId = session.user.id;
-                // Intentamos buscar por 'id' o 'user_id' según cómo hayas estructurado tu tabla perfiles
                 let { data, error } = await supabase.from('perfiles').select('*').eq('id', userId).single();
                 
                 if (error || !data) {
-                    // Plan B por si la columna se llama user_id
                     const res = await supabase.from('perfiles').select('*').eq('user_id', userId).single();
                     data = res.data;
                 }
@@ -170,13 +189,11 @@
         };
         initAuthAndProfile();
 
-        // 2. Cerrar sesión
         document.getElementById("btnLogout").addEventListener("click", async () => {
             await supabase.auth.signOut();
             window.location.href = "login.html";
         });
 
-        // 3. Cargar Resumen de Reservas
         async function cargarResumen() {
             try {
                 const { count } = await supabase
@@ -191,7 +208,6 @@
         }
         cargarResumen();
 
-        // 4. Cálculo automático en tiempo real
         const inputTotal = document.getElementById("reciboTotal");
         const inputSenia = document.getElementById("reciboSenia");
         const spanResto = document.getElementById("reciboResto");
@@ -206,7 +222,6 @@
         inputTotal.addEventListener("input", calcularRestoAutomatico);
         inputSenia.addEventListener("input", calcularRestoAutomatico);
 
-        // 5. Generar recibo inyectando los datos del DJ logueado
         document.getElementById("btnGenerarRecibo").addEventListener("click", () => {
             const cliente = document.getElementById("reciboCliente").value.trim();
             const servicio = document.getElementById("reciboServicio").value.trim();
@@ -219,7 +234,6 @@
                 return;
             }
 
-            // Inyectar datos específicos del perfil del DJ actual
             document.getElementById("lblEmpresa").textContent = datosPerfil.nombre || datosPerfil.Nombre || datosPerfil.empresa || "LEITMIX PRODUCCIONES";
             
             const logoUrl = datosPerfil.logo || datosPerfil.Logo || datosPerfil.imagen;
@@ -248,12 +262,10 @@
             document.getElementById("reciboPreview").scrollIntoView({ behavior: 'smooth' });
         });
 
-        // 6. Imprimir recibo
         document.getElementById("btnPrintRecibo").addEventListener("click", () => {
             window.print();
         });
 
-        // 7. Cargar tabla 'galeria' y tabla 'videos'
         const galeriaList = document.getElementById("galeriaList");
         const videosList = document.getElementById("videosList");
 
@@ -350,7 +362,6 @@
 
         cargarContenidoAdmin();
 
-        // 8. Subir Archivo
         const btnUpload = document.getElementById("btnUpload");
         const fileInput = document.getElementById("fileInput");
         const tituloInput = document.getElementById("tituloInput");
