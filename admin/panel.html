@@ -28,7 +28,7 @@
         .success-msg { color: #28a745; margin-bottom: 15px; font-weight: bold; }
         .section-title { color: #ffc107; text-align: left; margin: 15px 0 8px 0; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        /* Estilos para el Recibo Visual Integrado */
+        /* Estilos del Recibo Integrado */
         #reciboPreview { display: none; background: #fff; color: #333; padding: 25px; border-radius: 10px; text-align: left; margin-top: 15px; border: 2px solid #ffc107; }
         .recibo-header { text-align: center; border-bottom: 2px solid #ffc107; padding-bottom: 10px; margin-bottom: 15px; }
         .recibo-header h3 { color: #121212; margin: 0; font-size: 1.4rem; }
@@ -72,7 +72,7 @@
 
             <button id="btnGenerarRecibo">Generar Recibo en Pantalla</button>
 
-            <!-- Vista previa integrada del recibo (Soluciona el problema del código plano en celulares) -->
+            <!-- Vista Previa del Recibo -->
             <div id="reciboPreview">
                 <div class="recibo-header">
                     <h3>LEITMIX PRODUCCIONES</h3>
@@ -165,7 +165,7 @@
         }
         cargarResumen();
 
-        // 4. Cálculo automático en tiempo real para el Recibo
+        // 4. Cálculo automático en tiempo real
         const inputTotal = document.getElementById("reciboTotal");
         const inputSenia = document.getElementById("reciboSenia");
         const spanResto = document.getElementById("reciboResto");
@@ -193,7 +193,6 @@
                 return;
             }
 
-            // Rellenar datos en la vista previa
             document.getElementById("lblFecha").textContent = new Date().toLocaleDateString();
             document.getElementById("lblCliente").textContent = cliente;
             document.getElementById("lblServicio").textContent = servicio;
@@ -201,12 +200,11 @@
             document.getElementById("lblSenia").textContent = "-$" + senia;
             document.getElementById("lblResto").textContent = "$" + (resto > 0 ? resto : 0);
 
-            // Mostrar el recibo en pantalla
             document.getElementById("reciboPreview").style.display = "block";
             document.getElementById("reciboPreview").scrollIntoView({ behavior: 'smooth' });
         });
 
-        // 6. Botón de impresión limpia del recibo generado
+        // 6. Imprimir recibo
         document.getElementById("btnPrintRecibo").addEventListener("click", () => {
             window.print();
         });
@@ -216,7 +214,6 @@
         const videosList = document.getElementById("videosList");
 
         async function cargarContenidoAdmin() {
-            // Cargar Galería
             try {
                 galeriaList.innerHTML = "<p style='color: #aaa;'>Cargando...</p>";
                 const { data: galeria, error } = await supabase.from('galeria').select('*');
@@ -237,7 +234,6 @@
                 galeriaList.innerHTML = "<p style='color: #ff6b6b;'>Error al cargar galería.</p>";
             }
 
-            // Cargar Videos
             try {
                 videosList.innerHTML = "<p style='color: #aaa;'>Cargando...</p>";
                 const { data: videos, error } = await supabase.from('videos').select('*');
@@ -259,7 +255,6 @@
             }
         }
 
-        // Función auxiliar para armar la interfaz de cada elemento
         function crearItemUI(id, titulo, url, tabla) {
             const itemDiv = document.createElement("div");
             itemDiv.className = "file-item";
@@ -311,7 +306,7 @@
 
         cargarContenidoAdmin();
 
-        // 8. Subir Archivo y registrarlo en la tabla elegida
+        // 8. Subir Archivo
         const btnUpload = document.getElementById("btnUpload");
         const fileInput = document.getElementById("fileInput");
         const tituloInput = document.getElementById("tituloInput");
