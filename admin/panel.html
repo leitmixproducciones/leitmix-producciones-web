@@ -55,7 +55,7 @@
     <script type="module">
         import { supabase } from "./supabase.js";
 
-        // 1. Verificar Autenticación (si no está logueado, vuelve al login)
+        // 1. Verificar sesión
         const checkAuth = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -64,29 +64,28 @@
         };
         checkAuth();
 
-        // 2. Cerrar Sesión
+        // 2. Cerrar sesión
         document.getElementById("btnLogout").addEventListener("click", async () => {
             await supabase.auth.signOut();
             window.location.href = "login.html";
         });
 
-        // 3. Cargar Resumen de Reservas
+        // 3. Resumen de reservas
         async function cargarResumen() {
             try {
-                const { count, error } = await supabase
+                const { count } = await supabase
                     .from('reservas')
                     .select('*', { count: 'exact', head: true });
-
-                if (!error && count !== null) {
+                if (count !== null) {
                     document.getElementById("totalReservas").textContent = count;
                 }
             } catch (err) {
-                console.error("Error cargando reservas:", err);
+                console.error(err);
             }
         }
         cargarResumen();
 
-        // 4. Listar Archivos del bucket Media (incluyendo carpetas)
+        // 4. Listar archivos de forma directa recorriendo las carpetas de Supabase
         const fileList = document.getElementById("fileList");
 
         async function cargarArchivosAdmin() {
@@ -94,35 +93,36 @@
                 fileList.innerHTML = "<p style='color: #aaa;'>Cargando archivos...</p>";
                 let todosLosArchivos = [];
 
-                const { data: folders, error: folderError } = await supabase.storage
+                // Listar carpetas principales (imagenes, videos)
+                const { data: folders, error } = await supabase.storage
                     .from('Media')
                     .list('', { limit: 100 });
 
-                if (folderError) {
-                    fileList.innerHTML = `<p style='color: #ff6b6b;'>Error: ${folderError.message}</p>`;
+                if (error) {
+                    fileList.innerHTML = `<p style='color: #ff6b6b;'>Error: ${error.message}</p>`;
                     return;
                 }
 
-                for (const item of folders) {
-                    if (item.id === null) {
-                        const { data: subFiles } = await supabase.storage
+                for (let folder of folders) {
+                    if (folder.id === null) { // Es una carpeta
+                        const { data: files } = await supabase.storage
                             .from('Media')
-                            .list(item.name, { limit: 50 });
+                            .list(folder.name, { limit: 100 });
                         
-                        if (subFiles) {
-                            subFiles.forEach(subFile => {
-                                if (subFile.name !== '.emptyFolderPlaceholder') {
+                        if (files) {
+                            files.forEach(file => {
+                                if (file.name !== '.emptyFolderPlaceholder') {
                                     todosLosArchivos.push({
-                                        name: `${item.name}/${subFile.name}`,
-                                        originalName: subFile.name
+                                        path: `${folder.name}/${file.name}`,
+                                        name: `${folder.name}/${file.name}`
                                     });
                                 }
                             });
                         }
-                    } else if (item.name !== '.emptyFolderPlaceholder') {
+                    } else if (folder.name !== '.emptyFolderPlaceholder') { // Archivo suelto en raíz
                         todosLosArchivos.push({
-                            name: item.name,
-                            originalName: item.name
+                            path: folder.name,
+                            name: folder.name
                         });
                     }
                 }
@@ -146,13 +146,13 @@
                     deleteBtn.textContent = "Borrar";
                     
                     deleteBtn.onclick = async () => {
-                        if (confirm(`¿Estás seguro de borrar "${file.name}"?`)) {
-                            const { error } = await supabase.storage
+                        if (confirm(`¿Borrar "${file.name}"?`)) {
+                            const { error: errDel } = await supabase.storage
                                 .from('Media')
-                                .remove([file.name]);
+                                .remove([file.path]);
 
-                            if (error) {
-                                alert("Error al borrar: " + error.message);
+                            if (errDel) {
+                                alert("Error al borrar: " + errDel.message);
                             } else {
                                 cargarArchivosAdmin();
                             }
@@ -165,12 +165,12 @@
                 });
 
             } catch (err) {
-                fileList.innerHTML = "<p style='color: #ff6b6b;'>Error de conexión.</p>";
+                fileList.innerHTML = "<p style='color: #ff6b6b;'>Error al conectar.</p>";
             }
         }
         cargarArchivosAdmin();
 
-        // 5. Subir Archivos (Automáticamente los manda a la carpeta 'videos' si es video, o 'imagenes' si es foto)
+        // 5. Subir archivos
         const btnUpload = document.getElementById("btnUpload");
         const fileInput = document.getElementById("fileInput");
         const uploadMsg = document.getElementById("uploadMsg");
@@ -178,17 +178,14 @@
         btnUpload.addEventListener("click", async () => {
             const file = fileInput.files[0];
             if (!file) {
-                alert("Por favor selecciona un archivo.");
+                alert("Selecciona un archivo primero.");
                 return;
             }
 
-            uploadMsg.textContent = "Subiendo archivo...";
+            uploadMsg.textContent = "Subiendo...";
             btnUpload.disabled = true;
 
-            const fileNameLower = file.name.toLowerCase();
-            const isVideo = fileNameLower.endsWith('.mp4') || fileNameLower.endsWith('.webm') || fileNameLower.endsWith('.mov');
-            
-            // Definimos la carpeta de destino automáticamente
+            const isVideo = file.type.includes('video') || file.name.toLowerCase().endsWith('.mp4');
             const folder = isVideo ? 'videos' : 'imagenes';
             const filePath = `${folder}/${Date.now()}_${file.name}`;
 
@@ -204,7 +201,7 @@
                 uploadMsg.textContent = "Error: " + error.message;
             } else {
                 uploadMsg.style.color = "#28a745";
-                uploadMsg.textContent = "¡Archivo subido con éxito!";
+                uploadMsg.textContent = "¡Subido con éxito!";
                 cargarArchivosAdmin();
                 setTimeout(() => { uploadMsg.textContent = ""; }, 3000);
             }
