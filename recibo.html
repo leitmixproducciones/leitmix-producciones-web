@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprobante de Pago</title>
-    <!-- Librería para generar y descargar PDFs directamente -->
+    <title>Comprobante de Pago - Leitmix Producciones</title>
+    <!-- Librería para generación de PDF directo -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
@@ -13,7 +13,7 @@
             padding: 0;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             background-color: #121212;
             color: #e0e0e0;
             padding: 20px;
@@ -25,30 +25,29 @@
         .recibo-container {
             background: #1a1a1a;
             border: 1px solid #333;
-            border-radius: 10px;
+            border-radius: 12px;
             width: 100%;
             max-width: 650px;
-            padding: 24px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            padding: 28px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             position: relative;
             overflow: hidden;
         }
 
-        /* MARCA DE AGUA CENTRADA Y NÍTIDA */
+        /* Marca de agua centrada */
         .marca-de-agua {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 420px;
-            opacity: 0.12;
+            width: 75%;
+            max-width: 400px;
+            opacity: 0.08;
             pointer-events: none;
             z-index: 0;
             object-fit: contain;
         }
 
-        /* Capas por encima de la marca de agua */
         .header, .info-section, .detalles-tabla, .totales-box, 
         .observaciones-box, .gracias-mensaje, .footer-contacto, .acciones {
             position: relative;
@@ -58,15 +57,14 @@
         .header {
             text-align: center;
             border-bottom: 2px solid #f5b400;
-            padding-bottom: 12px;
-            margin-bottom: 14px;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
         }
 
-        /* LOGO PRINCIPAL EN ENCABEZADO */
         .logo-img {
-            max-height: 110px;
-            max-width: 300px;
-            margin-bottom: 8px;
+            max-height: 100px;
+            max-width: 280px;
+            margin-bottom: 10px;
             object-fit: contain;
         }
 
@@ -74,83 +72,90 @@
             color: #f5b400;
             font-size: 22px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            font-weight: 700;
         }
         .header p {
             color: #aaa;
             font-size: 13px;
-            margin-top: 2px;
+            margin-top: 3px;
         }
+
         .info-section {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             font-size: 13px;
-            background: rgba(34, 34, 34, 0.85);
-            padding: 12px;
-            border-radius: 6px;
-            gap: 10px;
-            border: 1px solid #2a2a2a;
+            background: rgba(30, 30, 30, 0.9);
+            padding: 14px;
+            border-radius: 8px;
+            gap: 12px;
+            border: 1px solid #2e2e2e;
         }
         .info-column {
             flex: 1;
         }
         .info-column p {
-            margin: 4px 0;
-            line-height: 1.3;
+            margin: 5px 0;
+            line-height: 1.4;
         }
+
         .detalles-tabla {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
         .detalles-tabla th, .detalles-tabla td {
-            padding: 10px;
+            padding: 12px;
             text-align: left;
             border-bottom: 1px solid #333;
             font-size: 13px;
         }
         .detalles-tabla th {
             color: #f5b400;
-            background: rgba(34, 34, 34, 0.85);
+            background: rgba(30, 30, 30, 0.9);
+            font-weight: 600;
         }
+
         .totales-box {
-            background: rgba(34, 34, 34, 0.85);
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 14px;
-            border: 1px solid #2a2a2a;
+            background: rgba(30, 30, 30, 0.9);
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #2e2e2e;
         }
         .totales-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             font-size: 13px;
         }
         .totales-row.total-final {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: bold;
             color: #f5b400;
             border-top: 1px solid #444;
-            padding-top: 6px;
-            margin-top: 6px;
+            padding-top: 8px;
+            margin-top: 8px;
         }
+
         .observaciones-box {
-            background: rgba(22, 22, 22, 0.85);
-            border-left: 3px solid #f5b400;
-            padding: 8px 12px;
+            background: rgba(22, 22, 22, 0.9);
+            border-left: 4px solid #f5b400;
+            padding: 10px 14px;
             border-radius: 4px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             font-size: 12px;
             color: #ccc;
+            line-height: 1.4;
         }
-        
+
         .gracias-mensaje {
             text-align: center;
             font-size: 14px;
             font-weight: bold;
             color: #f5b400;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             letter-spacing: 0.5px;
         }
 
@@ -159,17 +164,18 @@
             font-size: 12px;
             color: #aaa;
             border-top: 1px solid #333;
-            padding-top: 12px;
-            line-height: 1.5;
+            padding-top: 14px;
+            line-height: 1.6;
         }
         .footer-contacto strong {
             color: #f5b400;
         }
-        
+
         .redes-lista {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
             margin-top: 6px;
         }
 
@@ -177,22 +183,23 @@
             display: flex;
             justify-content: center;
             gap: 12px;
-            margin-top: 18px;
+            margin-top: 20px;
             flex-wrap: wrap;
         }
         .btn {
             background: #f5b400;
             color: #000;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 22px;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.2s, transform 0.1s;
+            transition: all 0.2s ease;
         }
         .btn:hover {
             background: #d49a00;
+            transform: translateY(-1px);
         }
         .btn-secundario {
             background: #333;
@@ -203,71 +210,53 @@
             background: #444;
         }
 
-        /* REGLAS STRICTAS IMPRESIÓN / SALIDA PDF A4 */
+        /* Estilos de Impresión */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 0.8cm;
+                margin: 1cm;
             }
             body {
                 background: #fff !important;
                 color: #000 !important;
                 padding: 0 !important;
-                margin: 0 !important;
-                display: block !important;
             }
             .recibo-container {
                 background: #fff !important;
-                border: 1px solid #bbb !important;
+                border: 1px solid #ccc !important;
                 box-shadow: none !important;
                 color: #000 !important;
                 max-width: 100% !important;
                 padding: 16px !important;
-                page-break-inside: avoid !important;
             }
             .marca-de-agua {
-                opacity: 0.14 !important;
-                filter: none !important;
+                opacity: 0.12 !important;
             }
             .info-section, .totales-box, .observaciones-box {
-                background: rgba(248, 249, 250, 0.9) !important;
+                background: #f8f9fa !important;
                 border: 1px solid #ddd !important;
                 color: #000 !important;
             }
             .detalles-tabla th {
                 color: #000 !important;
-                background: rgba(238, 238, 238, 0.9) !important;
+                background: #eee !important;
                 border-bottom: 2px solid #000 !important;
             }
             .detalles-tabla td {
                 border-bottom: 1px solid #ddd !important;
             }
-            .totales-row.total-final {
+            .totales-row.total-final, .header h1, .gracias-mensaje, .footer-contacto strong {
                 color: #000 !important;
-                border-top: 1px solid #000 !important;
             }
             .header {
                 border-bottom: 2px solid #000 !important;
-            }
-            .header h1 {
-                color: #000 !important;
-            }
-            .gracias-mensaje {
-                color: #000 !important;
-            }
-            .footer-contacto {
-                border-top: 1px solid #000 !important;
-                color: #222 !important;
-            }
-            .footer-contacto strong {
-                color: #000 !important;
             }
             .acciones {
                 display: none !important;
             }
         }
 
-        /* ESTILO TEMPORAL PARA CAPTURA PDF */
+        /* Modo PDF descargable */
         .modo-pdf {
             background: #ffffff !important;
             color: #000000 !important;
@@ -275,18 +264,17 @@
             box-shadow: none !important;
         }
         .modo-pdf .marca-de-agua {
-            opacity: 0.15 !important;
-            filter: none !important;
+            opacity: 0.12 !important;
         }
         .modo-pdf .info-section, 
         .modo-pdf .totales-box, 
         .modo-pdf .observaciones-box {
-            background: rgba(249, 249, 249, 0.88) !important;
+            background: #f8f9fa !important;
             border: 1px solid #ddd !important;
             color: #000 !important;
         }
         .modo-pdf .detalles-tabla th {
-            background: rgba(238, 238, 238, 0.88) !important;
+            background: #eee !important;
             color: #000 !important;
             border-bottom: 2px solid #000 !important;
         }
@@ -303,15 +291,10 @@
         .modo-pdf .header {
             border-bottom: 2px solid #000 !important;
         }
-        .modo-pdf .footer-contacto {
-            border-top: 1px solid #000 !important;
-            color: #333 !important;
-        }
     </style>
 </head>
 <body>
     <div class="recibo-container" id="reciboArea">
-        <!-- MARCA DE AGUA FLOTANTE -->
         <div id="contenedorMarcaAgua"></div>
 
         <div class="header">
@@ -384,11 +367,12 @@
 
     <script type="module">
         async function obtenerSupabase() {
-            // Intenta importar supabase.js desde múltiples ubicaciones probables
+            // Rutas dinámicas para localizar supabase.js según la carpeta exacta donde abra la web
             const posiblesRutas = [
                 "./supabase.js",
-                "./admin/supabase.js",
                 "../supabase.js",
+                "./admin/supabase.js",
+                "../admin/supabase.js",
                 "/leitmix-producciones-web/supabase.js",
                 "/leitmix-producciones-web/admin/supabase.js"
             ];
@@ -398,7 +382,7 @@
                     const mod = await import(ruta);
                     if (mod && mod.supabase) return mod.supabase;
                 } catch (e) {
-                    // Continúa intentando con la siguiente ruta si falla
+                    // Continúa si falla
                 }
             }
             return null;
@@ -408,8 +392,8 @@
             const supabase = await obtenerSupabase();
             
             if (!supabase) {
-                document.getElementById("reciboNombreNegocio").innerText = "Error al conectar con la Base de Datos";
-                alert("No se encontró el archivo de conexión a Supabase (supabase.js).");
+                document.getElementById("reciboNombreNegocio").innerText = "Error de conexión";
+                alert("No se pudo conectar a la base de datos (supabase.js).");
                 return;
             }
 
@@ -418,11 +402,11 @@
 
             if (!idRecibo) {
                 document.getElementById("reciboNombreNegocio").innerText = "Comprobante no especificado";
-                alert("No se especificó ningún ID de recibo en la dirección web (?id=...)");
+                alert("Falta el parámetro ID en la URL (?id=...)");
                 return;
             }
 
-            // 1. Cargar el recibo desde Supabase
+            // 1. Obtener datos del recibo
             const { data: recibo, error: errorRecibo } = await supabase
                 .from("recibos")
                 .select("*")
@@ -431,11 +415,11 @@
 
             if (errorRecibo || !recibo) {
                 document.getElementById("reciboNombreNegocio").innerText = "Comprobante no encontrado";
-                alert("No se encontró el comprobante en la base de datos.");
+                alert("No se encontró el recibo solicitado en la base de datos.");
                 return;
             }
 
-            // 2. Cargar los datos de configuración del DJ / Marca usando user_id
+            // 2. Obtener configuración comercial si existe user_id
             if (recibo.user_id) {
                 const { data: config } = await supabase
                     .from("configuracion")
@@ -444,28 +428,22 @@
                     .maybeSingle();
 
                 if (config) {
-                    // Logo principal y Marca de Agua
                     if (config.logo) {
                         document.getElementById("contenedorLogo").innerHTML = `<img src="${config.logo}" class="logo-img" alt="Logo">`;
-                        document.getElementById("contenedorMarcaAgua").innerHTML = `<img src="${config.logo}" class="marca-de-agua" alt="Marca de agua">`;
+                        document.getElementById("contenedorMarcaAgua").innerHTML = `<img src="${config.logo}" class="marca-de-agua" alt="Marca de Agua">`;
                     }
 
-                    // Nombre comercial
                     const nombreMarca = config.nombre_fantasia || config.nombre_negocio || config.nombre || "Leitmix Producciones";
                     document.getElementById("reciboNombreNegocio").innerText = nombreMarca;
                     document.getElementById("reciboSubtitulo").innerText = config.subtitulo || "Servicios Integrales para Eventos";
 
-                    // Contacto (WhatsApp & Alias)
                     const whatsapp = config.telefono_whatsapp || config.whatsapp || "";
                     const alias = config.alias_pago || "";
-                    
                     let contactoHtml = "";
                     if (whatsapp) contactoHtml += `📲 <strong>WhatsApp:</strong> ${whatsapp} `;
                     if (alias) contactoHtml += `${contactoHtml ? '| ' : ''}💳 <strong>Alias:</strong> ${alias}`;
-                    
                     document.getElementById("reciboContactoInfo").innerHTML = contactoHtml;
 
-                    // Redes Sociales
                     const instagram = config.instagram_url || config.instagram || "";
                     const tiktok = config.tiktok_url || "";
                     const youtube = config.youtube_url || "";
@@ -483,7 +461,7 @@
                 document.getElementById("reciboNombreNegocio").innerText = "Leitmix Producciones";
             }
 
-            // 3. Rellenar datos del cliente y montos del recibo
+            // 3. Rellenar la información en la pantalla
             document.getElementById("reciboCliente").innerText = recibo.nombre || "-";
             document.getElementById("reciboTelefono").innerText = recibo.telefono || "-";
             document.getElementById("reciboEvento").innerText = recibo.evento || "-";
@@ -506,12 +484,11 @@
                 document.getElementById("observacionesContainer").style.display = "block";
             }
 
-            // Configurar acción de descarga directa del PDF
+            // Descarga de PDF
             document.getElementById("btnDescargarPDF").addEventListener("click", () => {
                 const elemento = document.getElementById("reciboArea");
                 const bloqueAcciones = document.getElementById("bloqueAcciones");
 
-                // Ocultar botones y aplicar estilo claro para el archivo PDF final
                 bloqueAcciones.style.display = "none";
                 elemento.classList.add("modo-pdf");
 
@@ -524,7 +501,6 @@
                 };
 
                 html2pdf().set(opciones).from(elemento).save().then(() => {
-                    // Restaurar visualización en pantalla
                     bloqueAcciones.style.display = "flex";
                     elemento.classList.remove("modo-pdf");
                 });
