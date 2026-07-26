@@ -3,67 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitmix Producciones | DJ & Eventos</title>
+    <title>Panel de Administración | Leitmix</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #f1f1f1; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .card { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; }
-        h1, h2 { color: #ffc107; margin-bottom: 15px; }
-        p { color: #aaa; margin-bottom: 20px; }
-        input, textarea, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
-        input, textarea { background: #2a2a2a; color: #fff; border: 1px solid #444; }
-        textarea { resize: vertical; height: 100px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h1, h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.5rem; text-align: center; }
+        input, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
+        input { background: #2a2a2a; color: #fff; border: 1px solid #444; }
         button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
         button:hover { background: #e0a800; }
-        .success-msg { color: #28a745; margin-bottom: 15px; font-weight: bold; }
+        .btn-danger { background: #dc3545; color: #fff; }
+        .btn-danger:hover { background: #c82333; }
+        .hidden { display: none !important; }
+        .error-msg { color: #ff6b6b; text-align: center; margin-bottom: 10px; font-size: 0.9rem; }
+        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .stat-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-box h3 { font-size: 1.8rem; color: #ffc107; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="card">
-            <h1>Leitmix Producciones</h1>
-            <p>Música, sonido e iluminación profesional para tu evento.</p>
+        <!-- Sección de Login -->
+        <div id="loginSection" class="card">
+            <h2>🎧 Iniciar Sesión</h2>
+            <div id="loginError" class="error-msg"></div>
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Correo electrónico" required>
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <button type="submit">Ingresar</button>
+            </form>
         </div>
 
-        <div class="card">
-            <h2>📅 Reservas de Fecha</h2>
-            <div id="reservaMsg" class="success-msg"></div>
-            <form id="reservaForm">
-                <input type="text" id="nombreCliente" placeholder="Tu Nombre y Apellido" required>
-                <input type="date" id="fechaEvento" required>
-                <textarea id="detallesEvento" placeholder="Detalles del evento (Lugar, horario, tipo de fiesta)"></textarea>
-                <button type="submit">Enviar Solicitud de Reserva</button>
-            </form>
+        <!-- Panel de Control (Privado) -->
+        <div id="adminSection" class="card hidden">
+            <h1>Panel de Control</h1>
+            <button id="btnLogout" class="btn-danger">Cerrar sesión</button>
+
+            <div style="margin-top: 20px;">
+                <h2>📊 Resumen de Actividad</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <p>Total de Reservas Recibidas</p>
+                        <h3 id="totalReservas">0</h3>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { supabase } from "./supabase.js";
 
-        const reservaForm = document.getElementById("reservaForm");
-        const reservaMsg = document.getElementById("reservaMsg");
+        const loginSection = document.getElementById("loginSection");
+        const adminSection = document.getElementById("adminSection");
+        const loginForm = document.getElementById("loginForm");
+        const loginError = document.getElementById("loginError");
+        const btnLogout = document.getElementById("btnLogout");
+        const totalReservasEl = document.getElementById("totalReservas");
 
-        reservaForm.addEventListener("submit", async (e) => {
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                mostrarPanel();
+            } else {
+                mostrarLogin();
+            }
+        }
+
+        loginForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            reservaMsg.textContent = "";
+            loginError.textContent = "";
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
-            const nombre = document.getElementById("nombreCliente").value;
-            const fecha = document.getElementById("fechaEvento").value;
-            const detalles = document.getElementById("detallesEvento").value;
-
-            const { error } = await supabase
-                .from('reservas')
-                .insert([{ cliente: nombre, fecha: fecha, detalles: detalles }]);
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
 
             if (error) {
-                alert("Hubo un error al enviar la reserva: " + error.message);
+                loginError.textContent = "Error: " + error.message;
             } else {
-                reservaMsg.textContent = "¡Reserva enviada con éxito! Nos pondremos en contacto.";
-                reservaForm.reset();
+                mostrarPanel();
             }
         });
+
+        btnLogout.addEventListener("click", async () => {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            mostrarLogin();
+        });
+
+        function mostrarPanel() {
+            loginSection.classList.add("hidden");
+            adminSection.classList.remove("hidden");
+            cargarDatosAdmin();
+        }
+
+        function mostrarLogin() {
+            adminSection.classList.add("hidden");
+            loginSection.classList.remove("hidden");
+        }
+
+        async function cargarDatosAdmin() {
+            try {
+                const { count, error } = await supabase
+                    .from('reservas')
+                    .select('*', { count: 'exact', head: true });
+
+                if (!error) {
+                    totalReservasEl.textContent = count || 0;
+                }
+            } catch (err) {
+                console.log("Error al cargar datos:", err);
+            }
+        }
+
+        checkSession();
     </script>
 </body>
 </html>
