@@ -3,123 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración | Leitmix</title>
+    <title>Leitmix Producciones | Reservas y Galería</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #f1f1f1; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
-        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        h1, h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.5rem; text-align: center; }
-        input, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
-        input { background: #2a2a2a; color: #fff; border: 1px solid #444; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; }
+        h1 { color: #ffc107; margin-bottom: 10px; font-size: 1.8rem; }
+        p { color: #aaa; margin-bottom: 15px; }
+        input, textarea, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
+        input, textarea { background: #2a2a2a; color: #fff; border: 1px solid #444; }
+        textarea { resize: vertical; height: 90px; }
         button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
         button:hover { background: #e0a800; }
-        .btn-danger { background: #dc3545; color: #fff; }
-        .btn-danger:hover { background: #c82333; }
-        .hidden { display: none !important; }
-        .error-msg { color: #ff6b6b; text-align: center; margin-bottom: 10px; font-size: 0.9rem; }
-        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        .stat-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-box h3 { font-size: 1.8rem; color: #ffc107; margin-top: 5px; }
+        .success-msg { color: #28a745; margin-bottom: 15px; font-weight: bold; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .gallery-grid img, .gallery-grid video { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Sección de Login -->
-        <div id="loginSection" class="card">
-            <h2>🎧 Iniciar Sesión</h2>
-            <div id="loginError" class="error-msg"></div>
-            <form id="loginForm">
-                <input type="email" id="email" placeholder="Correo electrónico" required>
-                <input type="password" id="password" placeholder="Contraseña" required>
-                <button type="submit">Ingresar</button>
-            </form>
+        <!-- Presentación -->
+        <div class="card">
+            <h1>Leitmix Producciones</h1>
+            <p>Música, sonido e iluminación profesional.</p>
         </div>
 
-        <!-- Panel de Control (Privado) -->
-        <div id="adminSection" class="card hidden">
-            <h1>Panel de Control</h1>
-            <button id="btnLogout" class="btn-danger">Cerrar sesión</button>
+        <!-- Galería de Eventos (Se llena sola con lo que subas al panel) -->
+        <div class="card">
+            <h2>📸 Galería de Eventos</h2>
+            <div id="publicGallery" class="gallery-grid">Cargando galería...</div>
+        </div>
 
-            <div style="margin-top: 20px;">
-                <h2>📊 Resumen de Actividad</h2>
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <p>Total de Reservas Recibidas</p>
-                        <h3 id="totalReservas">0</h3>
-                    </div>
-                </div>
-            </div>
+        <!-- Hoja de Ruta / Reserva -->
+        <div class="card">
+            <h2>📋 Hoja de Ruta / Reserva</h2>
+            <div id="reservaMsg" class="success-msg"></div>
+            <form id="reservaForm">
+                <input type="text" id="nombreCliente" placeholder="Tu Nombre y Apellido" required>
+                <input type="date" id="fechaEvento" required>
+                <input type="text" id="lugarEvento" placeholder="Lugar / Salón del Evento" required>
+                <input type="text" id="horarioEvento" placeholder="Horario (Ej: 22:00 a 05:00 hs)" required>
+                <textarea id="detallesEvento" placeholder="Detalles extra (Estilo musical, equipos)"></textarea>
+                <button type="submit">Enviar Reserva por WhatsApp</button>
+            </form>
         </div>
     </div>
 
     <script type="module">
         import { supabase } from "./supabase.js";
 
-        const loginSection = document.getElementById("loginSection");
-        const adminSection = document.getElementById("adminSection");
-        const loginForm = document.getElementById("loginForm");
-        const loginError = document.getElementById("loginError");
-        const btnLogout = document.getElementById("btnLogout");
-        const totalReservasEl = document.getElementById("totalReservas");
+        const telefonoDj = "5491150480339"; 
+        const publicGallery = document.getElementById("publicGallery");
 
-        async function checkSession() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                mostrarPanel();
-            } else {
-                mostrarLogin();
+        // 1. Cargar la galería automáticamente desde Supabase Storage
+        async function cargarGaleriaPublica() {
+            const { data, error } = await supabase.storage
+                .from('galeria')
+                .list('', { limit: 10, sortBy: { column: 'created_at', order: 'desc' } });
+
+            if (error || !data || data.length === 0) {
+                publicGallery.innerHTML = "<p style='color: #aaa; grid-column: span 2;'>Pronto subiremos fotos y videos.</p>";
+                return;
             }
-        }
 
-        loginForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            loginError.textContent = "";
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
+            publicGallery.innerHTML = "";
+            data.forEach(file => {
+                const { data: publicUrlData } = supabase.storage
+                    .from('galeria')
+                    .getPublicUrl(file.name);
 
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                loginError.textContent = "Error: " + error.message;
-            } else {
-                mostrarPanel();
-            }
-        });
-
-        btnLogout.addEventListener("click", async () => {
-            await supabase.auth.signOut();
-            localStorage.clear();
-            mostrarLogin();
-        });
-
-        function mostrarPanel() {
-            loginSection.classList.add("hidden");
-            adminSection.classList.remove("hidden");
-            cargarDatosAdmin();
-        }
-
-        function mostrarLogin() {
-            adminSection.classList.add("hidden");
-            loginSection.classList.remove("hidden");
-        }
-
-        async function cargarDatosAdmin() {
-            try {
-                const { count, error } = await supabase
-                    .from('reservas')
-                    .select('*', { count: 'exact', head: true });
-
-                if (!error) {
-                    totalReservasEl.textContent = count || 0;
+                const isVideo = file.name.endsWith('.mp4') || file.name.endsWith('.webm') || file.name.endsWith('.mov');
+                
+                if (isVideo) {
+                    const video = document.createElement("video");
+                    video.src = publicUrlData.publicUrl;
+                    video.controls = true;
+                    publicGallery.appendChild(video);
+                } else {
+                    const img = document.createElement("img");
+                    img.src = publicUrlData.publicUrl;
+                    img.alt = "Evento Leitmix";
+                    publicGallery.appendChild(img);
                 }
-            } catch (err) {
-                console.log("Error al cargar datos:", err);
-            }
+            });
         }
 
-        checkSession();
+        // 2. Manejar envío de reservas a WhatsApp y Supabase
+        const reservaForm = document.getElementById("reservaForm");
+        const reservaMsg = document.getElementById("reservaMsg");
+
+        reservaForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            reservaMsg.textContent = "";
+
+            const cliente = document.getElementById("nombreCliente").value;
+            const fecha = document.getElementById("fechaEvento").value;
+            const lugar = document.getElementById("lugarEvento").value;
+            const horario = document.getElementById("horarioEvento").value;
+            const detalles = document.getElementById("detallesEvento").value;
+
+            await supabase.from('reservas').insert([{ cliente, fecha, lugar, horario, detalles }]);
+
+            const texto = `¡Hola! Quiero confirmar una reserva:%0A` +
+                          `*Cliente:* ${encodeURIComponent(cliente)}%0A` +
+                          `*Fecha:* ${encodeURIComponent(fecha)}%0A` +
+                          `*Lugar:* ${encodeURIComponent(lugar)}%0A` +
+                          `*Horario:* ${encodeURIComponent(horario)}%0A` +
+                          `*Detalles:* ${encodeURIComponent(detalles)}`;
+
+            reservaMsg.textContent = "¡Guardado! Redirigiendo a WhatsApp...";
+            
+            setTimeout(() => {
+                window.location.href = `https://wa.me/${telefonoDj}?text=${texto}`;
+            }, 1000);
+        });
+
+        cargarGaleriaPublica();
     </script>
 </body>
 </html>
