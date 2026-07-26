@@ -1,220 +1,179 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | Leitmix Producciones</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #080808;
+      color: white;
+      padding: 20px;
+    }
 
-<title>Admin | Leitmix Producciones</title>
+    h1, h2, h3 {
+      color: #f5b400;
+      margin-top: 0;
+    }
 
-<style>
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      box-sizing: border-box;
+    }
 
-body{
-font-family:Arial,sans-serif;
-background:#080808;
-color:white;
-padding:20px;
-}
+    button {
+      background: #f5b400;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-h1,h2,h3{
-color:#f5b400;
-margin-top:0;
-}
+    .card {
+      background: #151515;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
 
-input,button{
-width:100%;
-padding:12px;
-margin:8px 0;
-border-radius:8px;
-border:none;
-box-sizing:border-box;
-}
+    .item {
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
 
-button{
-background:#f5b400;
-font-weight:bold;
-cursor:pointer;
-}
+    .item img {
+      width: 120px;
+      border-radius: 10px;
+    }
 
-.card{
-background:#151515;
-padding:20px;
-border-radius:10px;
-margin-bottom:20px;
-}
+    .item video {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 10px;
+    }
 
-.item{
-background:#222;
-padding:15px;
-border-radius:10px;
-margin-top:15px;
-}
+    .borrar {
+      background: #d40000;
+      color: white;
+    }
 
-.item img{
-width:120px;
-border-radius:10px;
-}
+    .ayuda {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 8px;
+      display: block;
+    }
 
-.item video{
-width:100%;
-max-width:300px;
-border-radius:10px;
-}
+    /* Botón de configuración desplegable */
+    .btn-config-toggle {
+      background: #222;
+      color: #f5b400;
+      border: 1px solid #f5b400;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 10px;
+    }
 
-.borrar{
-background:#d40000;
-color:white;
-}
+    .btn-config-toggle:hover {
+      background: #333;
+    }
 
-.ayuda {
-font-size: 12px;
-color: #aaa;
-margin-bottom: 8px;
-display: block;
-}
-
-/* Botón de configuración desplegable */
-.btn-config-toggle {
-background: #222;
-color: #f5b400;
-border: 1px solid #f5b400;
-padding: 10px 15px;
-border-radius: 8px;
-font-weight: bold;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 8px;
-width: 100%;
-margin-top: 10px;
-}
-
-.btn-config-toggle:hover {
-background: #333;
-}
-
-/* Ocultar la sección por defecto */
-.oculto {
-display: none;
-}
-
-</style>
-
+    /* Ocultar la sección por defecto */
+    .oculto {
+      display: none;
+    }
+  </style>
 </head>
-
 
 <body>
 
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <h1 style="margin: 0;">Panel Leitmix Producciones</h1>
+      <button id="cerrarSesion" style="width: auto; background: #333; color: #fff; padding: 6px 12px; margin: 0; font-size: 12px;">🚪 Cerrar Sesión</button>
+    </div>
 
-<div class="card">
+    <!-- Botón para mostrar/ocultar configuración -->
+    <button type="button" id="btnToggleConfig" class="btn-config-toggle">
+      ⚙️ Mostrar / Ocultar Configuración del Negocio
+    </button>
+  </div>
 
-<h1>Panel Leitmix Producciones</h1>
+  <!-- SECCIÓN DE CONFIGURACIÓN (Oculta hasta tocar el botón) -->
+  <div id="seccionConfiguracion" class="card oculto">
+    <h2>⚙️ Configuración del negocio</h2>
 
-<!-- Botón para mostrar/ocultar configuración -->
-<button type="button" id="btnToggleConfig" class="btn-config-toggle">
-  ⚙️ Mostrar / Ocultar Configuración del Negocio
-</button>
+    <label for="configUrlWeb"><b>🌐 Dirección de tu Página Web (URL):</b></label>
+    <input id="configUrlWeb" type="url" placeholder="https://tu-sitio-dj.com">
+    <span class="ayuda">Link completo de tu web. Se usará para tus recibos y redirección.</span>
 
-</div>
+    <label for="configNombre"><b>Nombre del DJ / Productora:</b></label>
+    <input id="configNombre" type="text" placeholder="Leitmix Producciones">
 
+    <label for="configSubtitulo"><b>Eslogan o Subtítulo:</b></label>
+    <input id="configSubtitulo" type="text" placeholder="Sonido profesional • Iluminación • Efectos">
 
-<!-- SECCIÓN DE CONFIGURACIÓN (Oculta hasta tocar el botón) -->
-<div id="seccionConfiguracion" class="card oculto">
+    <label for="configWhatsapp"><b>WhatsApp para reservas (con código de país sin +):</b></label>
+    <input id="configWhatsapp" type="tel" placeholder="11 5048-0339">
 
-<h2>⚙️ Configuración del negocio</h2>
+    <label for="configAlias"><b>Alias de Pago (MercadoPago / CBU):</b></label>
+    <input id="configAlias" type="text" placeholder="Leitmix.nx">
 
-<label for="configUrlWeb"><b>🌐 Dirección de tu Página Web (URL):</b></label>
-<input id="configUrlWeb" type="url" placeholder="https://tu-sitio-dj.com">
-<span class="ayuda">Link completo de tu web. Se usará para tus recibos y redirección.</span>
+    <h3 style="margin-top: 20px;">🔗 Redes Sociales</h3>
 
-<label for="configNombre"><b>Nombre del DJ / Productora:</b></label>
-<input id="configNombre" type="text" placeholder="Leitmix Producciones">
+    <label for="configInstagram"><b>Link de Instagram:</b></label>
+    <input id="configInstagram" type="url" placeholder="https://www.instagram.com/tu_usuario">
 
-<label for="configSubtitulo"><b>Eslogan o Subtítulo:</b></label>
-<input id="configSubtitulo" type="text" placeholder="Sonido profesional • Iluminación • Efectos">
+    <label for="configTiktok"><b>Link de TikTok:</b></label>
+    <input id="configTiktok" type="url" placeholder="https://www.tiktok.com/@tu_usuario">
 
-<label for="configWhatsapp"><b>WhatsApp para reservas (con código de país sin +):</b></label>
-<input id="configWhatsapp" type="tel" placeholder="11 5048-0339">
+    <label for="configYoutube"><b>Link de YouTube:</b></label>
+    <input id="configYoutube" type="url" placeholder="https://www.youtube.com/@tu_canal">
 
-<label for="configAlias"><b>Alias de Pago (MercadoPago / CBU):</b></label>
-<input id="configAlias" type="text" placeholder="Leitmix.nx">
+    <button id="guardarConfiguracion" style="margin-top: 15px;">
+      💾 Guardar Configuración
+    </button>
+  </div>
 
-<h3 style="margin-top: 20px;">🔗 Redes Sociales</h3>
+  <div class="card">
+    <h2>Agregar imagen a Galería</h2>
+    <input id="imagenArchivo" type="file" accept="image/*">
+    <input id="imagenTitulo" placeholder="Título de imagen">
+    <button id="guardarImagen">Guardar imagen</button>
+  </div>
 
-<label for="configInstagram"><b>Link de Instagram:</b></label>
-<input id="configInstagram" type="url" placeholder="https://www.instagram.com/tu_usuario">
+  <div class="card">
+    <h2>Agregar video</h2>
+    <input id="videoArchivo" type="file" accept="video/*">
+    <input id="videoTitulo" placeholder="Título del video">
+    <button id="guardarVideo">Guardar video</button>
+  </div>
 
-<label for="configTiktok"><b>Link de TikTok:</b></label>
-<input id="configTiktok" type="url" placeholder="https://www.tiktok.com/@tu_usuario">
+  <div class="card">
+    <h2>Imágenes subidas</h2>
+    <div id="listaImagenes"></div>
+  </div>
 
-<label for="configYoutube"><b>Link de YouTube:</b></label>
-<input id="configYoutube" type="url" placeholder="https://www.youtube.com/@tu_canal">
+  <div class="card">
+    <h2>Videos subidos</h2>
+    <div id="listaVideos"></div>
+  </div>
 
-<button id="guardarConfiguracion" style="margin-top: 15px;">
-💾 Guardar Configuración
-</button>
-
-</div>
-
-
-<div class="card">
-
-<h2>Agregar imagen a Galería</h2>
-
-<input id="imagenArchivo" type="file" accept="image/*">
-
-<input id="imagenTitulo" placeholder="Título de imagen">
-
-<button id="guardarImagen">
-Guardar imagen
-</button>
-
-</div>
-
-
-
-<div class="card">
-
-<h2>Agregar video</h2>
-
-<input id="videoArchivo" type="file" accept="video/*">
-
-<input id="videoTitulo" placeholder="Título del video">
-
-<button id="guardarVideo">
-Guardar video
-</button>
-
-</div>
-
-
-
-<div class="card">
-
-<h2>Imágenes subidas</h2>
-
-<div id="listaImagenes">
-
-</div>
-
-</div>
-
-
-
-<div class="card">
-
-<h2>Videos subidos</h2>
-
-<div id="listaVideos">
-
-</div>
-
-</div>
-
-
-<script type="module" src="admin.js"></script>
-
+  <!-- Inyección limpia del script apuntando a la raíz y forzando actualización de versión -->
+  <script type="module" src="admin.js?v=100"></script>
 
 </body>
 </html>
