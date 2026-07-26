@@ -85,55 +85,39 @@
         }
         cargarResumen();
 
-        // 4. Listar archivos de forma directa recorriendo las carpetas de Supabase
+        // 4. Listar archivos dentro de las carpetas de forma segura
         const fileList = document.getElementById("fileList");
 
         async function cargarArchivosAdmin() {
             try {
                 fileList.innerHTML = "<p style='color: #aaa;'>Cargando archivos...</p>";
-                let todosLosArchivos = [];
+                let listaFinal = [];
 
-                // Listar carpetas principales (imagenes, videos)
-                const { data: folders, error } = await supabase.storage
-                    .from('Media')
-                    .list('', { limit: 100 });
+                // Listar carpetas imagenes y videos
+                for (let carpeta of ['imagenes', 'videos']) {
+                    const { data: files, error } = await supabase.storage
+                        .from('Media')
+                        .list(carpeta, { limit: 50 });
 
-                if (error) {
-                    fileList.innerHTML = `<p style='color: #ff6b6b;'>Error: ${error.message}</p>`;
-                    return;
-                }
-
-                for (let folder of folders) {
-                    if (folder.id === null) { // Es una carpeta
-                        const { data: files } = await supabase.storage
-                            .from('Media')
-                            .list(folder.name, { limit: 100 });
-                        
-                        if (files) {
-                            files.forEach(file => {
-                                if (file.name !== '.emptyFolderPlaceholder') {
-                                    todosLosArchivos.push({
-                                        path: `${folder.name}/${file.name}`,
-                                        name: `${folder.name}/${file.name}`
-                                    });
-                                }
-                            });
-                        }
-                    } else if (folder.name !== '.emptyFolderPlaceholder') { // Archivo suelto en raíz
-                        todosLosArchivos.push({
-                            path: folder.name,
-                            name: folder.name
+                    if (!error && files) {
+                        files.forEach(file => {
+                            if (file.name !== '.emptyFolderPlaceholder') {
+                                listaFinal.push({
+                                    name: `${carpeta}/${file.name}`,
+                                    path: `${carpeta}/${file.name}`
+                                });
+                            }
                         });
                     }
                 }
 
-                if (todosLosArchivos.length === 0) {
+                if (listaFinal.length === 0) {
                     fileList.innerHTML = "<p style='color: #aaa;'>No hay archivos subidos.</p>";
                     return;
                 }
 
                 fileList.innerHTML = "";
-                todosLosArchivos.forEach(file => {
+                listaFinal.forEach(file => {
                     const itemDiv = document.createElement("div");
                     itemDiv.className = "file-item";
 
@@ -165,7 +149,7 @@
                 });
 
             } catch (err) {
-                fileList.innerHTML = "<p style='color: #ff6b6b;'>Error al conectar.</p>";
+                fileList.innerHTML = "<p style='color: #ff6b6b;'>Error al conectar con el bucket.</p>";
             }
         }
         cargarArchivosAdmin();
