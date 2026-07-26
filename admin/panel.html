@@ -18,10 +18,14 @@
         button:hover { background: #e0a800; }
         .btn-danger { background: #dc3545; color: #fff; }
         .btn-danger:hover { background: #bd2130; }
-        .btn-small { padding: 6px 12px; font-size: 0.85rem; width: auto; margin-top: 5px; }
+        .btn-small { padding: 6px 12px; font-size: 0.85rem; width: auto; }
         .stat-number { font-size: 2.5rem; color: #ffc107; font-weight: bold; margin-bottom: 10px; }
-        .file-item { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 10px 15px; border-radius: 8px; margin-bottom: 8px; text-align: left; }
-        .file-name { font-size: 0.9rem; word-break: break-all; margin-right: 10px; color: #fff; }
+        
+        /* Estilos para la lista con miniatura */
+        .file-item { display: flex; align-items: center; justify-content: space-between; background: #2a2a2a; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: left; }
+        .file-info { display: flex; align-items: center; gap: 10px; overflow: hidden; margin-right: 10px; }
+        .file-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #000; }
+        .file-name { font-size: 0.85rem; color: #fff; word-break: break-all; }
         .success-msg { color: #28a745; margin-bottom: 15px; font-weight: bold; }
     </style>
 </head>
@@ -55,7 +59,7 @@
     <script type="module">
         import { supabase } from "../supabase.js";
 
-        // 1. Verificar sesión de seguridad
+        // 1. Verificar sesión
         const checkAuth = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -85,7 +89,7 @@
         }
         cargarResumen();
 
-        // 4. Listar Archivos de forma directa y limpia
+        // 4. Listar Archivos con Miniaturas
         const fileList = document.getElementById("fileList");
 
         async function cargarArchivosAdmin() {
@@ -117,19 +121,43 @@
 
                 fileList.innerHTML = "";
                 listaFinal.forEach(file => {
+                    const { data: publicUrlData } = supabase.storage
+                        .from('Media')
+                        .getPublicUrl(file.name);
+
                     const itemDiv = document.createElement("div");
                     itemDiv.className = "file-item";
+
+                    const infoDiv = document.createElement("div");
+                    infoDiv.className = "file-info";
+
+                    const fileNameLower = file.name.toLowerCase();
+                    const isVideo = fileNameLower.endsWith('.mp4') || fileNameLower.endsWith('.webm') || fileNameLower.endsWith('.mov');
+
+                    if (isVideo) {
+                        const videoThumb = document.createElement("video");
+                        videoThumb.className = "file-thumb";
+                        videoThumb.src = publicUrlData.publicUrl;
+                        infoDiv.appendChild(videoThumb);
+                    } else {
+                        const imgThumb = document.createElement("img");
+                        imgThumb.className = "file-thumb";
+                        imgThumb.src = publicUrlData.publicUrl;
+                        imgThumb.alt = "Miniatura";
+                        infoDiv.appendChild(imgThumb);
+                    }
 
                     const nameSpan = document.createElement("span");
                     nameSpan.className = "file-name";
                     nameSpan.textContent = file.name;
+                    infoDiv.appendChild(nameSpan);
 
                     const deleteBtn = document.createElement("button");
                     deleteBtn.className = "btn-danger btn-small";
                     deleteBtn.textContent = "Borrar";
                     
                     deleteBtn.onclick = async () => {
-                        if (confirm(`¿Estás seguro de borrar "${file.name}"?`)) {
+                        if (confirm(`¿Estás seguro de borrar este archivo?`)) {
                             const { error: errDel } = await supabase.storage
                                 .from('Media')
                                 .remove([file.path]);
@@ -142,7 +170,7 @@
                         }
                     };
 
-                    itemDiv.appendChild(nameSpan);
+                    itemDiv.appendChild(infoDiv);
                     itemDiv.appendChild(deleteBtn);
                     fileList.appendChild(itemDiv);
                 });
@@ -153,7 +181,7 @@
         }
         cargarArchivosAdmin();
 
-        // 5. Subir Archivos inteligentemente
+        // 5. Subir Archivos
         const btnUpload = document.getElementById("btnUpload");
         const fileInput = document.getElementById("fileInput");
         const uploadMsg = document.getElementById("uploadMsg");
