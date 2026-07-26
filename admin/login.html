@@ -6,10 +6,10 @@
   <title>Acceso Admin - Leitmix</title>
   <style>
     body { font-family: system-ui, sans-serif; background: #121212; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid #333; width: 90%; max-width: 350px; text-align: center; }
+    .card { background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid #333; width: 85%; max-width: 320px; text-align: center; }
     h2 { color: #f5b400; margin-bottom: 20px; }
     input { width: 100%; padding: 10px; margin-bottom: 12px; background: #222; border: 1px solid #333; color: #fff; border-radius: 6px; box-sizing: border-box; }
-    button { width: 100%; padding: 10px; border-radius: 6px; border: none; background: #f5b400; font-weight: bold; cursor: pointer; color: #000; font-size: 16px; }
+    button { width: 100%; padding: 12px; border-radius: 6px; border: none; background: #f5b400; font-weight: bold; cursor: pointer; color: #000; font-size: 16px; }
     .error { color: #e74c3c; font-size: 13px; margin-top: 10px; }
   </style>
 </head>
@@ -24,25 +24,31 @@
   </div>
 
   <script type="module">
-    import { supabase } from "./supabase.js";
+    // IMPORTANTE: Busca supabase.js en la carpeta raíz (../)
+    import { supabase } from "../supabase.js";
 
     document.getElementById("btnLogin").onclick = async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const errorMsg = document.getElementById("errorMsg");
-      errorMsg.innerText = "";
+      errorMsg.innerText = "Cargando...";
 
       if (!email || !password) {
         errorMsg.innerText = "Por favor completá todos los campos.";
         return;
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) {
-        errorMsg.innerText = "Error: " + error.message;
-      } else {
-        window.location.href = "admin.html";
+        if (error) {
+          errorMsg.innerText = "Error: " + error.message;
+        } else {
+          // Redirige al panel que está dentro de la misma carpeta
+          window.location.href = "panel.html";
+        }
+      } catch (err) {
+        errorMsg.innerText = "Error de conexión: " + err.message;
       }
     };
   </script>
