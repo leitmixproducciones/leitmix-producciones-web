@@ -1,84 +1,135 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de DJ - Leitmix</title>
-  <style>
-    body { font-family: system-ui, sans-serif; background: #121212; color: #fff; padding: 15px; margin: 0; }
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-    button { cursor: pointer; padding: 10px 14px; border-radius: 6px; border: none; background: #f5b400; font-weight: bold; color: #000; }
-    .card { background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #2a2a2a; margin-bottom: 15px; }
-    h2, h3, h4 { color: #f5b400; margin-top: 0; }
-    input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: #222; border: 1px solid #333; color: #fff; border-radius: 6px; box-sizing: border-box; }
-    .grid-dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 15px; }
-    .stat-box { background: #222; padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #333; }
-    .stat-val { font-size: 18px; font-weight: bold; color: #f5b400; }
-    .item-card { background: #222; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
-    .btn-danger { background: #e74c3c; color: white; }
-    .oculto { display: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración | Leitmix</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #121212; color: #f1f1f1; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h1, h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.5rem; text-align: center; }
+        input, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
+        input { background: #2a2a2a; color: #fff; border: 1px solid #444; }
+        button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #e0a800; }
+        .btn-danger { background: #dc3545; color: #fff; }
+        .btn-danger:hover { background: #c82333; }
+        .hidden { display: none !important; }
+        .error-msg { color: #ff6b6b; text-align: center; margin-bottom: 10px; font-size: 0.9rem; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-box h3 { font-size: 1.8rem; color: #ffc107; margin-top: 5px; }
+    </style>
 </head>
 <body>
 
-  <div class="header">
-    <h2 style="margin:0;">🎧 Panel Leitmix</h2>
-    <button id="cerrarSesion" class="btn-danger">Salir</button>
-  </div>
+    <div class="container">
+        <!-- SECCIÓN DE LOGIN (Se muestra si no hay sesión) -->
+        <div id="loginSection" class="card">
+            <h2>🎧 Iniciar Sesión</h2>
+            <div id="loginError" class="error-msg"></div>
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Correo electrónico" required>
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <button type="submit">Ingresar</button>
+            </form>
+        </div>
 
-  <!-- RESUMEN -->
-  <div class="card">
-    <h3>📊 Resumen de Eventos</h3>
-    <div class="grid-dash">
-      <div class="stat-box">Reservas<div id="dashTotalReservas" class="stat-val">0</div></div>
-      <div class="stat-box">Confirmadas<div id="dashConfirmadas" class="stat-val">0</div></div>
-      <div class="stat-box">Pendientes<div id="dashPendientes" class="stat-val">0</div></div>
+        <!-- SECCIÓN DEL PANEL (Se muestra una vez logueado) -->
+        <div id="adminSection" class="card hidden">
+            <h1>Panel de Administración</h1>
+            <button id="btnLogout" class="btn-danger">Cerrar sesión</button>
+
+            <div style="margin-top: 20px;">
+                <h2>📊 Resumen del Negocio</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <p>Total Reservas</p>
+                        <h3 id="totalReservas">0</h3>
+                    </div>
+                    <div class="stat-box">
+                        <p>Estado</p>
+                        <h3 style="color: #28a745; font-size: 1.2rem; margin-top: 15px;">Activo</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- CONFIGURACIÓN DEL NEGOCIO -->
-  <div class="card">
-    <h3>⚙️ Configuración del Negocio</h3>
-    <input type="text" id="cfgNombre" placeholder="Nombre Fantasía / Marca">
-    <input type="text" id="cfgWhatsapp" placeholder="Teléfono WhatsApp (Ej: 5491112345678)">
-    <input type="text" id="cfgAlias" placeholder="Alias de Pago / CBU">
-    <input type="text" id="cfgInstagram" placeholder="Instagram URL">
-    <button id="btnGuardarConfig">Guardar Datos</button>
-  </div>
+    <!-- Lógica conectada a Supabase -->
+    <script type="module">
+        import { supabase } from "./supabase.js";
 
-  <!-- GALERÍA DE FOTOS -->
-  <div class="card">
-    <h3>🖼️ Subir Fotos a la Galería</h3>
-    <input type="file" id="fotoArchivo" accept="image/*">
-    <input type="text" id="fotoTitulo" placeholder="Título o descripción corta">
-    <button id="btnSubirFoto">Subir Foto</button>
-    <div id="listaFotos" style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;"></div>
-  </div>
+        const loginSection = document.getElementById("loginSection");
+        const adminSection = document.getElementById("adminSection");
+        const loginForm = document.getElementById("loginForm");
+        const loginError = document.getElementById("loginError");
+        const btnLogout = document.getElementById("btnLogout");
+        const totalReservasEl = document.getElementById("totalReservas");
 
-  <!-- LISTA DE RESERVAS -->
-  <div class="card">
-    <h3>📅 Solicitudes de Reservas</h3>
-    <div id="listaReservas">Cargando reservas...</div>
-  </div>
+        // 1. Verificar si ya hay una sesión activa al cargar la página
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                mostrarPanel();
+            } else {
+                mostrarLogin();
+            }
+        }
 
-  <!-- EMITIR RECIBOS -->
-  <div class="card">
-    <h3>🧾 Emitir Recibo Manual</h3>
-    <input type="text" id="recNombre" placeholder="Nombre del Cliente">
-    <input type="text" id="recEvento" placeholder="Tipo de Evento (Ej: Casamiento, XV)">
-    <input type="date" id="recFecha">
-    <input type="number" id="recTotal" placeholder="Monto Total ($)">
-    <input type="number" id="recImporte" placeholder="Monto Recibido / Seña ($)">
-    <input type="text" id="recConcepto" placeholder="Concepto (Ej: Seña por servicio DJ)">
-    <button id="btnCrearRecibo">Generar Recibo</button>
-  </div>
+        // 2. Manejar el Login
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            loginError.textContent = "";
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
-  <!-- HISTORIAL DE RECIBOS -->
-  <div class="card">
-    <h3>📄 Historial de Recibos</h3>
-    <div id="listaRecibos">Cargando recibos...</div>
-  </div>
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-  <script type="module" src="admin.js"></script>
+            if (error) {
+                loginError.textContent = "Error: " + error.message;
+            } else {
+                mostrarPanel();
+            }
+        });
+
+        // 3. Manejar el Cerrar Sesión (Limpio y directo)
+        btnLogout.addEventListener("click", async () => {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            mostrarLogin();
+        });
+
+        function mostrarPanel() {
+            loginSection.classList.add("hidden");
+            adminSection.classList.remove("hidden");
+            cargarDatos();
+        }
+
+        function mostrarLogin() {
+            adminSection.classList.add("hidden");
+            loginSection.classList.remove("hidden");
+        }
+
+        // 4. Cargar datos reales desde Supabase (ej: conteo de reservas)
+        async function cargarDatos() {
+            try {
+                const { count, error } = await supabase
+                    .from('reservas') // Asegúrate que tu tabla en Supabase se llame así
+                    .select('*', { count: 'exact', head: true });
+
+                if (!error) {
+                    totalReservasEl.textContent = count || 0;
+                }
+            } catch (err) {
+                console.log("No se pudieron cargar las reservas automáticamente:", err);
+            }
+        }
+
+        // Ejecutar verificación al iniciar
+        checkSession();
+    </script>
 </body>
 </html>
