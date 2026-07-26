@@ -1,229 +1,50 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Ingreso - Leitmix Panel</title>
-
-<style>
-
-body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#050505;
-    font-family:Arial,sans-serif;
-    color:white;
-}
-
-.login{
-    width:90%;
-    max-width:350px;
-    background:#111;
-    padding:25px;
-    border-radius:15px;
-    border:1px solid #f5b400;
-}
-
-h2{
-    text-align:center;
-    color:#f5b400;
-}
-
-input,button{
-    width:100%;
-    padding:12px;
-    margin-top:12px;
-    border-radius:8px;
-    box-sizing:border-box;
-}
-
-input{
-    background:#222;
-    border:1px solid #444;
-    color:white;
-}
-
-button{
-    background:#f5b400;
-    border:0;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.secundario{
-    background:#222;
-    color:#f5b400;
-}
-
-#mensaje{
-    text-align:center;
-    margin-top:15px;
-    color:#f5b400;
-}
-
-</style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso Admin - Leitmix</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #121212; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid #333; width: 90%; max-width: 350px; text-align: center; }
+    h2 { color: #f5b400; margin-bottom: 20px; }
+    input { width: 100%; padding: 10px; margin-bottom: 12px; background: #222; border: 1px solid #333; color: #fff; border-radius: 6px; box-sizing: border-box; }
+    button { width: 100%; padding: 10px; border-radius: 6px; border: none; background: #f5b400; font-weight: bold; cursor: pointer; color: #000; font-size: 16px; }
+    .error { color: #e74c3c; font-size: 13px; margin-top: 10px; }
+  </style>
 </head>
-
 <body>
 
-
-<div class="login">
-
-<h2>Leitmix Panel</h2>
-
-<input id="email" type="email" placeholder="Email">
-
-<input id="password" type="password" placeholder="Contraseña">
-
-
-<button id="entrar">
-Ingresar
-</button>
-
-
-<button id="recuperar" class="secundario">
-Olvidé mi contraseña
-</button>
-
-
-<button onclick="window.location.href='registro.html'" class="secundario">
-Crear cuenta DJ
-</button>
-
-
-<p id="mensaje"></p>
-
-
-</div>
-
-
-
-<script type="module">
-
-import { supabase } from "../supabase.js";
-
-
-const boton = document.getElementById("entrar");
-
-
-boton.onclick = async ()=>{
-
-
-const email = document.getElementById("email").value.trim();
-
-const password = document.getElementById("password").value.trim();
-
-
-if(!email || !password){
-
-document.getElementById("mensaje").textContent =
-"Completá email y contraseña";
-
-return;
-
-}
-
-
-
-const { data, error } =
-await supabase.auth.signInWithPassword({
-
-email: email,
-
-password: password
-
-});
-
-
-
-if(error){
-
-document.getElementById("mensaje").textContent =
-error.message;
-
-console.log(error);
-
-return;
-
-}
-
-
-
-console.log("Login correcto:", data);
-
-
-window.location.href = "panel.html";
-
-
-};
-
-
-
-
-// RECUPERAR CONTRASEÑA
-
-
-const botonRecuperar =
-document.getElementById("recuperar");
-
-
-botonRecuperar.onclick = async ()=>{
-
-
-const email =
-document.getElementById("email").value.trim();
-
-
-
-if(!email){
-
-document.getElementById("mensaje").textContent =
-"Escribí tu email primero";
-
-return;
-
-}
-
-
-
-const {error} =
-await supabase.auth.resetPasswordForEmail(
-email,
-{
-
-redirectTo:
-"https://leitmixproducciones.github.io/leitmix-producciones-web/admin/nueva-password.html"
-
-});
-
-
-
-if(error){
-
-document.getElementById("mensaje").textContent =
-error.message;
-
-return;
-
-}
-
-
-
-document.getElementById("mensaje").textContent =
-"Revisá tu correo para cambiar la contraseña";
-
-
-};
-
-
-</script>
-
-
+  <div class="card">
+    <h2>🎧 Iniciar Sesión</h2>
+    <input type="email" id="email" placeholder="Tu Email">
+    <input type="password" id="password" placeholder="Tu Contraseña">
+    <button id="btnLogin">Ingresar</button>
+    <div id="errorMsg" class="error"></div>
+  </div>
+
+  <script type="module">
+    import { supabase } from "./supabase.js";
+
+    document.getElementById("btnLogin").onclick = async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const errorMsg = document.getElementById("errorMsg");
+      errorMsg.innerText = "";
+
+      if (!email || !password) {
+        errorMsg.innerText = "Por favor completá todos los campos.";
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        errorMsg.innerText = "Error: " + error.message;
+      } else {
+        window.location.href = "admin.html";
+      }
+    };
+  </script>
 </body>
 </html>
