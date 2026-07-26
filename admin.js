@@ -1,5 +1,10 @@
 import { supabase } from "./supabase.js";
 
+// CAPTURADOR DE ERRORES: Muestra un cartel en pantalla si algo falla en el celular
+window.onerror = function (msg, url, line) {
+  alert("⚠️ Error en el sistema:\n" + msg + "\nLínea: " + line);
+};
+
 // ======================
 // SESIÓN DE USUARIO
 // ======================
@@ -16,26 +21,24 @@ const { data: sesion } = await supabase.auth.getSession();
 
 if (!sesion || !sesion.session) {
   window.location.href = "login.html";
-  throw new Error("Sin sesión");
+  throw new Error("Sin sesión activa");
 }
 
 const usuario = sesion.session.user;
 
 // ======================
-// MOSTRAR / OCULTAR CONFIGURACIÓN (Seguro)
+// TOGGLE CONFIGURACIÓN
 // ======================
 const btnToggleConfig = document.getElementById("btnToggleConfig");
 const seccionConfiguracion = document.getElementById("seccionConfiguracion");
 
 if (btnToggleConfig && seccionConfiguracion) {
   btnToggleConfig.onclick = () => {
-    const estaOculto = seccionConfiguracion.style.display === "none" || seccionConfiguracion.classList.contains("oculto");
+    const estaOculto = seccionConfiguracion.classList.contains("oculto");
     if (estaOculto) {
-      seccionConfiguracion.style.display = "block";
       seccionConfiguracion.classList.remove("oculto");
       btnToggleConfig.innerText = "⚙️ Ocultar Configuración del Negocio ▲";
     } else {
-      seccionConfiguracion.style.display = "none";
       seccionConfiguracion.classList.add("oculto");
       btnToggleConfig.innerText = "⚙️ Mostrar Configuración del Negocio ▼";
     }
@@ -43,7 +46,7 @@ if (btnToggleConfig && seccionConfiguracion) {
 }
 
 // ======================
-// RESUMEN DEL NEGOCIO (DASHBOARD)
+// DASHBOARD
 // ======================
 async function cargarResumenNegocio() {
   try {
@@ -108,19 +111,12 @@ async function cargarResumenNegocio() {
 
     const totalPendienteCobro = recibos ? recibos.reduce((sum, r) => sum + Number(r.saldo_pendiente || 0), 0) : 0;
 
-    const elemTotalReservas = document.getElementById("totalReservasDash");
-    const elemPendientes = document.getElementById("pendientesDash");
-    const elemConfirmadas = document.getElementById("confirmadasDash");
-    const elemProximo = document.getElementById("dashProximoEvento");
-    const elemEventosSemana = document.getElementById("dashEventosSemana");
-    const elemPendienteCobro = document.getElementById("dashPendienteCobro");
-
-    if (elemTotalReservas) elemTotalReservas.innerText = totalReservas;
-    if (elemPendientes) elemPendientes.innerText = pendientes;
-    if (elemConfirmadas) elemConfirmadas.innerText = confirmadas;
-    if (elemProximo) elemProximo.innerHTML = proximoEventoStr;
-    if (elemEventosSemana) elemEventosSemana.innerText = eventosSemana;
-    if (elemPendienteCobro) elemPendienteCobro.innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
+    if (document.getElementById("totalReservasDash")) document.getElementById("totalReservasDash").innerText = totalReservas;
+    if (document.getElementById("pendientesDash")) document.getElementById("pendientesDash").innerText = pendientes;
+    if (document.getElementById("confirmadasDash")) document.getElementById("confirmadasDash").innerText = confirmadas;
+    if (document.getElementById("dashProximoEvento")) document.getElementById("dashProximoEvento").innerHTML = proximoEventoStr;
+    if (document.getElementById("dashEventosSemana")) document.getElementById("dashEventosSemana").innerText = eventosSemana;
+    if (document.getElementById("dashPendienteCobro")) document.getElementById("dashPendienteCobro").innerText = "$" + totalPendienteCobro.toLocaleString("es-AR");
 
     const maxReservasMes = Math.max(...reservasPorMes, 1);
     const contGrafico = document.getElementById("graficoReservasMes");
@@ -161,7 +157,7 @@ async function cargarResumenNegocio() {
 }
 
 // ======================
-// CONFIGURACIÓN DEL NEGOCIO
+// CONFIGURACIÓN
 // ======================
 async function cargarConfiguracion() {
   try {
@@ -260,7 +256,7 @@ if (botonLogo) {
 }
 
 // ======================
-// IMÁGENES (GALERÍA)
+// GALERÍA Y MEDIA
 // ======================
 const archivoImagen = document.getElementById("imagenArchivo");
 const tituloImagen = document.getElementById("imagenTitulo");
@@ -300,7 +296,7 @@ async function cargarImagenes() {
         <div class="item" style="background:#222; padding:8px; border-radius:8px; margin-top:10px; display:inline-block; margin-right:10px;">
           <img src="${imagen.Imagen}" style="max-width:120px; display:block; border-radius:8px;">
           <p style="font-size:12px; margin:5px 0; color:#fff;">${imagen.Titulo || ""}</p>
-          <button class="borrar" onclick="borrarImagen(${imagen.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
+          <button onclick="window.borrarImagen(${imagen.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
         </div>
       `;
     });
@@ -357,7 +353,7 @@ async function cargarVideos() {
         <div class="item" style="background:#222; padding:10px; border-radius:8px; margin-bottom:8px;">
           <p style="margin:0 0 5px 0; color:#fff;">${video.Titulo || ""}</p>
           <video controls style="max-width:100%; height:150px; border-radius:8px;"><source src="${video.Url}"></video>
-          <button class="borrar" onclick="borrarVideo(${video.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer; display:block; margin-top:5px;">Borrar</button>
+          <button onclick="window.borrarVideo(${video.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer; display:block; margin-top:5px;">Borrar</button>
         </div>
       `;
     });
@@ -392,8 +388,8 @@ async function cargarTestimonios() {
           <p style="margin:2px 0; font-size:12px; color:#aaa;">${testimonio.evento || ""}</p>
           <p style="margin:5px 0; font-size:13px; color:#fff;">"${testimonio.comentario}"</p>
           <p style="font-size:12px; color:#fff;">Estado: ${testimonio.aprobado ? "✅ Publicado" : "⏳ Pendiente"}</p>
-          ${!testimonio.aprobado ? `<button onclick="aprobarTestimonio(${testimonio.id})" style="font-size:11px; padding:4px 8px; margin-bottom:5px;">✅ Aprobar</button>` : ""}
-          <button class="borrar" onclick="borrarTestimonio(${testimonio.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar</button>
+          ${!testimonio.aprobado ? `<button onclick="window.aprobarTestimonio(${testimonio.id})" style="font-size:11px; padding:4px 8px; margin-bottom:5px;">✅ Aprobar</button>` : ""}
+          <button onclick="window.borrarTestimonio(${testimonio.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar</button>
         </div>
       `;
     });
@@ -442,14 +438,14 @@ async function cargarReservas() {
             <strong style="color: #f5b400; font-size: 14px; display: block; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 4px;">
               🎧 HOJA DE RUTA DEL EVENTO
             </strong>
-            <p style="margin: 6px 0; white-space: pre-line;"><strong>⏰ Cronograma & Momentos:</strong><br>${reserva.cronograma || 'A definir'}</p>
-            <p style="margin: 6px 0; white-space: pre-line;"><strong>🔥 Tandas & Infaltables:</strong><br>${reserva.playlist_infaltables || 'A definir'}</p>
+            <p style="margin: 6px 0; white-space: pre-line;"><strong>⏰ Cronograma:</strong><br>${reserva.cronograma || 'A definir'}</p>
+            <p style="margin: 6px 0; white-space: pre-line;"><strong>🔥 Infaltables:</strong><br>${reserva.playlist_infaltables || 'A definir'}</p>
             <p style="margin: 6px 0; white-space: pre-line;"><strong>🚫 Prohibidos:</strong><br>${reserva.playlist_prohibidos || 'Sin restricciones'}</p>
           </div>
 
-          <button onclick="confirmarReserva(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">Confirmar</button>
-          <button onclick="emitirRecibo(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">🧾 Emitir recibo</button>
-          <button class="borrar" onclick="borrarReserva(${reserva.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
+          <button onclick="window.confirmarReserva(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">Confirmar</button>
+          <button onclick="window.emitirRecibo(${reserva.id})" style="font-size:12px; padding:6px 12px; margin-right:5px;">🧾 Emitir recibo</button>
+          <button onclick="window.borrarReserva(${reserva.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">Borrar</button>
         </div>
       `;
     });
@@ -574,9 +570,9 @@ async function cargarRecibos() {
           <p style="margin:2px 0; font-size:13px;">👤 Cliente: ${recibo.nombre} | 🎉 Evento: ${recibo.evento}</p>
           <p style="margin:2px 0; font-size:13px;">💰 Total: $${Number(recibo.total || 0).toLocaleString("es-AR")} | 💵 Recibido: $${Number(recibo.importe || 0).toLocaleString("es-AR")}</p>
           <p style="margin:2px 0; font-size:13px; font-weight:bold; color:#f5b400;">📌 Saldo Pendiente: $${Number(recibo.saldo_pendiente || 0).toLocaleString("es-AR")}</p>
-          <p style="margin:2px 0; font-size:12px; color:#aaa;">📅 Fecha de emisión: ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
-          <p style="margin:5px 0;"><a href="../recibo.html?id=${recibo.id}" target="_blank" style="color:#f5b400;">📄 Ver recibo en pantalla completa</a></p>
-          <button class="borrar" onclick="borrarRecibo(${recibo.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar recibo</button>
+          <p style="margin:2px 0; font-size:12px; color:#aaa;">📅 Fecha: ${new Date(recibo.fecha_pago).toLocaleDateString("es-AR")}</p>
+          <p style="margin:5px 0;"><a href="recibo.html?id=${recibo.id}" target="_blank" style="color:#f5b400;">📄 Ver recibo</a></p>
+          <button onclick="window.borrarRecibo(${recibo.id})" style="background:#e74c3c; color:white; border:none; padding:6px 12px; font-size:12px; border-radius:6px; cursor:pointer;">🗑️ Borrar</button>
         </div>
       `;
     });
@@ -594,7 +590,7 @@ window.borrarRecibo = async function(id) {
 };
 
 // ======================
-// INICIALIZACIÓN PARALELA
+// INICIALIZACIÓN
 // ======================
 function inicializarPanel() {
   cargarConfiguracion();
