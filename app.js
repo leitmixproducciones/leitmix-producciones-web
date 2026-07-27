@@ -1,7 +1,7 @@
 import { supabase } from "./supabase.js";
 
 // 1. Enviar Reserva
-document.getElementById("formReserva").addEventListener("submit", async (e) => {
+document.getElementById("formReserva")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const nombre = document.getElementById("reservaNombre").value;
     const tipo = document.getElementById("reservaTipo").value;
@@ -18,8 +18,8 @@ document.getElementById("formReserva").addEventListener("submit", async (e) => {
     }
 });
 
-// 2. Subir Foto desde el Panel de Administración
-document.getElementById("formAdminGaleria").addEventListener("submit", async (e) => {
+// 2. Subir Foto desde el Panel de Administración (SÚPER PROTEGIDO)
+document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const titulo = document.getElementById("adminTituloFoto").value;
     const archivoInput = document.getElementById("adminArchivoFoto");
@@ -29,7 +29,7 @@ document.getElementById("formAdminGaleria").addEventListener("submit", async (e)
 
     const nombreArchivo = `${Date.now()}_${archivo.name}`;
 
-    // Sube el archivo al Storage de Supabase (asegurate de tener un bucket llamado 'galeria' o ajusta el nombre)
+    // Sube el archivo al Storage de Supabase
     const { data: uploadData, error: uploadError } = await supabase.storage
         .from("galeria")
         .upload(nombreArchivo, archivo);
@@ -56,7 +56,7 @@ document.getElementById("formAdminGaleria").addEventListener("submit", async (e)
 });
 
 // 3. Guardar Video desde el Panel de Administración
-document.getElementById("formAdminVideo").addEventListener("submit", async (e) => {
+document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const titulo = document.getElementById("adminTituloVideo").value;
     const urlVideo = document.getElementById("adminUrlVideo").value;
@@ -75,6 +75,8 @@ document.getElementById("formAdminVideo").addEventListener("submit", async (e) =
 // 4. Cargar Galería de Fotos
 async function cargarGaleriaWeb() {
     const contenedor = document.getElementById("galeriaPublica");
+    if (!contenedor) return; // Si no existe el contenedor en el HTML, no hace nada
+
     const { data, error } = await supabase.from("galeria").select("*");
 
     if (error || !data || data.length === 0) {
@@ -98,6 +100,8 @@ async function cargarGaleriaWeb() {
 // 5. Cargar Videos
 async function cargarVideosWeb() {
     const contenedor = document.getElementById("videosPublicos");
+    if (!contenedor) return; // Si no existe el contenedor en el HTML, no hace nada
+
     const { data, error } = await supabase.from("videos").select("*");
 
     if (error || !data || data.length === 0) {
@@ -131,6 +135,8 @@ async function cargarVideosWeb() {
 // 6. Cargar Testimonios Aprobados
 async function cargarTestimoniosWeb() {
     const contenedor = document.getElementById("testimoniosPublicos");
+    if (!contenedor) return; // Si no existe el contenedor en el HTML, no hace nada
+
     const { data, error } = await supabase
         .from("testimonios")
         .select("*")
@@ -154,6 +160,7 @@ async function cargarTestimoniosWeb() {
     }).join("");
 }
 
+// Ejecutar cargas
 cargarGaleriaWeb();
 cargarVideosWeb();
 cargarTestimoniosWeb();
