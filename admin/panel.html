@@ -17,6 +17,10 @@
         .btn-desaprobar { background: #dc3545; color: white; }
         .estado-aprobado { color: #28a745; font-size: 0.85rem; }
         .estado-pendiente { color: #ffc107; font-size: 0.85rem; }
+        .form-group { margin-bottom: 15px; }
+        input, textarea { width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 6px; margin-top: 5px; }
+        button.btn-main { background: #ffc107; color: #121212; border: none; padding: 10px 15px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        button.btn-main:hover { background: #e0a800; }
     </style>
 </head>
 <body>
@@ -26,9 +30,39 @@
         <button id="btnCerrarSesion" style="background: #333; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer;">Cerrar Sesión</button>
     </div>
 
+    <!-- SECCIÓN 1: TESTIMONIOS -->
     <div class="admin-section">
         <h3>⭐ Moderación de Testimonios</h3>
         <div id="listaTestimonios">Cargando testimonios...</div>
+    </div>
+
+    <!-- SECCIÓN 2: GESTIÓN DE FOTOS Y VIDEOS -->
+    <div class="admin-section">
+        <h3>📸 Subir Fotos / Videos</h3>
+        <div class="form-group">
+            <label>Título del contenido:</label>
+            <input type="text" id="mediaTitulo" placeholder="Ej: Sesión en vivo">
+        </div>
+        <div class="form-group">
+            <label>URL o Enlace del archivo:</label>
+            <input type="text" id="mediaUrl" placeholder="Enlace de la imagen o video">
+        </div>
+        <button class="btn-main" id="btnSubirMedia">Guardar Contenido</button>
+    </div>
+
+    <!-- SECCIÓN 3: GENERADOR DE RECIBOS -->
+    <div class="admin-section">
+        <h3>🧾 Generador de Recibos</h3>
+        <div class="form-group">
+            <label>Nombre del Cliente:</label>
+            <input type="text" id="reciboCliente" placeholder="Nombre completo">
+        </div>
+        <div class="form-group">
+            <label>Monto ($):</label>
+            <input type="number" id="reciboMonto" placeholder="0.00">
+        </div>
+        <button class="btn-main" id="btnGenerarRecibo">Generar Recibo</button>
+        <div id="vistaRecibo" style="margin-top: 15px; color: #ccc;"></div>
     </div>
 
     <script type="module">
@@ -49,11 +83,10 @@
             window.location.href = "login.html";
         });
 
-        // Cargar Testimonios
+        // 1. Cargar Testimonios
         async function cargarTestimoniosPendientes() {
             const contenedor = document.getElementById("listaTestimonios");
             
-            // Usamos 'testimonios' en plural. Si tu tabla es singular, cambialo por 'testimonio'
             const { data, error } = await supabase
                 .from("testimonios")
                 .select("*")
@@ -92,7 +125,6 @@
             });
         }
 
-        // Función global para cambiar estado
         window.cambiarEstado = async function(id, nuevoEstado) {
             const { error } = await supabase
                 .from("testimonios")
@@ -105,6 +137,37 @@
                 cargarTestimoniosPendientes();
             }
         }
+
+        // 2. Lógica para Fotos/Videos (Placeholder funcional)
+        document.getElementById("btnSubirMedia").addEventListener("click", () => {
+            const titulo = document.getElementById("mediaTitulo").value;
+            const url = document.getElementById("mediaUrl").value;
+            if(!titulo || !url) {
+                alert("Por favor completa los campos de contenido.");
+                return;
+            }
+            alert("Contenido listo para registrar en tu base de datos.");
+        });
+
+        // 3. Lógica para Recibos
+        document.getElementById("btnGenerarRecibo").addEventListener("click", () => {
+            const cliente = document.getElementById("reciboCliente").value;
+            const monto = document.getElementById("reciboMonto").value;
+            const vista = document.getElementById("vistaRecibo");
+
+            if(!cliente || !monto) {
+                alert("Completa el cliente y el monto.");
+                return;
+            }
+
+            vista.innerHTML = `
+                <div style="background: #2a2a2a; padding: 10px; border-radius: 6px; border: 1px solid #444;">
+                    <p><strong>Recibo generado para:</strong> ${cliente}</p>
+                    <p><strong>Monto:</strong> $${monto}</p>
+                    <p style="color: #28a745; font-size: 0.85rem;">✔ Listo para imprimir o descargar</p>
+                </div>
+            `;
+        });
 
         cargarTestimoniosPendientes();
     </script>
