@@ -7,7 +7,18 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #f1f1f1; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 600px; margin: 0 auto; position: relative; }
+        
+        /* Botón de Ajustes (Engranaje) */
+        .settings-btn { position: absolute; top: 0; right: 0; background: #2a2a2a; color: #ffc107; border: 1px solid #444; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; transition: background 0.3s; z-index: 10; }
+        .settings-btn:hover { background: #333; }
+
+        /* Modal / Desplegable de Configuración */
+        #settingsModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 100%; max-width: 450px; border: 2px solid #ffc107; text-align: left; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #aaa; font-size: 1.5rem; cursor: pointer; width: auto; padding: 0; }
+        .close-modal:hover { color: #fff; }
+
         .card { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; }
         h1 { color: #ffc107; margin-bottom: 15px; font-size: 1.8rem; }
         h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.4rem; }
@@ -81,6 +92,34 @@
 <body>
 
     <div class="container">
+        <!-- Botón Engranaje flotante -->
+        <button id="btnOpenSettings" class="settings-btn" title="Configurar Perfil">⚙️</button>
+
+        <!-- Modal / Menú Desplegable de Configuración de Perfil -->
+        <div id="settingsModal">
+            <div class="modal-content">
+                <button id="btnCloseSettings" class="close-modal">&times;</button>
+                <h2>⚙️ Mi Perfil / Empresa</h2>
+                <p style="font-size: 0.9rem;">Configura los datos que saldrán impresos en tus recibos.</p>
+                
+                <div id="profileMsg" class="success-msg"></div>
+
+                <label style="font-size: 0.85rem; color: #ccc;">Nombre de la Empresa / DJ:</label>
+                <input type="text" id="editNombre" placeholder="Ej: Leitmix Producciones">
+
+                <label style="font-size: 0.85rem; color: #ccc;">Instagram:</label>
+                <input type="text" id="editInstagram" placeholder="Ej: @leitmix_producciones">
+
+                <label style="font-size: 0.85rem; color: #ccc;">WhatsApp de Contacto:</label>
+                <input type="text" id="editWhatsapp" placeholder="Ej: 1150480339">
+
+                <label style="font-size: 0.85rem; color: #ccc;">Subir / Cambiar Logo:</label>
+                <input type="file" id="editLogoFile" accept="image/*">
+
+                <button id="btnSaveProfile" style="margin-top: 10px;">Guardar Cambios</button>
+            </div>
+        </div>
+
         <!-- Panel Principal -->
         <div class="card">
             <h1>Panel de Control</h1>
@@ -176,6 +215,7 @@
         import { supabase } from "../supabase.js";
 
         let datosPerfil = {};
+        let userIdGlobal = null;
 
         const initAuthAndProfile = async () => {
             const { data: { session } } = await supabase.auth.getSession();
@@ -184,23 +224,94 @@
                 return;
             }
 
+            userIdGlobal = session.user.id;
+
             try {
-                const userId = session.user.id;
-                let { data, error } = await supabase.from('perfiles').select('*').eq('id', userId).single();
+                let { data, error } = await supabase.from('perfiles').select('*').eq('id', userIdGlobal).single();
                 
                 if (error || !data) {
-                    const res = await supabase.from('perfiles').select('*').eq('user_id', userId).single();
+                    const res = await supabase.from('perfiles').select('*').eq('user_id', userIdGlobal).single();
                     data = res.data;
                 }
 
                 if (data) {
                     datosPerfil = data;
+                    // Precargar inputs del modal
+                    document.getElementById("editNombre").value = data.nombre || data.Nombre || data.empresa || "";
+                    document.getElementById("editInstagram").value = data.instagram || data.Instagram || "";
+                    document.getElementById("editWhatsapp").value = data.whatsapp || data.Whatsapp || data.telefono || "";
                 }
             } catch (err) {
                 console.log("No se pudo cargar el perfil específico del usuario.");
             }
         };
         initAuthAndProfile();
+
+        // Control del Modal de Ajustes (Engranaje)
+        const modal = document.getElementById("settingsModal");
+        document.getElementById("btnOpenSettings").addEventListener("click", () => {
+            modal.style.display = "flex";
+        });
+        document.getElementById("btnCloseSettings").addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+        window.addEventListener("click", (e) => {
+            if (e.target === modal) modal.style.display = "none";
+        });
+
+        // Guardar cambios de perfil
+        const btnSaveProfile = document.getElementById("btnSaveProfile");
+        const profileMsg = document.getElementById("profileMsg");
+
+        btnSaveProfile.addEventListener("click", async () => {
+            if (!userIdGlobal) return;
+
+            const nuevoNombre = document.getElementById("editNombre").value.trim();
+            const nuevoInstagram = document.getElementById("editInstagram").value.trim();
+            const nuevoWhatsapp = document.getElementById("editWhatsapp").value.trim();
+            const logoFile = document.getElementById("editLogoFile").files[0];
+
+            btnSaveProfile.disabled = true;
+            profileMsg.style.color = "#ffc107";
+            profileMsg.textContent = "Guardando perfil...";
+
+            let logoUrl = datosPerfil.logo || datosPerfil.Logo || datosPerfil.imagen || "";
+
+            if (logoFile) {
+                const filePath = `logos/${userIdGlobal}_${Date.now()}_${logoFile.name}`;
+                const { error: uploadErr } = await supabase.storage.from('Media').upload(filePath, logoFile);
+                if (!uploadErr) {
+                    const { data: pubUrl } = supabase.storage.from('Media').getPublicUrl(filePath);
+                    logoUrl = pubUrl.publicUrl;
+                }
+            }
+
+            const updates = {
+                nombre: nuevoNombre,
+                instagram: nuevoInstagram,
+                whatsapp: nuevoWhatsapp,
+                logo: logoUrl
+            };
+
+            // Intentar actualizar por id o user_id según esquema de tabla
+            let { error } = await supabase.from('perfiles').update(updates).eq('id', userIdGlobal);
+            if (error) {
+                await supabase.from('perfiles').update(updates).eq('user_id', userIdGlobal);
+            }
+
+            datosPerfil.nombre = nuevoNombre;
+            datosPerfil.instagram = nuevoInstagram;
+            datosPerfil.whatsapp = nuevoWhatsapp;
+            datosPerfil.logo = logoUrl;
+
+            btnSaveProfile.disabled = false;
+            profileMsg.style.color = "#28a745";
+            profileMsg.textContent = "¡Perfil actualizado con éxito!";
+            setTimeout(() => {
+                profileMsg.textContent = "";
+                modal.style.display = "none";
+            }, 1500);
+        });
 
         document.getElementById("btnLogout").addEventListener("click", async () => {
             await supabase.auth.signOut();
