@@ -12,9 +12,10 @@ async function verificarAuth() {
     }
     usuario = sesion.session.user;
     
-    // Una vez verificado el usuario, inicializamos todo el panel
+    // Inicializamos todo el panel al verificar el usuario
     cargarConfiguracion();
     cargarFotos();
+    cargarVideos();
     cargarReservas();
     cargarRecibos();
   } catch (e) {
@@ -25,7 +26,7 @@ async function verificarAuth() {
 
 verificarAuth();
 
-// Cerrar sesión (Con respaldo directo para que funcione sí o sí)
+// Cerrar sesión
 const btnCerrar = document.getElementById("cerrarSesion");
 if (btnCerrar) {
   btnCerrar.onclick = async () => {
@@ -55,7 +56,7 @@ async function cargarConfiguracion() {
 const btnGuardarConfig = document.getElementById("btnGuardarConfig");
 if (btnGuardarConfig) {
   btnGuardarConfig.onclick = async () => {
-    if (!usuario) return;
+    if (!usuario) return alert("Usuario no identificado.");
     const config = {
       user_id: usuario.id,
       nombre_fantasia: document.getElementById("cfgNombre").value,
@@ -69,7 +70,7 @@ if (btnGuardarConfig) {
   };
 }
 
-// 3. Subir Fotos y mostrar galería general / de usuario
+// 3. Subir Fotos y mostrar galería
 const btnSubirFoto = document.getElementById("btnSubirFoto");
 if (btnSubirFoto) {
   btnSubirFoto.onclick = async () => {
@@ -98,13 +99,12 @@ async function cargarFotos() {
   const cont = document.getElementById("listaFotos");
   if (!cont) return;
   
-  cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1;'>Cargando fotos...</p>";
+  cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1; text-align:center;'>Cargando fotos...</p>";
 
-  // Traemos todas las fotos para que puedas ver y administrar todo lo de la web
   let { data } = await supabase.from("galeria").select("*");
   
   if (!data || data.length === 0) {
-    cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1;'>No hay fotos subidas.</p>";
+    cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1; text-align:center;'>No hay fotos subidas.</p>";
     return;
   }
 
@@ -115,9 +115,9 @@ async function cargarFotos() {
     
     if (imgUrl) {
       cont.innerHTML += `
-        <div style="background:#1a1a1a; padding:6px; border-radius:6px; text-align:center; border: 1px solid #333;">
-          <img src="${imgUrl}" style="width:100%; height:90px; object-fit:cover; border-radius:4px;" alt="Foto">
-          <p style="font-size:11px; margin:4px 0; color:#ddd; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${imgTitulo}">${imgTitulo}</p>
+        <div style="background:#2a2a2a; padding:6px; border-radius:6px; text-align:center; border: 1px solid #444;">
+          <img src="${imgUrl}" style="width:100%; height:80px; object-fit:cover; border-radius:4px;" alt="Foto">
+          <p style="font-size:11px; margin:4px 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${imgTitulo}">${imgTitulo}</p>
           <button onclick="window.borrarFoto(${img.id})" class="btn-danger" style="margin-top:2px; font-size:10px; padding:4px 6px; width:100%;">Borrar</button>
         </div>`;
     }
@@ -132,12 +132,80 @@ window.borrarFoto = async (id) => {
   }
 };
 
-// 4. Reservas (Blindado para que no se quede colgado)
+// 4. Gestión de Videos
+const btnSubirVideo = document.getElementById("btnSubirVideo");
+if (btnSubirVideo) {
+  btnSubirVideo.onclick = async () => {
+    const tituloInput = document.getElementById("videoTitulo");
+    const urlInput = document.getElementById("videoUrl");
+    
+    const titulo = tituloInput ? tituloInput.value : "Sin título";
+    const urlVideo = urlInput ? urlInput.value : "";
+
+    if (!urlVideo) return alert("Ingresá la URL del video primero.");
+
+    const { error } = await supabase.from("videos").insert([{ 
+      Titulo: titulo, 
+      url: urlVideo, 
+      user_id: usuario ? usuario.id : null 
+    }]);
+
+    if (error) {
+      alert("Error al subir video: " + error.message);
+    } else {
+      alert("¡Video agregado con éxito!");
+      if (tituloInput) tituloInput.value = "";
+      if (urlInput) urlInput.value = "";
+      cargarVideos();
+    }
+  };
+}
+
+async function cargarVideos() {
+  const cont = document.getElementById("listaVideos");
+  if (!cont) return;
+  
+  cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1; text-align:center;'>Cargando videos...</p>";
+
+  let { data, error } = await supabase.from("videos").select("*");
+  
+  if (error || !data || data.length === 0) {
+    cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1; text-align:center;'>No hay videos subidos todavía.</p>";
+    return;
+  }
+
+  cont.innerHTML = "";
+  data.forEach(vid => {
+    const vidUrl = vid.url || vid.Video || vid.video || '';
+    const vidTitulo = vid.Titulo || vid.titulo || 'Sin título';
+    const vidId = vid.id;
+
+    if (vidUrl) {
+      cont.innerHTML += `
+        <div style="background:#2a2a2a; padding:8px; border-radius:6px; text-align:center; border: 1px solid #444;">
+          <p style="font-size:11px; margin:5px 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${vidTitulo}">🎬 ${vidTitulo}</p>
+          <button onclick="window.borrarVideo(${vidId})" class="btn-danger" style="margin-top:2px; font-size:10px; padding:4px; width:100%;">Borrar</button>
+        </div>`;
+    }
+  });
+}
+
+window.borrarVideo = async (id) => {
+  if (confirm("¿Estás seguro de borrar este video?")) {
+    const { error } = await supabase.from("videos").delete().eq("id", id);
+    if (error) {
+      alert("Error al borrar: " + error.message);
+    } else {
+      cargarVideos();
+    }
+  }
+};
+
+// 5. Reservas
 async function cargarReservas() {
   const cont = document.getElementById("listaReservas");
   if (!cont) return;
 
-  // Intentamos traer todas las reservas
   let { data } = await supabase.from("reservas").select("*").order("id", { ascending: false });
   
   if (!data || data.length === 0) {
@@ -179,7 +247,7 @@ window.borrarReserva = async (id) => {
   }
 };
 
-// 5. Recibos
+// 6. Recibos
 const btnCrearRecibo = document.getElementById("btnCrearRecibo");
 if (btnCrearRecibo) {
   btnCrearRecibo.onclick = async () => {
