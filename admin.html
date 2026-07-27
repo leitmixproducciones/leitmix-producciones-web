@@ -12,8 +12,8 @@
         h1, h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.5rem; text-align: center; }
         input, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
         input { background: #2a2a2a; color: #fff; border: 1px solid #444; }
-        button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
-        button:hover { background: #e0a800; }
+        button, .btn-main { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button:hover, .btn-main:hover { background: #e0a800; }
         .btn-danger { background: #dc3545; color: #fff; }
         .btn-danger:hover { background: #c82333; }
         .hidden { display: none !important; }
@@ -21,6 +21,7 @@
         .stats-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .stat-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; }
         .stat-box h3 { font-size: 1.8rem; color: #ffc107; margin-top: 5px; }
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -42,6 +43,7 @@
             <h1>Panel de Control</h1>
             <button id="btnLogout" class="btn-danger">Cerrar sesión</button>
 
+            <!-- 1. Resumen de Actividad -->
             <div style="margin-top: 20px;">
                 <h2>📊 Resumen de Actividad</h2>
                 <div class="stats-grid">
@@ -50,6 +52,30 @@
                         <h3 id="totalReservas">0</h3>
                     </div>
                 </div>
+            </div>
+
+            <hr style="border-color:#333; margin: 25px 0;">
+
+            <!-- 2. Gestión de Fotos (Galería) -->
+            <div>
+                <h2>📸 Gestión de Fotos</h2>
+                <input type="text" id="fotoTitulo" placeholder="Título de la foto (opcional)">
+                <input type="file" id="fotoArchivo" accept="image/*">
+                <button id="btnSubirFoto" class="btn-main">Subir Foto desde Galería</button>
+                
+                <div id="listaFotos" class="media-grid"></div>
+            </div>
+
+            <hr style="border-color:#333; margin: 25px 0;">
+
+            <!-- 3. Gestión de Videos (Misma modalidad que Galería) -->
+            <div>
+                <h2>🎬 Gestión de Videos</h2>
+                <input type="text" id="videoTitulo" placeholder="Título del video (ej: Show en vivo)">
+                <input type="file" id="videoArchivo" accept="video/*">
+                <button id="btnSubirVideo" class="btn-main">Subir Video desde Galería</button>
+
+                <div id="listaVideos" class="media-grid"></div>
             </div>
         </div>
     </div>
@@ -64,9 +90,12 @@
         const btnLogout = document.getElementById("btnLogout");
         const totalReservasEl = document.getElementById("totalReservas");
 
+        let usuario = null;
+
         async function checkSession() {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
+                usuario = session.user;
                 mostrarPanel();
             } else {
                 mostrarLogin();
@@ -79,11 +108,12 @@
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
 
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
             if (error) {
                 loginError.textContent = "Error: " + error.message;
             } else {
+                usuario = data.user;
                 mostrarPanel();
             }
         });
@@ -91,6 +121,7 @@
         btnLogout.addEventListener("click", async () => {
             await supabase.auth.signOut();
             localStorage.clear();
+            usuario = null;
             mostrarLogin();
         });
 
@@ -98,6 +129,8 @@
             loginSection.classList.add("hidden");
             adminSection.classList.remove("hidden");
             cargarDatosAdmin();
+            cargarFotos();
+            cargarVideos();
         }
 
         function mostrarLogin() {
@@ -118,6 +151,156 @@
                 console.log("Error al cargar datos:", err);
             }
         }
+
+        // --- SUBIR FOTOS ---
+        const btnSubirFoto = document.getElementById("btnSubirFoto");
+        if (btnSubirFoto) {
+            btnSubirFoto.onclick = async () => {
+                const archivoInput = document.getElementById("fotoArchivo");
+                const tituloInput = document.getElementById("fotoTitulo");
+
+                if (!archivoInput || !archivoInput.files[0]) return alert("Seleccioná una foto primero.");
+                const archivo = archivoInput.files[0];
+                const titulo = tituloInput ? tituloInput.value : "Sin título";
+
+                btnSubirFoto.disabled = true;
+                btnSubirFoto.innerText = "Subiendo foto...";
+
+                try {
+                    const path = `galeria/${usuario ? usuario.id : 'general'}/${Date.now()}-${archivo.name}`;
+                    const { error: uploadError } = await supabase.storage.from("Media").upload(path, archivo);
+                    if (uploadError) throw uploadError;
+
+                    const { data: urlData } = supabase.storage.from("Media").getPublicUrl(path);
+                    await supabase.from("galeria").insert([{ user_id: usuario ? usuario.id : null, Imagen: urlData.publicUrl, Titulo: titulo }]);
+
+                    alert("¡Foto subida con éxito!");
+                    if (tituloInput) tituloInput.value = "";
+                    archivoInput.value = "";
+                    cargarFotos();
+                } catch (err) {
+                    alert("Error al subir foto: " + err.message);
+                } finally {
+                    btnSubirFoto.disabled = false;
+                    btnSubirFoto.innerText = "Subir Foto desde Galería";
+                }
+            };
+        }
+
+        async function cargarFotos() {
+            const cont = document.getElementById("listaFotos");
+            if (!cont) return;
+
+            cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1; text-align:center;'>Cargando fotos...</p>";
+            let { data } = await supabase.from("galeria").select("*");
+
+            if (!data || data.length === 0) {
+                cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1; text-align:center;'>No hay fotos subidas.</p>";
+                return;
+            }
+
+            cont.innerHTML = "";
+            data.forEach(img => {
+                const imgUrl = img.Imagen || img.url || img.imagen || '';
+                const imgTitulo = img.Titulo || img.titulo || 'Sin título';
+
+                if (imgUrl) {
+                    cont.innerHTML += `
+                        <div style="background:#2a2a2a; padding:6px; border-radius:6px; text-align:center; border: 1px solid #444;">
+                            <img src="${imgUrl}" style="width:100%; height:80px; object-fit:cover; border-radius:4px;" alt="Foto">
+                            <p style="font-size:11px; margin:4px 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${imgTitulo}</p>
+                            <button onclick="window.borrarFoto(${img.id})" class="btn-danger" style="margin-top:2px; font-size:10px; padding:4px 6px; width:100%;">Borrar</button>
+                        </div>`;
+                }
+            });
+        }
+
+        window.borrarFoto = async (id) => {
+            if (confirm("¿Borrar esta imagen?")) {
+                const { error } = await supabase.from("galeria").delete().eq("id", id);
+                if (error) alert("Error al borrar: " + error.message);
+                else cargarFotos();
+            }
+        };
+
+        // --- SUBIR VIDEOS (NUEVO) ---
+        const btnSubirVideo = document.getElementById("btnSubirVideo");
+        if (btnSubirVideo) {
+            btnSubirVideo.onclick = async () => {
+                const archivoInput = document.getElementById("videoArchivo");
+                const tituloInput = document.getElementById("videoTitulo");
+
+                if (!archivoInput || !archivoInput.files[0]) return alert("Seleccioná un archivo de video primero.");
+                const archivo = archivoInput.files[0];
+                const titulo = tituloInput && tituloInput.value.trim() !== "" ? tituloInput.value : "Sin título";
+
+                btnSubirVideo.disabled = true;
+                btnSubirVideo.innerText = "Subiendo video... Aguardá un momento.";
+
+                try {
+                    const path = `videos/${usuario ? usuario.id : 'general'}/${Date.now()}-${archivo.name}`;
+                    const { error: uploadError } = await supabase.storage.from("Media").upload(path, archivo);
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: urlData } = supabase.storage.from("Media").getPublicUrl(path);
+
+                    const { error: dbError } = await supabase.from("videos").insert([{ 
+                        Titulo: titulo, 
+                        Url: urlData.publicUrl, 
+                        user_id: usuario ? usuario.id : null 
+                    }]);
+
+                    if (dbError) throw dbError;
+
+                    alert("¡Video subido con éxito!");
+                    if (tituloInput) tituloInput.value = "";
+                    archivoInput.value = "";
+                    cargarVideos();
+                } catch (err) {
+                    alert("Error al subir video: " + err.message);
+                } finally {
+                    btnSubirVideo.disabled = false;
+                    btnSubirVideo.innerText = "Subir Video desde Galería";
+                }
+            };
+        }
+
+        async function cargarVideos() {
+            const cont = document.getElementById("listaVideos");
+            if (!cont) return;
+
+            cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1; text-align:center;'>Cargando videos...</p>";
+            let { data } = await supabase.from("videos").select("*");
+
+            if (!data || data.length === 0) {
+                cont.innerHTML = "<p style='font-size:12px; color:#aaa; grid-column: 1/-1; text-align:center;'>No hay videos subidos.</p>";
+                return;
+            }
+
+            cont.innerHTML = "";
+            data.forEach(vid => {
+                const vidUrl = vid.Url || vid.url || vid.Video || vid.video || '';
+                const vidTitulo = vid.Titulo || vid.titulo || 'Sin título';
+
+                if (vidUrl) {
+                    cont.innerHTML += `
+                        <div style="background:#2a2a2a; padding:6px; border-radius:6px; text-align:center; border: 1px solid #444;">
+                            <video src="${vidUrl}" style="width:100%; height:80px; object-fit:cover; border-radius:4px;" controls preload="metadata"></video>
+                            <p style="font-size:11px; margin:4px 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${vidTitulo}</p>
+                            <button onclick="window.borrarVideo(${vid.id})" class="btn-danger" style="margin-top:2px; font-size:10px; padding:4px 6px; width:100%;">Borrar</button>
+                        </div>`;
+                }
+            });
+        }
+
+        window.borrarVideo = async (id) => {
+            if (confirm("¿Borrar este video?")) {
+                const { error } = await supabase.from("videos").delete().eq("id", id);
+                if (error) alert("Error al borrar: " + error.message);
+                else cargarVideos();
+            }
+        };
 
         checkSession();
     </script>
