@@ -1,0 +1,29 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background-color: #121212; color: #f1f1f1; line-height: 1.6; padding-bottom: 40px; }
+
+header { background: #1e1e1e; padding: 30px 20px; text-align: center; border-bottom: 2px solid #ffc107; }
+header h1 { color: #ffc107; font-size: 2.2rem; margin-bottom: 5px; }
+header p { color: #aaa; font-size: 1.1rem; }
+
+.container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+section { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+h2 { color: #ffc107; margin-bottom: 20px; text-align: center; font-size: 1.4rem; border-bottom: 1px solid #333; padding-bottom: 10px; }
+
+/* Formulario de Reservas */
+.form-group { margin-bottom: 15px; }
+label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.95rem; }
+input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 1rem; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #ffc107; }
+button.btn-main { background: #ffc107; color: #121212; border: none; padding: 12px; width: 100%; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.3s; }
+button.btn-main:hover { background: #e0a800; }
+
+/* Grillas */
+.grid-galeria, .testimonios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
+.media-card, .testimonio-card { background: #2a2a2a; padding: 15px; border-radius: 10px; border: 1px solid #444; }
+
+/* AQUÍ CAMBIAMOS A CONTAIN PARA QUE NO SE CORTEN LAS FOTOS */
+.media-card img { width: 100%; height: 180px; object-fit: contain; border-radius: 6px; margin-bottom: 10px; background: #000; display: block; }
+.media-card video { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: #000; }
+
+footer { text-align: center; padding: 20px; color: #777; font-size: 0.9rem; }
