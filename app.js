@@ -1,19 +1,18 @@
 import { supabase } from "./supabase.js";
 
 // ==========================================
-// 1. ENVIAR RESERVA + REDIRIGIR A MI WHATSAPP
+// 1. ENVIAR RESERVA + BOTÓN CONFIRMACIÓN A WHATSAPP
 // ==========================================
 document.getElementById("formReserva")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     
-    // Obtenemos los valores del formulario
     const nombre = document.getElementById("reservaNombre")?.value || "";
     const telefono = document.getElementById("reservaTelefono")?.value || "";
     const evento = document.getElementById("reservaEvento")?.value || "";
     const fecha = document.getElementById("reservaFecha")?.value || "";
     const comentarios = document.getElementById("reservaComentarios")?.value || "Sin comentarios";
 
-    // 1. Guardar en la base de datos Supabase
+    // 1. Guardar en Supabase
     const { error } = await supabase.from("reservas").insert([{ 
         nombre: nombre, 
         telefono: telefono, 
@@ -27,25 +26,27 @@ document.getElementById("formReserva")?.addEventListener("submit", async (e) => 
         return;
     }
 
-    // 2. Tu número de WhatsApp configurado para Argentina
+    // 2. Armar link de WhatsApp
     const telefonoDuenio = "5491150480339"; 
+    const textoMensaje = `¡Hola! Quiero confirmar mi reserva:\n\n` +
+        `👤 *Nombre:* ${nombre}\n` +
+        `📞 *Teléfono:* ${telefono}\n` +
+        `🎉 *Evento:* ${evento}\n` +
+        `📅 *Fecha:* ${fecha}\n` +
+        `💬 *Comentarios:* ${comentarios}`;
 
-    // Mensaje preformateado para el chat
-    const mensaje = `¡Hola! Quiero solicitar/confirmar una reserva.%0A%0A` +
-        `👤 *Nombre:* ${encodeURIComponent(nombre)}%0A` +
-        `📞 *Teléfono:* ${encodeURIComponent(telefono)}%0A` +
-        `🎉 *Evento:* ${encodeURIComponent(evento)}%0A` +
-        `📅 *Fecha:* ${encodeURIComponent(fecha)}%0A` +
-        `💬 *Comentarios:* ${encodeURIComponent(comentarios)}`;
+    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${telefonoDuenio}&text=${encodeURIComponent(textoMensaje)}`;
 
-    const urlWhatsApp = `https://wa.me/${telefonoDuenio}?text=${mensaje}`;
-
-    // Limpiamos el formulario
+    // 3. Limpiar formulario
     document.getElementById("formReserva").reset();
 
-    // 3. Abre tu WhatsApp en una pestaña nueva con el mensaje listo para enviar
-    window.open(urlWhatsApp, "_blank");
+    // 4. Preguntar si desea finalizar la reserva por WhatsApp
+    const abrirWhatsApp = confirm("¡Reserva registrada con éxito! ¿Querés abrir WhatsApp ahora para enviar los datos?");
+    if (abrirWhatsApp) {
+        window.location.href = urlWhatsApp;
+    }
 });
+
 // ==========================================
 // 2. SUBIR FOTO (PANEL ADMIN)
 // ==========================================
