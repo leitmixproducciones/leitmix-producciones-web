@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitmix Producciones | Sonido, Iluminación y Djs</title>
+    <title>Leitmix Producciones | Sonido, Iluminación y DJs</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #f1f1f1; line-height: 1.6; }
+        body { background-color: #121212; color: #f1f1f1; line-height: 1.6; padding-bottom: 40px; }
         
-        header { background: #1e1e1e; padding: 20px; text-align: center; border-bottom: 2px solid #ffc107; }
-        header h1 { color: #ffc107; font-size: 2rem; }
-        header p { color: #aaa; font-size: 1rem; }
+        header { background: #1e1e1e; padding: 30px 20px; text-align: center; border-bottom: 2px solid #ffc107; }
+        header h1 { color: #ffc107; font-size: 2.2rem; margin-bottom: 5px; }
+        header p { color: #aaa; font-size: 1.1rem; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
 
         section { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        h2 { color: #ffc107; margin-bottom: 20px; text-align: center; font-size: 1.5rem; }
+        h2 { color: #ffc107; margin-bottom: 20px; text-align: center; font-size: 1.4rem; border-bottom: 1px solid #333; padding-bottom: 10px; }
 
-        .testimonios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
-        .testimonio-card { background: #2a2a2a; padding: 20px; border-radius: 10px; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        /* Formulario / Hoja de Ruta de Reservas */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.95rem; }
+        input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 1rem; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #ffc107; }
+        button.btn-main { background: #ffc107; color: #121212; border: none; padding: 12px; width: 100%; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.3s; }
+        button.btn-main:hover { background: #e0a800; }
+
+        /* Grilla de Contenido y Testimonios */
+        .grid-galeria, .testimonios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
+        .media-card, .testimonio-card { background: #2a2a2a; padding: 15px; border-radius: 10px; border: 1px solid #444; }
+        .media-card img { width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; }
         
-        .btn-admin { display: inline-block; background: #ffc107; color: #121212; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px; }
-        .btn-admin:hover { background: #e0a800; }
-
         footer { text-align: center; padding: 20px; color: #777; font-size: 0.9rem; }
     </style>
 </head>
@@ -30,21 +37,59 @@
 
     <header>
         <h1>Leitmix Producciones</h1>
-        <p>Hacemos que tu evento sea inolvidable</p>
+        <p>Sonido, Iluminación y DJs para eventos inolvidables</p>
     </header>
 
     <div class="container">
 
-        <!-- SECCIÓN DE INICIO / BIENVENIDA -->
-        <section style="text-align: center;">
-            <h2>Bienvenidos a nuestra web</h2>
-            <p style="color: #ccc; margin-bottom: 15px;">Especialistas en sonido profesional, iluminación de vanguardia y DJs para fiestas, casamientos y eventos corporativos.</p>
-            <a href="admin/login.html" class="btn-admin">Acceder al Panel de Administración</a>
+        <!-- SECCIÓN 1: RESERVAS / HOJA DE RUTA -->
+        <section>
+            <h2>📅 Reserva tu Fecha (Hoja de Ruta)</h2>
+            <form id="formReserva">
+                <div class="form-group">
+                    <label>Nombre y Apellido</label>
+                    <input type="text" id="reservaNombre" required placeholder="Tu nombre completo">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Evento</label>
+                    <select id="reservaTipo">
+                        <option value="Casamiento">Casamiento</option>
+                        <option value="Cumpleaños / 15">Cumpleaños / 15 Años</option>
+                        <option value="Evento Corporativo">Evento Corporativo</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha del Evento</label>
+                    <input type="date" id="reservaFecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Detalles / Requerimientos (Sonido, Luces, DJ)</label>
+                    <textarea id="reservaDetalles" rows="3" placeholder="Contanos qué servicios necesitas..."></textarea>
+                </div>
+                <button type="submit" class="btn-main">Enviar Solicitud de Reserva</button>
+            </form>
         </section>
 
-        <!-- SECCIÓN: TESTIMONIOS PÚBLICOS -->
+        <!-- SECCIÓN 2: GALERÍA DE FOTOS -->
         <section>
-            <h2>⭐ Lo que dicen nuestros clientes</h2>
+            <h2>📸 Galería de Fotos</h2>
+            <div id="galeriaPublica" class="grid-galeria">
+                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando fotos...</p>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: VIDEOS -->
+        <section>
+            <h2>🎬 Videos de Eventos</h2>
+            <div id="videosPublicos" class="grid-galeria">
+                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando videos...</p>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: TESTIMONIOS -->
+        <section>
+            <h2>⭐ Opiniones de Clientes</h2>
             <div id="testimoniosPublicos" class="testimonios-grid">
                 <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando opiniones...</p>
             </div>
@@ -56,46 +101,101 @@
         <p>&copy; 2026 Leitmix Producciones. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- SCRIPT PARA CONECTAR Y TRAER LOS TESTIMONIOS APROBADOS DESDE SUPABASE -->
+    <!-- SCRIPT DE CONEXIÓN CON SUPABASE -->
     <script type="module">
         import { supabase } from "./supabase.js";
 
+        // 1. Enviar Reserva (Hoja de Ruta)
+        document.getElementById("formReserva").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById("reservaNombre").value;
+            const tipo = document.getElementById("reservaTipo").value;
+            const fecha = document.getElementById("reservaFecha").value;
+            const detalles = document.getElementById("reservaDetalles").value;
+
+            // Nota: Asegúrate de tener una tabla llamada 'reservas' en Supabase con columnas equivalentes si deseas guardarlas
+            const { error } = await supabase.from("reservas").insert([{ nombre, tipo, fecha, detalles }]);
+
+            if (error) {
+                alert("Hubo un error al enviar la reserva: " + error.message);
+            } else {
+                alert("¡Reserva enviada con éxito! Nos pondremos en contacto pronto.");
+                document.getElementById("formReserva").reset();
+            }
+        });
+
+        // 2. Cargar Galería de Fotos Pública
+        async function cargarGaleriaWeb() {
+            const contenedor = document.getElementById("galeriaPublica");
+            const { data, error } = await supabase.from("galeria").select("*");
+
+            if (error || !data || data.length === 0) {
+                contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>No hay fotos disponibles por el momento.</p>";
+                return;
+            }
+
+            contenedor.innerHTML = data.map(item => {
+                const titulo = item.titulo || item.nombre || 'Evento Leitmix';
+                const imgUrl = item.url || item.imagen || item.link || '';
+                return `
+                    <div class="media-card">
+                        ${imgUrl ? `<img src="${imgUrl}" alt="${titulo}">` : '<div style="height: 160px; background: #333; display: flex; align-items: center; justify-content: center; color: #777; border-radius: 6px; margin-bottom: 8px;">Sin imagen</div>'}
+                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107;">${titulo}</p>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        // 3. Cargar Videos Públicos
+        async function cargarVideosWeb() {
+            const contenedor = document.getElementById("videosPublicos");
+            const { data, error } = await supabase.from("videos").select("*");
+
+            if (error || !data || data.length === 0) {
+                contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>No hay videos disponibles por el momento.</p>";
+                return;
+            }
+
+            contenedor.innerHTML = data.map(item => {
+                const titulo = item.titulo || item.nombre || 'Video Leitmix';
+                return `
+                    <div class="media-card">
+                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-bottom: 5px;">🎬 ${titulo}</p>
+                        <p style="color: #aaa; font-size: 0.85rem;">Reproductor de video disponible próximamente.</p>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        // 4. Cargar Testimonios Aprobados
         async function cargarTestimoniosWeb() {
             const contenedor = document.getElementById("testimoniosPublicos");
-
-            // Trae únicamente los testimonios que tienen aprobado = true ordenados del más nuevo al más viejo
             const { data, error } = await supabase
                 .from("testimonios")
                 .select("*")
                 .eq("aprobado", true)
                 .order("id", { ascending: false });
 
-            if (error) {
-                contenedor.innerHTML = "<p style='color: #dc3545; text-align: center; grid-column: 1 / -1;'>Error al cargar los testimonios.</p>";
-                return;
-            }
-
-            if (!data || data.length === 0) {
+            if (error || !data || data.length === 0) {
                 contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>Aún no hay testimonios publicados.</p>";
                 return;
             }
 
-            contenedor.innerHTML = "";
-            data.forEach(t => {
-                const estrellasHTML = "⭐".repeat(t.estrellas || 5);
-
-                const tarjeta = document.createElement("div");
-                tarjeta.className = "testimonio-card";
-                
-                tarjeta.innerHTML = `
-                    <div style="font-size: 1.1rem; margin-bottom: 8px;">${estrellasHTML}</div>
-                    <p style="font-style: italic; color: #ddd; margin-bottom: 12px; font-size: 0.95rem;">"${t.comentario}"</p>
-                    <h4 style="color: #ffc107; font-size: 0.95rem; font-weight: 600;">- ${t.nombre}</h4>
+            contenedor.innerHTML = data.map(t => {
+                const estrellas = "⭐".repeat(t.estrellas || 5);
+                return `
+                    <div class="testimonio-card">
+                        <div style="font-size: 1rem; margin-bottom: 6px;">${estrellas}</div>
+                        <p style="font-style: italic; color: #ddd; margin-bottom: 10px; font-size: 0.9rem;">"${t.comentario}"</p>
+                        <h4 style="color: #ffc107; font-size: 0.9rem; font-weight: 600;">- ${t.nombre}</h4>
+                    </div>
                 `;
-                contenedor.appendChild(tarjeta);
-            });
+            }).join("");
         }
 
+        // Inicializar funciones públicas
+        cargarGaleriaWeb();
+        cargarVideosWeb();
         cargarTestimoniosWeb();
     </script>
 </body>
