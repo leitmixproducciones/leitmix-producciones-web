@@ -3,104 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control | Leitmix Producciones</title>
+    <title>Panel de Administración | Leitmix Producciones</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #f1f1f1; padding: 20px; max-width: 800px; margin: 0 auto; }
-        
-        .admin-card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        h2, h3 { color: #ffc107; margin-bottom: 15px; }
-        
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 1rem; }
-        input:focus, select:focus { outline: none; border-color: #ffc107; }
-
-        button { padding: 12px; border-radius: 8px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; width: 100%; margin-top: 5px; }
-        .btn-main { background: #ffc107; color: #121212; }
-        .btn-main:hover { background: #e0a800; }
-        .btn-danger { background: #dc3545; color: white; }
+        body { background-color: #121212; color: #f1f1f1; padding: 20px; }
+        .container { max-width: 650px; margin: 0 auto; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h1, h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.5rem; text-align: center; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
+        input, select { background: #2a2a2a; color: #fff; border: 1px solid #444; }
+        button, .btn-main { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button:hover, .btn-main:hover { background: #e0a800; }
+        .btn-danger { background: #dc3545; color: #fff; }
         .btn-danger:hover { background: #c82333; }
-
-        .item-card { background: #2a2a2a; padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #444; text-align: left; }
-        .grid-fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 15px; }
-        .stats-container { display: flex; gap: 15px; justify-content: space-around; margin-bottom: 15px; text-align: center; }
-        .stat-box { background: #2a2a2a; padding: 10px; border-radius: 8px; flex: 1; border: 1px solid #444; }
-
-        details summary { cursor: pointer; color: #ffc107; font-size: 1.1rem; font-weight: bold; outline: none; padding: 2px 0; }
-        details[open] summary { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .hidden { display: none !important; }
+        .error-msg { color: #ff6b6b; text-align: center; margin-bottom: 10px; font-size: 0.9rem; }
+        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .stat-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-box h3 { font-size: 1.8rem; color: #ffc107; margin-top: 5px; }
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 15px; }
+        .logo-panel { max-width: 130px; height: auto; display: block; margin: 0 auto 10px auto; }
     </style>
 </head>
 <body>
 
-    <!-- CABECERA / CERRAR SESIÓN -->
-    <div class="admin-card" style="display: flex; justify-content: space-between; align-items: center;">
-        <h2>Panel de Control</h2>
-        <button class="btn-danger" id="cerrarSesion" style="width: auto; padding: 8px 15px; font-size: 0.9rem; margin-top: 0;">Cerrar sesión</button>
-    </div>
+    <div class="container">
+        <!-- Sección de Login -->
+        <div id="loginSection" class="card">
+            <div style="text-align: center;">
+                <img id="logoLogin" src="" alt="Leitmix Producciones" class="logo-panel" style="display:none;">
+            </div>
+            <h2>🎧 Iniciar Sesión</h2>
+            <div id="loginError" class="error-msg"></div>
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Correo electrónico" required>
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <button type="submit">Ingresar</button>
+            </form>
+        </div>
 
-    <!-- CONFIGURACIÓN DE LA WEB (MENÚ DESPLEGABLE) -->
-    <div class="admin-card">
-        <details>
-            <summary>⚙️ Configuración del Negocio</summary>
-            <input type="text" id="cfgNombre" placeholder="Nombre de Fantasía (Ej: Leitmix Producciones)">
-            <input type="text" id="cfgWhatsapp" placeholder="Teléfono WhatsApp (Ej: 54911...)">
-            <input type="text" id="cfgAlias" placeholder="Alias de Pago (Ej: leitmix.mp)">
-            <input type="text" id="cfgInstagram" placeholder="URL de Instagram">
-            <button class="btn-main" id="btnGuardarConfig">Guardar Configuración</button>
-        </details>
-    </div>
+        <!-- Panel de Control (Privado) -->
+        <div id="adminSection" class="card hidden">
+            <div style="text-align: center; margin-bottom: 15px;">
+                <img id="logoHeader" src="" alt="Leitmix Producciones" class="logo-panel" style="display:none;">
+                <h1>Panel de Control</h1>
+            </div>
+            <button id="btnLogout" class="btn-danger">Cerrar sesión</button>
 
-    <!-- GESTIÓN DE FOTOS (GALERÍA) -->
-    <div class="admin-card">
-        <h3>📸 Gestión de Fotos</h3>
-        <input type="text" id="fotoTitulo" placeholder="Título o Descripción de la foto">
-        <input type="file" id="fotoArchivo" accept="image/*" style="background: #2a2a2a; padding: 10px;">
-        <button class="btn-main" id="btnSubirFoto">Subir Foto a la Web</button>
-        
-        <div class="grid-fotos" id="listaFotos">
-            <!-- Las fotos cargadas aparecerán aquí automáticamente -->
+            <!-- 1. Resumen de Actividad -->
+            <div style="margin-top: 20px;">
+                <h2>📊 Resumen de Actividad</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <p>Total de Reservas Recibidas</p>
+                        <h3 id="totalReservas">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border-color:#333; margin: 25px 0;">
+
+            <!-- 2. Emitir Recibos de Pago -->
+            <div>
+                <h2>🧾 Emitir Recibo de Pago</h2>
+                <form id="formRecibo">
+                    <select id="reciboReservaId">
+                        <option value="">-- Seleccionar Reserva a Vincular (Opcional) --</option>
+                    </select>
+                    <input type="text" id="reciboNombre" placeholder="Nombre y Apellido del Cliente" required>
+                    <input type="text" id="reciboEvento" placeholder="Tipo de Evento / Fecha" required>
+                    <input type="text" id="reciboConcepto" placeholder="Concepto (Ej: Seña / Reserva de fecha)" value="Seña de evento" required>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="reciboTotal" placeholder="Precio Total ($)" step="0.01" required>
+                        <input type="number" id="reciboSena" placeholder="Seña / Abonado ($)" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn-main">💾 Generar y Guardar Recibo</button>
+                </form>
+
+                <h3 style="color:#fff; margin: 20px 0 10px 0; font-size:1.1rem; text-align:center;">📋 Recibos Emitidos</h3>
+                <div id="listaRecibosAdmin"></div>
+            </div>
+
+            <hr style="border-color:#333; margin: 25px 0;">
+
+            <!-- 3. Gestión de Fotos -->
+            <div>
+                <h2>📸 Gestión de Fotos</h2>
+                <form id="formAdminGaleria">
+                    <input type="text" id="adminTituloFoto" placeholder="Título de la foto (opcional)">
+                    <input type="file" id="adminArchivoFoto" accept="image/*" required>
+                    <button type="submit" id="btnSubirFoto" class="btn-main">Subir Foto a la Galería</button>
+                </form>
+                
+                <div id="listaFotos" class="media-grid"></div>
+            </div>
+
+            <hr style="border-color:#333; margin: 25px 0;">
+
+            <!-- 4. Gestión de Videos -->
+            <div>
+                <h2>🎬 Gestión de Videos</h2>
+                <form id="formAdminVideo">
+                    <input type="text" id="adminTituloVideo" placeholder="Título del video (Ej: Show en vivo)">
+                    <input type="text" id="adminUrlVideo" placeholder="URL del video (MP4 o YouTube)" required>
+                    <button type="submit" class="btn-main">Guardar Video</button>
+                </form>
+
+                <div id="adminListaVideos" style="margin-top: 15px;"></div>
+            </div>
         </div>
     </div>
 
-    <!-- GESTIÓN DE VIDEOS -->
-    <div class="admin-card">
-        <h3>🎬 Gestión de Videos</h3>
-        <input type="text" id="videoTitulo" placeholder="Título o Descripción del video">
-        <input type="text" id="videoUrl" placeholder="URL del video (Ej: Link de YouTube)">
-        <button class="btn-main" id="btnSubirVideo">Subir Video a la Web</button>
-        
-        <div class="grid-fotos" id="listaVideos">
-            <!-- Los videos cargados aparecerán aquí automáticamente -->
-        </div>
-    </div>
-
-    <!-- SECCIÓN DE RESERVAS -->
-    <div class="admin-card">
-        <h3>📅 Reservas y Estadísticas</h3>
-        <div class="stats-container">
-            <div class="stat-box"><small>Total</small><h2 id="dashTotalReservas" style="color:#ffc107;">0</h2></div>
-            <div class="stat-box"><small>Confirmadas</small><h2 id="dashConfirmadas" style="color:#28a745;">0</h2></div>
-            <div class="stat-box"><small>Pendientes</small><h2 id="dashPendientes" style="color:#ffc107;">0</h2></div>
-        </div>
-        <div id="listaReservas">Cargando reservas...</div>
-    </div>
-
-    <!-- EMISIÓN DE RECIBOS -->
-    <div class="admin-card">
-        <h3>🧾 Emitir Recibo de Pago</h3>
-        <input type="text" id="recNombre" placeholder="Nombre del Cliente">
-        <input type="text" id="recEvento" placeholder="Tipo de Evento (Ej: Casamiento / 15 Años)">
-        <input type="date" id="recFecha">
-        <input type="number" id="recTotal" placeholder="Precio Total ($)">
-        <input type="number" id="recImporte" placeholder="Seña / Importe Abonado ($)">
-        <input type="text" id="recConcepto" placeholder="Concepto (Ej: Seña inicial)">
-        <button class="btn-main" id="btnCrearRecibo">Generar y Guardar Recibo</button>
-
-        <div style="margin-top: 20px;" id="listaRecibos">
-            <!-- Historial de recibos -->
-        </div>
-    </div>
-
-    <!-- Script principal corregido con ruta relativa hacia la raíz -->
-    <script type="module" src="../admin.js"></script>
+    <!-- Carga del JS Modular -->
+    <script type="module" src="../app.js"></script>
 </body>
 </html>
