@@ -17,7 +17,7 @@
         section { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         h2 { color: #ffc107; margin-bottom: 20px; text-align: center; font-size: 1.4rem; border-bottom: 1px solid #333; padding-bottom: 10px; }
 
-        /* Formulario / Hoja de Ruta de Reservas */
+        /* Formulario de Reservas */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.95rem; }
         input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 1rem; }
@@ -25,10 +25,10 @@
         button.btn-main { background: #ffc107; color: #121212; border: none; padding: 12px; width: 100%; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.3s; }
         button.btn-main:hover { background: #e0a800; }
 
-        /* Grilla de Contenido y Testimonios */
+        /* Grillas */
         .grid-galeria, .testimonios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
         .media-card, .testimonio-card { background: #2a2a2a; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        .media-card img { width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; }
+        .media-card img, .media-card video { width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; background: #000; }
         
         footer { text-align: center; padding: 20px; color: #777; font-size: 0.9rem; }
     </style>
@@ -42,7 +42,7 @@
 
     <div class="container">
 
-        <!-- SECCIÓN 1: RESERVAS / HOJA DE RUTA -->
+        <!-- SECCIÓN 1: RESERVAS -->
         <section>
             <h2>📅 Reserva tu Fecha (Hoja de Ruta)</h2>
             <form id="formReserva">
@@ -64,7 +64,7 @@
                     <input type="date" id="reservaFecha" required>
                 </div>
                 <div class="form-group">
-                    <label>Detalles / Requerimientos (Sonido, Luces, DJ)</label>
+                    <label>Detalles / Requerimientos</label>
                     <textarea id="reservaDetalles" rows="3" placeholder="Contanos qué servicios necesitas..."></textarea>
                 </div>
                 <button type="submit" class="btn-main">Enviar Solicitud de Reserva</button>
@@ -101,11 +101,11 @@
         <p>&copy; 2026 Leitmix Producciones. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- SCRIPT DE CONEXIÓN CON SUPABASE -->
+    <!-- SCRIPT DE SUPABASE -->
     <script type="module">
         import { supabase } from "./supabase.js";
 
-        // 1. Enviar Reserva (Hoja de Ruta)
+        // 1. Enviar Reserva
         document.getElementById("formReserva").addEventListener("submit", async (e) => {
             e.preventDefault();
             const nombre = document.getElementById("reservaNombre").value;
@@ -113,7 +113,6 @@
             const fecha = document.getElementById("reservaFecha").value;
             const detalles = document.getElementById("reservaDetalles").value;
 
-            // Nota: Asegúrate de tener una tabla llamada 'reservas' en Supabase con columnas equivalentes si deseas guardarlas
             const { error } = await supabase.from("reservas").insert([{ nombre, tipo, fecha, detalles }]);
 
             if (error) {
@@ -124,7 +123,7 @@
             }
         });
 
-        // 2. Cargar Galería de Fotos Pública
+        // 2. Cargar Galería de Fotos (Maneja múltiples variantes de nombres de columnas)
         async function cargarGaleriaWeb() {
             const contenedor = document.getElementById("galeriaPublica");
             const { data, error } = await supabase.from("galeria").select("*");
@@ -135,18 +134,20 @@
             }
 
             contenedor.innerHTML = data.map(item => {
-                const titulo = item.titulo || item.nombre || 'Evento Leitmix';
-                const imgUrl = item.url || item.imagen || item.link || '';
+                const titulo = item.titulo || item.nombre || item.descripcion || 'Evento Leitmix';
+                // Detecta automáticamente si guardaste la ruta en url, imagen, link o archivo
+                const imgUrl = item.url || item.imagen || item.link || item.archivo || item.src || '';
+                
                 return `
                     <div class="media-card">
-                        ${imgUrl ? `<img src="${imgUrl}" alt="${titulo}">` : '<div style="height: 160px; background: #333; display: flex; align-items: center; justify-content: center; color: #777; border-radius: 6px; margin-bottom: 8px;">Sin imagen</div>'}
-                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107;">${titulo}</p>
+                        ${imgUrl ? `<img src="${imgUrl}" alt="${titulo}" onerror="this.style.display='none'">` : ''}
+                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-top: 5px;">${titulo}</p>
                     </div>
                 `;
             }).join("");
         }
 
-        // 3. Cargar Videos Públicos
+        // 3. Cargar Videos Públicos (Soporta reproducción si hay enlace)
         async function cargarVideosWeb() {
             const contenedor = document.getElementById("videosPublicos");
             const { data, error } = await supabase.from("videos").select("*");
@@ -157,11 +158,13 @@
             }
 
             contenedor.innerHTML = data.map(item => {
-                const titulo = item.titulo || item.nombre || 'Video Leitmix';
+                const titulo = item.titulo || item.nombre || item.descripcion || 'Video Leitmix';
+                const vidUrl = item.url || item.video || item.link || item.archivo || '';
+
                 return `
                     <div class="media-card">
-                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-bottom: 5px;">🎬 ${titulo}</p>
-                        <p style="color: #aaa; font-size: 0.85rem;">Reproductor de video disponible próximamente.</p>
+                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-bottom: 8px;">🎬 ${titulo}</p>
+                        ${vidUrl ? `<video src="${vidUrl}" controls style="width: 100%; height: 150px; border-radius: 6px;"></video>` : '<p style="color: #aaa; font-size: 0.85rem;">Próximamente disponible</p>'}
                     </div>
                 `;
             }).join("");
@@ -193,7 +196,6 @@
             }).join("");
         }
 
-        // Inicializar funciones públicas
         cargarGaleriaWeb();
         cargarVideosWeb();
         cargarTestimoniosWeb();
