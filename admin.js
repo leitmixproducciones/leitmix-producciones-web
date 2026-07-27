@@ -12,7 +12,6 @@ async function verificarAuth() {
     }
     usuario = sesion.session.user;
     
-    // Inicializamos todo el panel al verificar el usuario
     cargarConfiguracion();
     cargarFotos();
     cargarVideos();
@@ -276,6 +275,7 @@ if (btnCrearRecibo) {
       alert("¡Recibo " + numRecibo + " emitido!");
       document.getElementById("recNombre").value = "";
       document.getElementById("recEvento").value = "";
+      document.getElementById("recFecha").value = "";
       document.getElementById("recTotal").value = "";
       document.getElementById("recImporte").value = "";
       document.getElementById("recConcepto").value = "";
