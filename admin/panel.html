@@ -24,6 +24,10 @@
         .grid-fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 15px; }
         .stats-container { display: flex; gap: 15px; justify-content: space-around; margin-bottom: 15px; text-align: center; }
         .stat-box { background: #2a2a2a; padding: 10px; border-radius: 8px; flex: 1; border: 1px solid #444; }
+
+        /* Estilo para el menú desplegable */
+        details summary { cursor: pointer; color: #ffc107; font-size: 1.1rem; font-weight: bold; outline: none; padding: 2px 0; }
+        details[open] summary { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -34,14 +38,16 @@
         <button class="btn-danger" id="cerrarSesion" onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='login.html';" style="width: auto; padding: 8px 15px; font-size: 0.9rem; margin-top: 0;">Cerrar sesión</button>
     </div>
 
-    <!-- CONFIGURACIÓN DE LA WEB -->
+    <!-- CONFIGURACIÓN DE LA WEB (MENÚ DESPLEGABLE) -->
     <div class="admin-card">
-        <h3>⚙️ Configuración del Negocio</h3>
-        <input type="text" id="cfgNombre" placeholder="Nombre de Fantasía (Ej: Leitmix Producciones)">
-        <input type="text" id="cfgWhatsapp" placeholder="Teléfono WhatsApp (Ej: 54911...)">
-        <input type="text" id="cfgAlias" placeholder="Alias de Pago (Ej: leitmix.mp)">
-        <input type="text" id="cfgInstagram" placeholder="URL de Instagram">
-        <button class="btn-main" id="btnGuardarConfig">Guardar Configuración</button>
+        <details>
+            <summary>⚙️ Configuración del Negocio</summary>
+            <input type="text" id="cfgNombre" placeholder="Nombre de Fantasía (Ej: Leitmix Producciones)">
+            <input type="text" id="cfgWhatsapp" placeholder="Teléfono WhatsApp (Ej: 54911...)">
+            <input type="text" id="cfgAlias" placeholder="Alias de Pago (Ej: leitmix.mp)">
+            <input type="text" id="cfgInstagram" placeholder="URL de Instagram">
+            <button class="btn-main" id="btnGuardarConfig">Guardar Configuración</button>
+        </details>
     </div>
 
     <!-- GESTIÓN DE FOTOS (GALERÍA) -->
