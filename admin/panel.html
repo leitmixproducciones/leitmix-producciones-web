@@ -31,7 +31,7 @@
         /* Estilos del Recibo Integrado */
         #reciboPreview { display: none; background: #fff; color: #333; padding: 25px; border-radius: 10px; text-align: left; margin-top: 15px; border: 2px solid #ffc107; }
         .recibo-header { text-align: center; border-bottom: 2px solid #ffc107; padding-bottom: 12px; margin-bottom: 15px; }
-        .recibo-logo { max-width: 90px; height: auto; margin-bottom: 8px; border-radius: 50%; }
+        .recibo-logo { max-width: 80px; max-height: 80px; width: auto; height: auto; margin: 0 auto 8px auto; display: block; border-radius: 50%; object-fit: cover; border: 2px solid #ffc107; }
         .recibo-header h3 { color: #121212; margin: 0; font-size: 1.4rem; font-weight: 800; }
         .recibo-header p { color: #555; font-size: 0.85rem; margin: 3px 0 0 0; }
         .recibo-details table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -41,8 +41,18 @@
         .recibo-footer { text-align: center; margin-top: 20px; font-size: 0.8rem; color: #555; border-top: 1px solid #eee; padding-top: 10px; }
         .recibo-footer .redes { margin-top: 6px; font-weight: bold; color: #121212; font-size: 0.85rem; }
 
-        /* CONFIGURACIÓN EXCLUSIVA PARA IMPRESIÓN (OCULTA TODO EXCEPTO EL RECIBO) */
+        /* CONFIGURACIÓN EXCLUSIVA PARA IMPRESIÓN EN UNA SOLA HOJA */
         @media print {
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+            body, html {
+                background: #fff !important;
+                color: #000 !important;
+                height: 100%;
+                overflow: hidden;
+            }
             body * {
                 visibility: hidden;
             }
@@ -50,17 +60,20 @@
                 visibility: visible;
             }
             #reciboPreview {
+                display: block !important;
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
+                max-width: 100%;
                 border: none !important;
                 margin: 0;
-                padding: 10px;
+                padding: 5px;
                 box-shadow: none;
+                background: #fff !important;
             }
             #btnPrintRecibo {
-                display: none !important; /* Oculta el botón de imprimir dentro del papel */
+                display: none !important;
             }
         }
     </style>
