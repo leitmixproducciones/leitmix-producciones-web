@@ -131,7 +131,7 @@ window.borrarFoto = async (id) => {
   }
 };
 
-// 4. Gestión de Videos
+// 4. Gestión de Videos (Corregido con la columna "Url")
 const btnSubirVideo = document.getElementById("btnSubirVideo");
 if (btnSubirVideo) {
   btnSubirVideo.onclick = async () => {
@@ -143,9 +143,10 @@ if (btnSubirVideo) {
 
     if (!urlVideo) return alert("Ingresá la URL del video primero.");
 
+    // Se guarda con "Url" (con mayúscula) respetando tu tabla en Supabase
     const { error } = await supabase.from("videos").insert([{ 
       Titulo: titulo, 
-      url: urlVideo, 
+      Url: urlVideo, 
       user_id: usuario ? usuario.id : null 
     }]);
 
@@ -175,7 +176,7 @@ async function cargarVideos() {
 
   cont.innerHTML = "";
   data.forEach(vid => {
-    const vidUrl = vid.url || vid.Video || vid.video || '';
+    const vidUrl = vid.Url || vid.url || vid.Video || vid.video || '';
     const vidTitulo = vid.Titulo || vid.titulo || 'Sin título';
     const vidId = vid.id;
 
