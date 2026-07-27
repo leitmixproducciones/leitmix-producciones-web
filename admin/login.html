@@ -91,7 +91,7 @@
             }
 
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + "/reset-password.html", // Opcional si creas pantalla de reseteo, sino usa la misma
+                redirectTo: window.location.origin + "/nueva-password.html", 
             });
 
             if (error) {
