@@ -53,15 +53,15 @@ async function cargarVideosWeb() {
 
     contenedor.innerHTML = data.map(item => {
         const titulo = item.Titulo || item.titulo || item.nombre || 'Video Leitmix';
-        const vidUrl = item.Video || item.video || item.url || item.link || '';
+        const vidUrl = item.Url || item.url || item.Video || item.video || item.link || '';
 
         let contenidoVideo = '<p style="color: #aaa; font-size: 0.85rem;">Próximamente disponible</p>';
         if (vidUrl) {
             if (vidUrl.includes('youtube.com') || vidUrl.includes('youtu.be')) {
-                let ytId = vidUrl.includes('youtu.be') ? vidUrl.split('/').pop() : new URLSearchParams(new URL(vidUrl).search).get('v');
+                let ytId = vidUrl.includes('youtu.be') ? vidUrl.split('/').pop().split('?')[0] : new URLSearchParams(new URL(vidUrl).search).get('v');
                 contenidoVideo = `<iframe width="100%" height="180" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:6px; margin-bottom:10px;"></iframe>`;
             } else {
-                contenidoVideo = `<video src="${vidUrl}" controls style="width: 100%; height: 180px; border-radius: 6px; margin-bottom: 10px;"></video>`;
+                contenidoVideo = `<video src="${vidUrl}" controls style="width: 100%; height: 180px; border-radius: 6px; margin-bottom: 10px; background: #000;"></video>`;
             }
         }
 
