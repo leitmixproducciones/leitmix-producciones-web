@@ -1,17 +1,17 @@
 import { supabase } from "./supabase.js";
 
-// 1. Enviar Reserva (IDs sincronizados con el HTML)
+// ==========================================
+// 1. ENVIAR RESERVA
+// ==========================================
 document.getElementById("formReserva")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     
-    // Captura los datos usando los IDs reales de tu index.html
     const nombre = document.getElementById("reservaNombre")?.value || "";
     const telefono = document.getElementById("reservaTelefono")?.value || "";
     const evento = document.getElementById("reservaEvento")?.value || "";
     const fecha = document.getElementById("reservaFecha")?.value || "";
     const comentarios = document.getElementById("reservaComentarios")?.value || "";
 
-    // Mapea las variables a las columnas de Supabase
     const { error } = await supabase.from("reservas").insert([{ 
         nombre, 
         telefono, 
@@ -28,7 +28,9 @@ document.getElementById("formReserva")?.addEventListener("submit", async (e) => 
     }
 });
 
-// 2. Subir Foto desde el Panel de Administración (Protegido si no está en la página)
+// ==========================================
+// 2. SUBIR FOTO (PANEL ADMIN)
+// ==========================================
 document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const titulo = document.getElementById("adminTituloFoto")?.value || "";
@@ -39,7 +41,6 @@ document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e
 
     const nombreArchivo = `${Date.now()}_${archivo.name}`;
 
-    // Sube el archivo al Storage de Supabase
     const { data: uploadData, error: uploadError } = await supabase.storage
         .from("galeria")
         .upload(nombreArchivo, archivo);
@@ -49,11 +50,9 @@ document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e
         return;
     }
 
-    // Obtiene la URL pública del archivo subido
     const { data: urlData } = supabase.storage.from("galeria").getPublicUrl(nombreArchivo);
     const publicUrl = urlData.publicUrl;
 
-    // Guarda el registro en la tabla 'galeria'
     const { error: dbError } = await supabase.from("galeria").insert([{ Titulo: titulo, Imagen: publicUrl }]);
 
     if (dbError) {
@@ -65,11 +64,15 @@ document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e
     }
 });
 
-// 3. Guardar Video desde el Panel de Administración
+// ==========================================
+// 3. GUARDAR VIDEO (PANEL ADMIN)
+// ==========================================
 document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const titulo = document.getElementById("adminTituloVideo")?.value || "";
     const urlVideo = document.getElementById("adminUrlVideo")?.value || "";
+
+    if (!urlVideo) return alert("Por favor ingresá la URL del video.");
 
     const { error } = await supabase.from("videos").insert([{ Titulo: titulo, Url: urlVideo }]);
 
@@ -79,15 +82,20 @@ document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) 
         alert("¡Video guardado con éxito!");
         document.getElementById("formAdminVideo").reset();
         cargarVideosWeb();
+        cargarVideosAdmin(); // Actualiza también la lista del panel admin
     }
 });
 
-// 4. Cargar Galería de Fotos
+// ==========================================
+// 4. CARGAR GALERÍA DE FOTOS (PÚBLICA)
+// ==========================================
 async function cargarGaleriaWeb() {
     const contenedor = document.getElementById("galeriaPublica");
     if (!contenedor) return;
 
     const { data, error } = await supabase.from("galeria").select("*");
+
+    if (error) console.error("Error cargando galería:", error);
 
     if (error || !data || data.length === 0) {
         contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>No hay fotos disponibles.</p>";
@@ -107,12 +115,16 @@ async function cargarGaleriaWeb() {
     }).join("");
 }
 
-// 5. Cargar Videos (Soporta YouTube y videos MP4 directos de Supabase Storage)
+// ==========================================
+// 5. CARGAR VIDEOS (PÚBLICO)
+// ==========================================
 async function cargarVideosWeb() {
     const contenedor = document.getElementById("videosPublicos");
     if (!contenedor) return;
 
     const { data, error } = await supabase.from("videos").select("*");
+
+    if (error) console.error("Error cargando videos web:", error);
 
     if (error || !data || data.length === 0) {
         contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>No hay videos disponibles.</p>";
@@ -147,7 +159,60 @@ async function cargarVideosWeb() {
     }).join("");
 }
 
-// 6. Cargar Testimonios Aprobados
+// ==========================================
+// 6. CARGAR VIDEOS (PANEL ADMIN CON BOTÓN ELIMINAR)
+// ==========================================
+async function cargarVideosAdmin() {
+    const contenedorAdmin = document.getElementById("adminListaVideos");
+    if (!contenedorAdmin) return;
+
+    const { data, error } = await supabase.from("videos").select("*").order("id", { ascending: false });
+
+    if (error) console.error("Error cargando videos admin:", error);
+
+    if (error || !data || data.length === 0) {
+        contenedorAdmin.innerHTML = "<p style='color: #888;'>No hay videos para administrar.</p>";
+        return;
+    }
+
+    contenedorAdmin.innerHTML = data.map(vid => {
+        const titulo = vid.Titulo || vid.titulo || 'Sin título';
+        const url = vid.Url || vid.url || '';
+
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #333;">
+                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">
+                    <strong style="color: #ffc107;">🎬 ${titulo}</strong><br>
+                    <small style="color: #aaa;">${url}</small>
+                </div>
+                <button class="btn-eliminar-video" data-id="${vid.id}" style="background: #e63946; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                    🗑️ Eliminar
+                </button>
+            </div>
+        `;
+    }).join("");
+
+    // Asignar eventos de eliminación a cada botón
+    document.querySelectorAll(".btn-eliminar-video").forEach(boton => {
+        boton.addEventListener("click", async (e) => {
+            const idVideo = e.currentTarget.getAttribute("data-id");
+            if (confirm("¿Estás seguro de que querés eliminar este video?")) {
+                const { error: delError } = await supabase.from("videos").delete().eq("id", idVideo);
+                if (delError) {
+                    alert("Error al eliminar: " + delError.message);
+                } else {
+                    alert("Video eliminado con éxito.");
+                    cargarVideosAdmin();
+                    cargarVideosWeb();
+                }
+            }
+        });
+    });
+}
+
+// ==========================================
+// 7. CARGAR TESTIMONIOS (PÚBLICO)
+// ==========================================
 async function cargarTestimoniosWeb() {
     const contenedor = document.getElementById("testimoniosPublicos");
     if (!contenedor) return;
@@ -157,6 +222,8 @@ async function cargarTestimoniosWeb() {
         .select("*")
         .eq("aprobado", true)
         .order("id", { ascending: false });
+
+    if (error) console.error("Error cargando testimonios:", error);
 
     if (error || !data || data.length === 0) {
         contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>Aún no hay testimonios publicados.</p>";
@@ -175,7 +242,10 @@ async function cargarTestimoniosWeb() {
     }).join("");
 }
 
-// Ejecutar cargas iniciales
+// ==========================================
+// EJECUCIÓN INICIAL AL CARGAR LA PÁGINA
+// ==========================================
 cargarGaleriaWeb();
 cargarVideosWeb();
+cargarVideosAdmin();
 cargarTestimoniosWeb();
