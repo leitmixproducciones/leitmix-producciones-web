@@ -25,7 +25,6 @@
         .stats-container { display: flex; gap: 15px; justify-content: space-around; margin-bottom: 15px; text-align: center; }
         .stat-box { background: #2a2a2a; padding: 10px; border-radius: 8px; flex: 1; border: 1px solid #444; }
 
-        /* Estilo para el menú desplegable */
         details summary { cursor: pointer; color: #ffc107; font-size: 1.1rem; font-weight: bold; outline: none; padding: 2px 0; }
         details[open] summary { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
     </style>
@@ -93,7 +92,7 @@
         <input type="date" id="recFecha">
         <input type="number" id="recTotal" placeholder="Precio Total ($)">
         <input type="number" id="recImporte" placeholder="Seña / Importe Abonado ($)">
-        <input type="text" id="recConcepto" placeholder="Concepto (Ej: Seña inicial de seña)">
+        <input type="text" id="recConcepto" placeholder="Concepto (Ej: Seña inicial)">
         <button class="btn-main" id="btnCrearRecibo">Generar y Guardar Recibo</button>
 
         <div style="margin-top: 20px;" id="listaRecibos">
@@ -101,7 +100,7 @@
         </div>
     </div>
 
-    <!-- Conexión con tu script actual -->
+    <!-- Script principal -->
     <script type="module" src="admin.js"></script>
 </body>
 </html>
