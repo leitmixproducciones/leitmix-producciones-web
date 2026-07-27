@@ -48,7 +48,175 @@ document.getElementById("formReserva")?.addEventListener("submit", async (e) => 
 });
 
 // ==========================================
-// 2. SUBIR FOTO (PANEL ADMIN)
+// 2. GESTIÓN DE RECIBOS DE PAGO (PANEL ADMIN)
+// ==========================================
+
+// Cargar las reservas en el selector desplegable para autocompletar
+async function cargarReservasEnSelect() {
+    const select = document.getElementById("reciboReservaId");
+    if (!select) return;
+
+    const { data: reservas } = await supabase
+        .from("reservas")
+        .select("id, nombre, evento, fecha")
+        .order("fecha", { ascending: false });
+
+    if (!reservas) return;
+
+    select.innerHTML = '<option value="">-- Seleccionar Reserva Vincular (Opcional) --</option>' + 
+        reservas.map(r => `<option value="${r.id}">${r.nombre} - ${r.evento || 'Evento'} (${r.fecha})</option>`).join("");
+}
+
+// Autocompletar nombre y evento al seleccionar una reserva
+document.getElementById("reciboReservaId")?.addEventListener("change", async (e) => {
+    const reservaId = e.target.value;
+    if (!reservaId) return;
+
+    const { data } = await supabase.from("reservas").select("*").eq("id", reservaId).single();
+    if (data) {
+        if(document.getElementById("reciboNombre")) document.getElementById("reciboNombre").value = data.nombre || "";
+        if(document.getElementById("reciboEvento")) document.getElementById("reciboEvento").value = data.evento || "";
+    }
+});
+
+// Evento para emitir y guardar el recibo en la base de datos
+document.getElementById("formRecibo")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    const nombre = document.getElementById("reciboNombre")?.value || "";
+    const evento = document.getElementById("reciboEvento")?.value || "";
+    const total = parseFloat(document.getElementById("reciboTotal")?.value) || 0;
+    const sena = parseFloat(document.getElementById("reciboSena")?.value) || 0;
+    const concepto = document.getElementById("reciboConcepto")?.value || "Seña de evento";
+    const numRecibo = "REC-" + Math.floor(10000 + Math.random() * 90000);
+
+    const { error } = await supabase.from("recibos").insert([{
+        numero_recibo: numRecibo,
+        nombre: nombre,
+        evento: evento,
+        total: total,
+        sena: sena,
+        concepto: concepto
+    }]);
+
+    if (error) {
+        alert("Error al guardar recibo: " + error.message);
+    } else {
+        alert("¡Recibo generado con éxito!");
+        document.getElementById("formRecibo").reset();
+        cargarRecibosAdmin();
+    }
+});
+
+// Cargar lista de recibos en el Panel de Administración
+async function cargarRecibosAdmin() {
+    const cont = document.getElementById("listaRecibosAdmin") || document.getElementById("recibosEmitidos");
+    if (!cont) return;
+
+    const { data: recibos, error } = await supabase
+        .from("recibos")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error || !recibos || recibos.length === 0) {
+        cont.innerHTML = "<p style='color:#888; font-size:0.9rem; text-align:center;'>No hay recibos generados.</p>";
+        return;
+    }
+
+    cont.innerHTML = recibos.map(r => {
+        const total = parseFloat(r.total || 0);
+        const sena = parseFloat(r.sena || 0);
+        const restante = total - sena;
+        const numRecibo = r.numero_recibo || `REC-${r.id}`;
+
+        return `
+            <div style="background: #222; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;">
+                <strong style="color: #ffc107; font-size: 1rem;">🧾 ${numRecibo} - ${r.nombre}</strong>
+                <p style="margin: 5px 0; color: #ccc; font-size: 0.85rem;">
+                    Total: $${total} | Abonado: $${sena} | <b style="color: #ff5252;">Pendiente: $${restante}</b>
+                </p>
+                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                    <button onclick="window.generarImagenRecibo('${r.nombre}', '${r.evento || 'Evento'}', '${numRecibo}', ${total}, ${sena}, '${r.concepto || 'Seña'}')" 
+                            style="background: #ffc107; color: #121212; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:0.8rem;">
+                        👁️ Ver Recibo
+                    </button>
+                    <button onclick="window.borrarRecibo('${r.id}')" 
+                            style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size:0.8rem;">
+                        Borrar
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+// Función global para borrar recibos
+window.borrarRecibo = async (id) => {
+    if (confirm("¿Estás seguro de que querés borrar este recibo?")) {
+        const { error } = await supabase.from("recibos").delete().eq("id", id);
+        if (error) alert("Error al eliminar: " + error.message);
+        else cargarRecibosAdmin();
+    }
+};
+
+// Función global para generar y visualizar/imprimir el comprobante
+window.generarImagenRecibo = function(nombre, evento, numeroRecibo, total, sena, concepto) {
+    const restante = total - sena;
+    const fechaHoy = new Date().toLocaleDateString('es-AR');
+
+    const contenidoHTML = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <title>Recibo ${numeroRecibo}</title>
+            <style>
+                body { font-family: Arial, sans-serif; background: #121212; color: #333; padding: 20px; display: flex; justify-content: center; }
+                .recibo-card { background: #fff; width: 340px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-top: 8px solid #ffc107; text-align: center; }
+                .logo { font-size: 1.3rem; font-weight: bold; color: #121212; margin-bottom: 2px; }
+                .sub { font-size: 0.8rem; color: #666; margin-bottom: 15px; }
+                .numero { font-size: 0.9rem; font-weight: bold; background: #eee; padding: 6px 12px; border-radius: 4px; display: inline-block; margin-bottom: 15px; }
+                .detalles { text-align: left; font-size: 0.9rem; border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 12px 0; margin-bottom: 15px; line-height: 1.6; }
+                .monto-box { background: #fff8e1; border: 1px solid #ffe082; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; color: #856404; margin-bottom: 15px; }
+                .btn-imprimir { background: #28a745; color: #fff; border: none; padding: 10px 18px; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; }
+                @media print { .btn-imprimir { display: none; } body { background: white; padding: 0; } }
+            </style>
+        </head>
+        <body>
+            <div class="recibo-card">
+                <div class="logo">🎵 LEITMIX PRODUCCIONES</div>
+                <div class="sub">Sonido, Iluminación y DJs</div>
+                <div class="numero">COMPROBANTE: ${numeroRecibo}</div>
+                
+                <div class="detalles">
+                    <b>Fecha:</b> ${fechaHoy}<br>
+                    <b>Cliente:</b> ${nombre}<br>
+                    <b>Evento:</b> ${evento}<br>
+                    <b>Concepto:</b> ${concepto}
+                </div>
+
+                <div class="monto-box">
+                    Abonado / Seña: $${sena}
+                </div>
+
+                <div class="detalles" style="border: none; padding: 0; margin-bottom: 10px;">
+                    <b>Precio Total:</b> $${total}<br>
+                    <b style="color: ${restante > 0 ? '#d9534f' : '#28a745'};">Saldo Pendiente: $${restante}</b>
+                </div>
+
+                <button class="btn-imprimir" onclick="window.print()">🖨️ Guardar PDF / Imprimir</button>
+            </div>
+        </body>
+        </html>
+    `;
+
+    const ventana = window.open('', '_blank');
+    ventana.document.write(contenidoHTML);
+    ventana.document.close();
+};
+
+// ==========================================
+// 3. SUBIR FOTO (PANEL ADMIN)
 // ==========================================
 document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -84,7 +252,7 @@ document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e
 });
 
 // ==========================================
-// 3. GUARDAR VIDEO (PANEL ADMIN)
+// 4. GUARDAR VIDEO (PANEL ADMIN)
 // ==========================================
 document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -101,12 +269,12 @@ document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) 
         alert("¡Video guardado con éxito!");
         document.getElementById("formAdminVideo").reset();
         cargarVideosWeb();
-        cargarVideosAdmin(); // Actualiza también la lista del panel admin
+        cargarVideosAdmin();
     }
 });
 
 // ==========================================
-// 4. CARGAR GALERÍA DE FOTOS (PÚBLICA)
+// 5. CARGAR GALERÍA DE FOTOS (PÚBLICA)
 // ==========================================
 async function cargarGaleriaWeb() {
     const contenedor = document.getElementById("galeriaPublica");
@@ -135,7 +303,7 @@ async function cargarGaleriaWeb() {
 }
 
 // ==========================================
-// 5. CARGAR VIDEOS (PÚBLICO)
+// 6. CARGAR VIDEOS (PÚBLICO)
 // ==========================================
 async function cargarVideosWeb() {
     const contenedor = document.getElementById("videosPublicos");
@@ -179,7 +347,7 @@ async function cargarVideosWeb() {
 }
 
 // ==========================================
-// 6. CARGAR VIDEOS (PANEL ADMIN CON BOTÓN ELIMINAR)
+// 7. CARGAR VIDEOS (PANEL ADMIN CON BOTÓN ELIMINAR)
 // ==========================================
 async function cargarVideosAdmin() {
     const contenedorAdmin = document.getElementById("adminListaVideos");
@@ -211,7 +379,6 @@ async function cargarVideosAdmin() {
         `;
     }).join("");
 
-    // Asignar eventos de eliminación a cada botón
     document.querySelectorAll(".btn-eliminar-video").forEach(boton => {
         boton.addEventListener("click", async (e) => {
             const idVideo = e.currentTarget.getAttribute("data-id");
@@ -230,7 +397,7 @@ async function cargarVideosAdmin() {
 }
 
 // ==========================================
-// 7. CARGAR TESTIMONIOS (PÚBLICO)
+// 8. CARGAR TESTIMONIOS (PÚBLICO)
 // ==========================================
 async function cargarTestimoniosWeb() {
     const contenedor = document.getElementById("testimoniosPublicos");
@@ -268,3 +435,5 @@ cargarGaleriaWeb();
 cargarVideosWeb();
 cargarVideosAdmin();
 cargarTestimoniosWeb();
+cargarReservasEnSelect();
+cargarRecibosAdmin();
