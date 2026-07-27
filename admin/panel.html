@@ -6,244 +6,84 @@
     <title>Panel de Control | Leitmix Producciones</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #f1f1f1; padding: 20px; }
+        body { background-color: #121212; color: #f1f1f1; padding: 20px; max-width: 800px; margin: 0 auto; }
         
-        .admin-card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; }
+        .admin-card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         h2, h3 { color: #ffc107; margin-bottom: 15px; }
         
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 1rem; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 1rem; }
         input:focus, select:focus { outline: none; border-color: #ffc107; }
 
-        button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button { padding: 12px; border-radius: 8px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; width: 100%; margin-top: 5px; }
         .btn-main { background: #ffc107; color: #121212; }
         .btn-main:hover { background: #e0a800; }
         .btn-danger { background: #dc3545; color: white; }
         .btn-danger:hover { background: #c82333; }
 
-        .testimonio-item { background: #2a2a2a; padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #444; text-align: left; }
-        .btn-accion { padding: 6px 12px; width: auto; font-size: 0.9rem; margin-top: 8px; display: inline-block; }
-        .btn-aprobar { background: #28a745; color: white; }
-        .btn-desaprobar { background: #dc3545; color: white; }
-        .estado-aprobado { color: #28a745; font-size: 0.85rem; }
-        .estado-pendiente { color: #ffc107; font-size: 0.85rem; }
+        .item-card { background: #2a2a2a; padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #444; text-align: left; }
+        .grid-fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 15px; }
+        .stats-container { display: flex; gap: 15px; justify-content: space-around; margin-bottom: 15px; text-align: center; }
+        .stat-box { background: #2a2a2a; padding: 10px; border-radius: 8px; flex: 1; border: 1px solid #444; }
     </style>
 </head>
 <body>
 
-    <!-- PANEL / CERRAR SESIÓN -->
-    <div class="admin-card">
+    <!-- CABECERA / CERRAR SESIÓN -->
+    <div class="admin-card" style="display: flex; justify-content: space-between; align-items: center;">
         <h2>Panel de Control</h2>
-        <button class="btn-danger" id="btnCerrarSesion">Cerrar sesión</button>
+        <button class="btn-danger" id="cerrarSesion" style="width: auto; padding: 8px 15px; font-size: 0.9rem; margin-top: 0;">Cerrar sesión</button>
     </div>
 
-    <!-- SECCIÓN: MODERACIÓN DE TESTIMONIOS -->
+    <!-- CONFIGURACIÓN DE LA WEB -->
     <div class="admin-card">
-        <h3>⭐ Moderación de Testimonios</h3>
-        <div id="listaTestimonios" style="color: #aaa;">Cargando testimonios...</div>
+        <h3>⚙️ Configuración del Negocio</h3>
+        <input type="text" id="cfgNombre" placeholder="Nombre de Fantasía (Ej: Leitmix Producciones)">
+        <input type="text" id="cfgWhatsapp" placeholder="Teléfono WhatsApp (Ej: 54911...)">
+        <input type="text" id="cfgAlias" placeholder="Alias de Pago (Ej: leitmix.mp)">
+        <input type="text" id="cfgInstagram" placeholder="URL de Instagram">
+        <button class="btn-main" id="btnGuardarConfig">Guardar Configuración</button>
     </div>
 
-    <!-- RESUMEN -->
+    <!-- GESTIÓN DE FOTOS (GALERÍA) -->
     <div class="admin-card">
-        <h3>📊 Resumen</h3>
-        <p style="color: #ccc; margin-bottom: 5px;">Total de Reservas Recibidas</p>
-        <h1 id="totalReservas" style="color: #ffc107; font-size: 2.5rem;">0</h1>
-    </div>
-
-    <!-- GENERADOR DE RECIBOS -->
-    <div class="admin-card">
-        <h3>🧾 Generar Recibo de Seña / Pago</h3>
-        <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 15px;">Calcula automáticamente y genera el comprobante con el logo.</p>
+        <h3>📸 Gestión de Fotos</h3>
+        <input type="text" id="fotoTitulo" placeholder="Título o Descripción de la foto">
+        <input type="file" id="fotoArchivo" accept="image/*" style="background: #2a2a2a; padding: 10px;">
+        <button class="btn-main" id="btnSubirFoto">Subir Foto a la Web</button>
         
-        <input type="text" id="reciboCliente" placeholder="Nombre del Cliente">
-        <input type="text" id="reciboServicio" placeholder="Tipo de Servicio (Ej: DJ + Iluminación)">
-        <input type="number" id="reciboTotal" placeholder="Precio Total ($)">
-        <input type="number" id="reciboSena" placeholder="Seña / Anticipo pagado ($)">
-        <div id="restoPagar" style="background: #2a2a2a; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; text-align: left; border: 1px solid #444;">Resto a Pagar: $0</div>
-        
-        <button class="btn-main" id="btnGenerarRecibo">Generar / Imprimir Recibo</button>
-    </div>
-
-    <!-- GESTIÓN DE CONTENIDO (FOTOS Y VIDEOS) -->
-    <div class="admin-card">
-        <h3>📸 Gestión de Contenido</h3>
-        
-        <input type="text" id="mediaTitulo" placeholder="Título del archivo (Ej: Video Show)">
-        
-        <select id="mediaTabla">
-            <option value="galeria">Tabla: Galería (Fotos)</option>
-            <option value="videos">Tabla: Videos</option>
-        </select>
-
-        <input type="file" id="mediaArchivo" style="padding: 10px; background: #2a2a2a;">
-        
-        <button class="btn-main" id="btnSubirMedia" style="margin-top: 10px;">Subir y Registrar</button>
-
-        <div style="margin-top: 20px; text-align: left;">
-            <h4 style="color: #ffc107; font-size: 1rem; border-bottom: 1px solid #444; padding-bottom: 5px;">🖼️ Elementos en Tabla 'galeria'</h4>
-            <div id="listaGaleria" style="margin-top: 10px; color: #aaa; font-size: 0.9rem;">Cargando fotos...</div>
-
-            <h4 style="color: #ffc107; font-size: 1rem; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 20px;">🎬 Elementos en Tabla 'videos'</h4>
-            <div id="listaVideos" style="margin-top: 10px; color: #aaa; font-size: 0.9rem;">Cargando videos...</div>
+        <div class="grid-fotos" id="listaFotos">
+            <!-- Las fotos cargadas aparecerán aquí automáticamente -->
         </div>
     </div>
 
-    <script type="module">
-        import { supabase } from "../supabase.js";
+    <!-- SECCIÓN DE RESERVAS -->
+    <div class="admin-card">
+        <h3>📅 Reservas y Estadísticas</h3>
+        <div class="stats-container">
+            <div class="stat-box"><small>Total</small><h2 id="dashTotalReservas" style="color:#ffc107;">0</h2></div>
+            <div class="stat-box"><small>Confirmadas</small><h2 id="dashConfirmadas" style="color:#28a745;">0</h2></div>
+            <div class="stat-box"><small>Pendientes</small><h2 id="dashPendientes" style="color:#ffc107;">0</h2></div>
+        </div>
+        <div id="listaReservas">Cargando reservas...</div>
+    </div>
 
-        // 1. Verificar sesión activa
-        async function verificarSesion() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                window.location.href = "login.html";
-            }
-        }
-        verificarSesion();
+    <!-- EMISIÓN DE RECIBOS -->
+    <div class="admin-card">
+        <h3>🧾 Emitir Recibo de Pago</h3>
+        <input type="text" id="recNombre" placeholder="Nombre del Cliente">
+        <input type="text" id="recEvento" placeholder="Tipo de Evento (Ej: Casamiento / 15 Años)">
+        <input type="date" id="recFecha">
+        <input type="number" id="recTotal" placeholder="Precio Total ($)">
+        <input type="number" id="recImporte" placeholder="Seña / Importe Abonado ($)">
+        <input type="text" id="recConcepto" placeholder="Concepto (Ej: Seña inicial de seña)">
+        <button class="btn-main" id="btnCrearRecibo">Generar y Guardar Recibo</button>
 
-        // Cerrar sesión
-        document.getElementById("btnCerrarSesion").addEventListener("click", async () => {
-            await supabase.auth.signOut();
-            window.location.href = "login.html";
-        });
+        <div style="margin-top: 20px;" id="listaRecibos">
+            <!-- Historial de recibos -->
+        </div>
+    </div>
 
-        // 2. Moderación de Testimonios
-        async function cargarTestimonios() {
-            const contenedor = document.getElementById("listaTestimonios");
-            const { data, error } = await supabase
-                .from("testimonios")
-                .select("*")
-                .order("id", { ascending: false });
-
-            if (error) {
-                contenedor.innerHTML = `<p style="color: #dc3545;">Error: ${error.message}</p>`;
-                return;
-            }
-
-            if (!data || data.length === 0) {
-                contenedor.textContent = "No hay testimonios registrados.";
-                return;
-            }
-
-            contenedor.innerHTML = "";
-            data.forEach(t => {
-                const div = document.createElement("div");
-                div.className = "testimonio-item";
-                const estrellasHTML = "⭐".repeat(t.estrellas || 5);
-                const estadoTexto = t.aprobado ? 'Aprobado (Visible en web)' : 'Pendiente de aprobación';
-                const claseEstado = t.aprobado ? 'estado-aprobado' : 'estado-pendiente';
-                const textoBoton = t.aprobado ? 'Desaprobar' : 'Aprobar';
-                const claseBoton = t.aprobado ? 'btn-desaprobar' : 'btn-aprobar';
-
-                div.innerHTML = `
-                    <p><strong>${t.nombre}</strong> <span style="margin-left: 8px;">${estrellasHTML}</span></p>
-                    <p style="margin: 6px 0; color: #ccc; font-style: italic;">"${t.comentario}"</p>
-                    <p class="${claseEstado}">Estado: <strong>${estadoTexto}</strong></p>
-                    <button class="btn-accion ${claseBoton}" onclick="window.cambiarEstadoTestimonio(${t.id}, ${!t.aprobado})">
-                        ${textoBoton}
-                    </button>
-                `;
-                contenedor.appendChild(div);
-            });
-        }
-
-        window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
-            const { error } = await supabase
-                .from("testimonios")
-                .update({ aprobado: nuevoEstado })
-                .eq("id", id);
-
-            if (error) {
-                alert("Error al actualizar: " + error.message);
-            } else {
-                cargarTestimonios();
-            }
-        };
-
-        // 3. Cálculo automático Resto a Pagar en Recibos
-        const inputTotal = document.getElementById("reciboTotal");
-        const inputSena = document.getElementById("reciboSena");
-        const divResto = document.getElementById("restoPagar");
-
-        function calcularResto() {
-            const total = parseFloat(inputTotal.value) || 0;
-            const sena = parseFloat(inputSena.value) || 0;
-            const resto = total - sena;
-            divResto.textContent = `Resto a Pagar: $${resto >= 0 ? resto : 0}`;
-        }
-        inputTotal.addEventListener("input", calcularResto);
-        inputSena.addEventListener("input", calcularResto);
-
-        document.getElementById("btnGenerarRecibo").addEventListener("click", () => {
-            const cliente = document.getElementById("reciboCliente").value;
-            if (!cliente) {
-                alert("Por favor ingresa el nombre del cliente.");
-                return;
-            }
-            alert("Recibo listo para imprimir/generar.");
-        });
-
-        // 4. Cargar elementos de Galería y Videos con miniaturas
-        async function cargarMedia() {
-            // Galería
-            const contGaleria = document.getElementById("listaGaleria");
-            const { data: galData, error: galError } = await supabase.from("galeria").select("*");
-            
-            if (galError || !galData || galData.length === 0) {
-                contGaleria.textContent = "No hay fotos registradas.";
-            } else {
-                contGaleria.innerHTML = galData.map(item => {
-                    const nombreItem = item.titulo || item.nombre || item.descripcion || `Elemento ID: ${item.id}`;
-                    const imgUrl = item.url || item.imagen || item.link || '';
-                    
-                    return `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #333; padding: 8px; border-radius: 6px;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            ${imgUrl ? `<img src="${imgUrl}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" alt="Miniatura">` : '<div style="width: 40px; height: 40px; background: #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #aaa;">Sin foto</div>'}
-                            <span>${nombreItem}</span>
-                        </div>
-                        <button onclick="window.eliminarMedia('galeria', ${item.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Eliminar</button>
-                    </div>`;
-                }).join("");
-            }
-
-            // Videos
-            const contVideos = document.getElementById("listaVideos");
-            const { data: vidData, error: vidError } = await supabase.from("videos").select("*");
-            
-            if (vidError || !vidData || vidData.length === 0) {
-                contVideos.textContent = "No hay videos registrados.";
-            } else {
-                contVideos.innerHTML = vidData.map(item => {
-                    const nombreItem = item.titulo || item.nombre || item.descripcion || `Video ID: ${item.id}`;
-                    return `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #333; padding: 8px; border-radius: 6px;">
-                        <span>• ${nombreItem}</span>
-                        <button onclick="window.eliminarMedia('videos', ${item.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Eliminar</button>
-                    </div>`;
-                }).join("");
-            }
-        }
-
-        window.eliminarMedia = async function(tabla, id) {
-            if(!confirm("¿Estás seguro de eliminar este elemento?")) return;
-            const { error } = await supabase.from(tabla).delete().eq("id", id);
-            if(error) {
-                alert("Error al eliminar: " + error.message);
-            } else {
-                cargarMedia();
-            }
-        };
-
-        document.getElementById("btnSubirMedia").addEventListener("click", async () => {
-            const titulo = document.getElementById("mediaTitulo").value;
-            const tabla = document.getElementById("mediaTabla").value;
-            if (!titulo) {
-                alert("Ingresa un título para el archivo.");
-                return;
-            }
-            alert(`Contenido preparado para la tabla '${tabla}'.`);
-        });
-
-        // Inicializar
-        cargarTestimonios();
-        cargarMedia();
-    </script>
+    <!-- Conexión con tu script actual -->
+    <script type="module" src="admin.js"></script>
 </body>
 </html>
