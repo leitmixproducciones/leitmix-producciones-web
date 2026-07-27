@@ -3,548 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control | Leitmix Producciones</title>
+    <title>Panel de Administración | Leitmix Producciones</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #f1f1f1; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; position: relative; }
-        
-        /* Botón de Ajustes (Engranaje) */
-        .settings-btn { position: absolute; top: 0; right: 0; background: #2a2a2a; color: #ffc107; border: 1px solid #444; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; transition: background 0.3s; z-index: 10; }
-        .settings-btn:hover { background: #333; }
-
-        /* Modal / Desplegable de Configuración */
-        #settingsModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 100%; max-width: 450px; border: 2px solid #ffc107; text-align: left; position: relative; max-height: 90vh; overflow-y: auto; }
-        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #aaa; font-size: 1.5rem; cursor: pointer; width: auto; padding: 0; }
-        .close-modal:hover { color: #fff; }
-
-        .card { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; }
-        h1 { color: #ffc107; margin-bottom: 15px; font-size: 1.8rem; }
-        h2 { color: #ffc107; margin-bottom: 15px; font-size: 1.4rem; }
-        p { color: #aaa; margin-bottom: 15px; }
-        input, select, button { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-size: 1rem; }
-        input, select { background: #2a2a2a; color: #fff; border: 1px solid #444; }
-        button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
-        button:hover { background: #e0a800; }
-        .btn-danger { background: #dc3545; color: #fff; }
-        .btn-danger:hover { background: #bd2130; }
-        .btn-small { padding: 6px 12px; font-size: 0.85rem; width: auto; }
-        .stat-number { font-size: 2.5rem; color: #ffc107; font-weight: bold; margin-bottom: 10px; }
-        
-        .file-item { display: flex; align-items: center; justify-content: space-between; background: #2a2a2a; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: left; }
-        .file-info { display: flex; align-items: center; gap: 10px; overflow: hidden; margin-right: 10px; }
-        .file-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #000; }
-        .file-title { font-size: 0.9rem; color: #fff; font-weight: bold; word-break: break-all; }
-        .success-msg { color: #28a745; margin-bottom: 15px; font-weight: bold; }
-        .section-title { color: #ffc107; text-align: left; margin: 15px 0 8px 0; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px; }
-
-        /* Estilos del Recibo Integrado */
-        #reciboPreview { display: none; background: #fff; color: #333; padding: 25px; border-radius: 10px; text-align: left; margin-top: 15px; border: 2px solid #ffc107; }
-        .recibo-header { text-align: center; border-bottom: 2px solid #ffc107; padding-bottom: 12px; margin-bottom: 15px; }
-        .recibo-logo { max-width: 80px; max-height: 80px; width: auto; height: auto; margin: 0 auto 8px auto; display: block; border-radius: 50%; object-fit: cover; border: 2px solid #ffc107; }
-        .recibo-header h3 { color: #121212; margin: 0; font-size: 1.4rem; font-weight: 800; }
-        .recibo-header p { color: #555; font-size: 0.85rem; margin: 3px 0 0 0; }
-        .recibo-details table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .recibo-details th, .recibo-details td { border: 1px solid #ddd; padding: 8px; font-size: 0.9rem; text-align: left; }
-        .recibo-details th { background: #f4f4f4; }
-        .recibo-totals { text-align: right; margin-top: 15px; font-size: 1rem; }
-        .recibo-footer { text-align: center; margin-top: 20px; font-size: 0.8rem; color: #555; border-top: 1px solid #eee; padding-top: 10px; }
-        .recibo-footer .redes { margin-top: 6px; font-weight: bold; color: #121212; font-size: 0.85rem; }
-
-        /* CONFIGURACIÓN EXCLUSIVA PARA IMPRESIÓN EN UNA SOLA HOJA */
-        @media print {
-            @page {
-                size: A4;
-                margin: 10mm;
-            }
-            body, html {
-                background: #fff !important;
-                color: #000 !important;
-                height: 100%;
-                overflow: hidden;
-            }
-            body * {
-                visibility: hidden;
-            }
-            #reciboPreview, #reciboPreview * {
-                visibility: visible;
-            }
-            #reciboPreview {
-                display: block !important;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                max-width: 100%;
-                border: none !important;
-                margin: 0;
-                padding: 5px;
-                box-shadow: none;
-                background: #fff !important;
-            }
-            #btnPrintRecibo {
-                display: none !important;
-            }
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        h2 { color: #ffc107; }
+        .admin-section { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 20px; border: 1px solid #333; }
+        h3 { color: #ffc107; margin-bottom: 15px; font-size: 1.3rem; }
+        .testimonio-item { background: #2a2a2a; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #444; }
+        .btn-accion { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 8px; }
+        .btn-aprobar { background: #28a745; color: white; }
+        .btn-desaprobar { background: #dc3545; color: white; }
+        .estado-aprobado { color: #28a745; font-size: 0.85rem; }
+        .estado-pendiente { color: #ffc107; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Botón Engranaje flotante -->
-        <button id="btnOpenSettings" class="settings-btn" title="Configurar Perfil">⚙️</button>
+    <div class="header">
+        <h2>🎛️ Panel de Control - Leitmix</h2>
+        <button id="btnCerrarSesion" style="background: #333; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer;">Cerrar Sesión</button>
+    </div>
 
-        <!-- Modal / Menú Desplegable de Configuración de Perfil -->
-        <div id="settingsModal">
-            <div class="modal-content">
-                <button id="btnCloseSettings" class="close-modal">&times;</button>
-                <h2>⚙️ Mi Perfil / Empresa</h2>
-                <p style="font-size: 0.9rem;">Configura los datos que saldrán impresos en tus recibos.</p>
-                
-                <div id="profileMsg" class="success-msg"></div>
-
-                <label style="font-size: 0.85rem; color: #ccc;">Nombre de la Empresa / DJ:</label>
-                <input type="text" id="editNombre" placeholder="Ej: Leitmix Producciones">
-
-                <label style="font-size: 0.85rem; color: #ccc;">Instagram:</label>
-                <input type="text" id="editInstagram" placeholder="Ej: @leitmix_producciones">
-
-                <label style="font-size: 0.85rem; color: #ccc;">WhatsApp de Contacto:</label>
-                <input type="text" id="editWhatsapp" placeholder="Ej: 1150480339">
-
-                <label style="font-size: 0.85rem; color: #ccc;">Subir / Cambiar Logo:</label>
-                <input type="file" id="editLogoFile" accept="image/*">
-
-                <button id="btnSaveProfile" style="margin-top: 10px;">Guardar Cambios</button>
-            </div>
-        </div>
-
-        <!-- Panel Principal -->
-        <div class="card">
-            <h1>Panel de Control</h1>
-            <button id="btnLogout" class="btn-danger">Cerrar sesión</button>
-        </div>
-
-        <!-- Resumen -->
-        <div class="card">
-            <h2>📊 Resumen</h2>
-            <p>Total de Reservas Recibidas</p>
-            <div id="totalReservas" class="stat-number">0</div>
-        </div>
-
-        <!-- Generador de Recibos -->
-        <div class="card">
-            <h2>🧾 Generar Recibo de Seña / Pago</h2>
-            <p>Calcula automáticamente y genera el comprobante.</p>
-            
-            <input type="text" id="reciboCliente" placeholder="Nombre del Cliente">
-            <input type="text" id="reciboServicio" placeholder="Tipo de Servicio (Ej: DJ + Iluminación)">
-            <input type="number" id="reciboTotal" placeholder="Precio Total ($)">
-            <input type="number" id="reciboSenia" placeholder="Seña / Anticipo pagado ($)">
-            
-            <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; margin-bottom: 12px; text-align: left; border: 1px solid #444;">
-                <p style="margin: 0; font-size: 0.95rem; color: #ffc107;">Resto a Pagar: <span id="reciboResto" style="font-weight: bold; color: #fff;">$0</span></p>
-            </div>
-
-            <button id="btnGenerarRecibo">Generar Recibo en Pantalla</button>
-
-            <!-- Vista Previa del Recibo -->
-            <div id="reciboPreview">
-                <div class="recibo-header">
-                    <img id="lblLogo" src="" alt="Logo" class="recibo-logo" style="display:none;">
-                    <h3 id="lblEmpresa">LEITMIX PRODUCCIONES</h3>
-                    <p>Comprobante Oficial de Reserva y Pagos</p>
-                </div>
-                <div class="recibo-details">
-                    <p style="color:#333; margin: 4px 0;"><strong>Fecha:</strong> <span id="lblFecha"></span></p>
-                    <p style="color:#333; margin: 4px 0;"><strong>Cliente:</strong> <span id="lblCliente"></span></p>
-                    <p style="color:#333; margin: 4px 0;"><strong>Servicio:</strong> <span id="lblServicio"></span></p>
-                    
-                    <table>
-                        <tr>
-                            <th>Concepto</th>
-                            <th>Monto</th>
-                        </tr>
-                        <tr>
-                            <td>Valor Total del Servicio</td>
-                            <td id="lblTotal">$0</td>
-                        </tr>
-                        <tr>
-                            <td>Seña / Anticipo Abonado</td>
-                            <td id="lblSenia">$0</td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="recibo-totals">
-                    <p style="color:#333;"><strong>Resto a Abonar:</strong> <span id="lblResto" style="color: #d9534f; font-weight: bold;">$0</span></p>
-                </div>
-                <div class="recibo-footer">
-                    <p>¡Gracias por confiar en nuestros servicios!</p>
-                    <p>Este comprobante es válido como constancia de seña.</p>
-                    <p class="redes"><span id="lblInstagram"></span> <span id="lblWhatsapp"></span></p>
-                </div>
-                <button id="btnPrintRecibo" style="background: #28a745; color: #fff; margin-top: 15px;">🖨️ Imprimir / Guardar como PDF</button>
-            </div>
-        </div>
-
-        <!-- Gestión de Fotos y Videos -->
-        <div class="card">
-            <h2>📸 Gestión de Contenido</h2>
-            <div id="uploadMsg" class="success-msg"></div>
-            
-            <input type="text" id="tituloInput" placeholder="Título del archivo (Ej: Video Show)">
-            <select id="tipoSelect">
-                <option value="galeria">Tabla: Galería (Fotos)</option>
-                <option value="videos">Tabla: Videos</option>
-            </select>
-            <input type="file" id="fileInput" accept="image/*,video/*">
-            <button id="btnUpload">Subir y Registrar</button>
-
-            <!-- Listado de Galería -->
-            <div class="section-title">🖼️ Elementos en Tabla 'galeria'</div>
-            <div id="galeriaList">Cargando fotos...</div>
-
-            <!-- Listado de Videos -->
-            <div class="section-title">🎬 Elementos en Tabla 'videos'</div>
-            <div id="videosList">Cargando videos...</div>
-        </div>
+    <div class="admin-section">
+        <h3>⭐ Moderación de Testimonios</h3>
+        <div id="listaTestimonios">Cargando testimonios...</div>
     </div>
 
     <script type="module">
         import { supabase } from "../supabase.js";
 
-        let datosPerfil = {};
-        let userIdGlobal = null;
-
-        const initAuthAndProfile = async () => {
+        // Verificar sesión activa
+        async function verificarSesion() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 window.location.href = "login.html";
-                return;
             }
+        }
+        verificarSesion();
 
-            userIdGlobal = session.user.id;
-
-            try {
-                let { data, error } = await supabase.from('perfiles').select('*').eq('id', userIdGlobal).single();
-                
-                if (error || !data) {
-                    const res = await supabase.from('perfiles').select('*').eq('user_id', userIdGlobal).single();
-                    data = res.data;
-                }
-
-                if (data) {
-                    datosPerfil = data;
-                    // Precargar inputs del modal
-                    document.getElementById("editNombre").value = data.nombre || data.Nombre || data.empresa || "";
-                    document.getElementById("editInstagram").value = data.instagram || data.Instagram || "";
-                    document.getElementById("editWhatsapp").value = data.whatsapp || data.Whatsapp || data.telefono || "";
-                }
-            } catch (err) {
-                console.log("No se pudo cargar el perfil específico del usuario.");
-            }
-        };
-        initAuthAndProfile();
-
-        // Control del Modal de Ajustes (Engranaje)
-        const modal = document.getElementById("settingsModal");
-        document.getElementById("btnOpenSettings").addEventListener("click", () => {
-            modal.style.display = "flex";
-        });
-        document.getElementById("btnCloseSettings").addEventListener("click", () => {
-            modal.style.display = "none";
-        });
-        window.addEventListener("click", (e) => {
-            if (e.target === modal) modal.style.display = "none";
-        });
-
-        // Guardar cambios de perfil
-        const btnSaveProfile = document.getElementById("btnSaveProfile");
-        const profileMsg = document.getElementById("profileMsg");
-
-        btnSaveProfile.addEventListener("click", async () => {
-            if (!userIdGlobal) return;
-
-            const nuevoNombre = document.getElementById("editNombre").value.trim();
-            const nuevoInstagram = document.getElementById("editInstagram").value.trim();
-            const nuevoWhatsapp = document.getElementById("editWhatsapp").value.trim();
-            const logoFile = document.getElementById("editLogoFile").files[0];
-
-            btnSaveProfile.disabled = true;
-            profileMsg.style.color = "#ffc107";
-            profileMsg.textContent = "Guardando perfil...";
-
-            let logoUrl = datosPerfil.logo || datosPerfil.Logo || datosPerfil.imagen || "";
-
-            if (logoFile) {
-                const filePath = `logos/${userIdGlobal}_${Date.now()}_${logoFile.name}`;
-                const { error: uploadErr } = await supabase.storage.from('Media').upload(filePath, logoFile);
-                if (!uploadErr) {
-                    const { data: pubUrl } = supabase.storage.from('Media').getPublicUrl(filePath);
-                    logoUrl = pubUrl.publicUrl;
-                }
-            }
-
-            const updates = {
-                nombre: nuevoNombre,
-                instagram: nuevoInstagram,
-                whatsapp: nuevoWhatsapp,
-                logo: logoUrl
-            };
-
-            // Intentar actualizar por id o user_id según esquema de tabla
-            let { error } = await supabase.from('perfiles').update(updates).eq('id', userIdGlobal);
-            if (error) {
-                await supabase.from('perfiles').update(updates).eq('user_id', userIdGlobal);
-            }
-
-            datosPerfil.nombre = nuevoNombre;
-            datosPerfil.instagram = nuevoInstagram;
-            datosPerfil.whatsapp = nuevoWhatsapp;
-            datosPerfil.logo = logoUrl;
-
-            btnSaveProfile.disabled = false;
-            profileMsg.style.color = "#28a745";
-            profileMsg.textContent = "¡Perfil actualizado con éxito!";
-            setTimeout(() => {
-                profileMsg.textContent = "";
-                modal.style.display = "none";
-            }, 1500);
-        });
-
-        document.getElementById("btnLogout").addEventListener("click", async () => {
+        // Cerrar sesión
+        document.getElementById("btnCerrarSesion").addEventListener("click", async () => {
             await supabase.auth.signOut();
             window.location.href = "login.html";
         });
 
-        async function cargarResumen() {
-            try {
-                const { count } = await supabase
-                    .from('reservas')
-                    .select('*', { count: 'exact', head: true });
-                if (count !== null) {
-                    document.getElementById("totalReservas").textContent = count;
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-        cargarResumen();
+        // Cargar Testimonios
+        async function cargarTestimoniosPendientes() {
+            const contenedor = document.getElementById("listaTestimonios");
+            
+            const { data, error } = await supabase
+                .from("testimonio")
+                .select("*")
+                .order("id", { ascending: false });
 
-        const inputTotal = document.getElementById("reciboTotal");
-        const inputSenia = document.getElementById("reciboSenia");
-        const spanResto = document.getElementById("reciboResto");
-
-        function calcularRestoAutomatico() {
-            const total = parseFloat(inputTotal.value) || 0;
-            const senia = parseFloat(inputSenia.value) || 0;
-            const resto = total - senia;
-            spanResto.textContent = "$" + (resto > 0 ? resto : 0);
-        }
-
-        inputTotal.addEventListener("input", calcularRestoAutomatico);
-        inputSenia.addEventListener("input", calcularRestoAutomatico);
-
-        document.getElementById("btnGenerarRecibo").addEventListener("click", () => {
-            const cliente = document.getElementById("reciboCliente").value.trim();
-            const servicio = document.getElementById("reciboServicio").value.trim();
-            const total = parseFloat(inputTotal.value) || 0;
-            const senia = parseFloat(inputSenia.value) || 0;
-            const resto = total - senia;
-
-            if (!cliente || !servicio || total <= 0) {
-                alert("Por favor completa el nombre del cliente, el servicio y el precio total.");
+            if (error) {
+                contenedor.textContent = "Error al cargar los testimonios.";
                 return;
             }
 
-            document.getElementById("lblEmpresa").textContent = datosPerfil.nombre || datosPerfil.Nombre || datosPerfil.empresa || "LEITMIX PRODUCCIONES";
-            
-            const logoUrl = datosPerfil.logo || datosPerfil.Logo || datosPerfil.imagen;
-            const imgLogo = document.getElementById("lblLogo");
-            if (logoUrl) {
-                imgLogo.src = logoUrl;
-                imgLogo.style.display = "inline-block";
-            } else {
-                imgLogo.style.display = "none";
+            if (!data || data.length === 0) {
+                contenedor.textContent = "No hay testimonios registrados.";
+                return;
             }
 
-            const ig = datosPerfil.instagram || datosPerfil.Instagram || "";
-            const wa = datosPerfil.whatsapp || datosPerfil.Whatsapp || datosPerfil.telefono || "";
-            
-            document.getElementById("lblInstagram").textContent = ig ? `📸 ${ig}` : "";
-            document.getElementById("lblWhatsapp").textContent = wa ? ` | 📞 WhatsApp: ${wa}` : "";
-
-            document.getElementById("lblFecha").textContent = new Date().toLocaleDateString();
-            document.getElementById("lblCliente").textContent = cliente;
-            document.getElementById("lblServicio").textContent = servicio;
-            document.getElementById("lblTotal").textContent = "$" + total;
-            document.getElementById("lblSenia").textContent = "-$" + senia;
-            document.getElementById("lblResto").textContent = "$" + (resto > 0 ? resto : 0);
-
-            document.getElementById("reciboPreview").style.display = "block";
-            document.getElementById("reciboPreview").scrollIntoView({ behavior: 'smooth' });
-        });
-
-        document.getElementById("btnPrintRecibo").addEventListener("click", () => {
-            window.print();
-        });
-
-        const galeriaList = document.getElementById("galeriaList");
-        const videosList = document.getElementById("videosList");
-
-        async function cargarContenidoAdmin() {
-            try {
-                galeriaList.innerHTML = "<p style='color: #aaa;'>Cargando...</p>";
-                const { data: galeria, error } = await supabase.from('galeria').select('*');
+            contenedor.innerHTML = "";
+            data.forEach(t => {
+                const div = document.createElement("div");
+                div.className = "testimonio-item";
                 
-                if (error) {
-                    galeriaList.innerHTML = `<p style='color: #ff6b6b;'>Error: ${error.message}</p>`;
-                } else if (!galeria || galeria.length === 0) {
-                    galeriaList.innerHTML = "<p style='color: #aaa;'>No hay fotos en galería.</p>";
-                } else {
-                    galeriaList.innerHTML = "";
-                    galeria.forEach(item => {
-                        const url = item.Imagen || item.url || item.imagen;
-                        const itemDiv = crearItemUI(item.id, item.Titulo || 'Sin título', url, 'galeria');
-                        galeriaList.appendChild(itemDiv);
-                    });
-                }
-            } catch (e) {
-                galeriaList.innerHTML = "<p style='color: #ff6b6b;'>Error al cargar galería.</p>";
-            }
+                const estrellasHTML = "⭐".repeat(t.estrellas || 5);
+                const estadoTexto = t.aprobado ? 'Aprobado (Visible en web)' : 'Pendiente de aprobación';
+                const claseEstado = t.aprobado ? 'estado-aprobado' : 'estado-pendiente';
+                const textoBoton = t.aprobado ? 'Desaprobar' : 'Aprobar';
+                const claseBoton = t.aprobado ? 'btn-desaprobar' : 'btn-aprobar';
 
-            try {
-                videosList.innerHTML = "<p style='color: #aaa;'>Cargando...</p>";
-                const { data: videos, error } = await supabase.from('videos').select('*');
-                
-                if (error) {
-                    videosList.innerHTML = `<p style='color: #ff6b6b;'>Error: ${error.message}</p>`;
-                } else if (!videos || videos.length === 0) {
-                    videosList.innerHTML = "<p style='color: #aaa;'>No hay videos registrados.</p>";
-                } else {
-                    videosList.innerHTML = "";
-                    videos.forEach(item => {
-                        const url = item.url || item.Video || item.video || item.Imagen;
-                        const itemDiv = crearItemUI(item.id, item.Titulo || item.titulo || 'Sin título', url, 'videos');
-                        videosList.appendChild(itemDiv);
-                    });
-                }
-            } catch (e) {
-                videosList.innerHTML = "<p style='color: #ff6b6b;'>Error al cargar videos.</p>";
-            }
+                div.innerHTML = `
+                    <p><strong>${t.nombre}</strong> <span style="margin-left: 10px;">${estrellasHTML}</span></p>
+                    <p style="margin: 8px 0; color: #ccc; font-style: italic;">"${t.comentario}"</p>
+                    <p class="${claseEstado}">Estado: <strong>${estadoTexto}</strong></p>
+                    <button class="btn-accion ${claseBoton}" onclick="window.cambiarEstado(${t.id}, ${!t.aprobado})">
+                        ${textoBoton}
+                    </button>
+                `;
+                contenedor.appendChild(div);
+            });
         }
 
-        function crearItemUI(id, titulo, url, tabla) {
-            const itemDiv = document.createElement("div");
-            itemDiv.className = "file-item";
+        // Función global para cambiar estado
+        window.cambiarEstado = async function(id, nuevoEstado) {
+            const { error } = await supabase
+                .from("testimonio")
+                .update({ aprobado: nuevoEstado })
+                .eq("id", id);
 
-            const infoDiv = document.createElement("div");
-            infoDiv.className = "file-info";
-
-            if (url && (url.endsWith('.mp4') || url.endsWith('.mov') || tabla === 'videos')) {
-                const videoThumb = document.createElement("video");
-                videoThumb.className = "file-thumb";
-                videoThumb.src = url;
-                infoDiv.appendChild(videoThumb);
-            } else if (url) {
-                const imgThumb = document.createElement("img");
-                imgThumb.className = "file-thumb";
-                imgThumb.src = url;
-                imgThumb.alt = "Miniatura";
-                infoDiv.appendChild(imgThumb);
-            }
-
-            const titleSpan = document.createElement("span");
-            titleSpan.className = "file-title";
-            titleSpan.textContent = titulo;
-            infoDiv.appendChild(titleSpan);
-
-            const deleteBtn = document.createElement("button");
-            deleteBtn.className = "btn-danger btn-small";
-            deleteBtn.textContent = "Borrar";
-            
-            deleteBtn.onclick = async () => {
-                if (confirm(`¿Borrar "${titulo}" de la tabla ${tabla}?`)) {
-                    const { error: errDel } = await supabase
-                        .from(tabla)
-                        .delete()
-                        .eq('id', id);
-
-                    if (errDel) {
-                        alert("Error al borrar: " + errDel.message);
-                    } else {
-                        cargarContenidoAdmin();
-                    }
-                }
-            };
-
-            itemDiv.appendChild(infoDiv);
-            itemDiv.appendChild(deleteBtn);
-            return itemDiv;
-        }
-
-        cargarContenidoAdmin();
-
-        const btnUpload = document.getElementById("btnUpload");
-        const fileInput = document.getElementById("fileInput");
-        const tituloInput = document.getElementById("tituloInput");
-        const tipoSelect = document.getElementById("tipoSelect");
-        const uploadMsg = document.getElementById("uploadMsg");
-
-        btnUpload.addEventListener("click", async () => {
-            const file = fileInput.files[0];
-            const titulo = tituloInput.value.trim();
-            const tablaDestino = tipoSelect.value;
-
-            if (!file || !titulo) {
-                alert("Por favor completa el título y selecciona un archivo.");
-                return;
-            }
-
-            uploadMsg.textContent = "Subiendo archivo...";
-            btnUpload.disabled = true;
-
-            const folder = tablaDestino === 'videos' ? 'videos' : 'imagenes';
-            const filePath = `${folder}/${Date.now()}_${file.name}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('Media')
-                .upload(filePath, file);
-
-            if (uploadError) {
-                uploadMsg.style.color = "#dc3545";
-                uploadMsg.textContent = "Error al subir: " + uploadError.message;
-                btnUpload.disabled = false;
-                return;
-            }
-
-            const { data: publicUrlData } = supabase.storage
-                .from('Media')
-                .getPublicUrl(filePath);
-
-            const datosInserta = tablaDestino === 'galeria' 
-                ? { Titulo: titulo, Imagen: publicUrlData.publicUrl }
-                : { Titulo: titulo, url: publicUrlData.publicUrl };
-
-            const { error: dbError } = await supabase
-                .from(tablaDestino)
-                .insert([datosInserta]);
-
-            btnUpload.disabled = false;
-            fileInput.value = "";
-            tituloInput.value = "";
-
-            if (dbError) {
-                uploadMsg.style.color = "#dc3545";
-                uploadMsg.textContent = "Error en base de datos: " + dbError.message;
+            if (error) {
+                alert("Error al actualizar: " + error.message);
             } else {
-                uploadMsg.style.color = "#28a745";
-                uploadMsg.textContent = "¡Agregado con éxito!";
-                cargarContenidoAdmin();
-                setTimeout(() => { uploadMsg.textContent = ""; }, 3000);
+                cargarTestimoniosPendientes();
             }
-        });
+        }
+
+        cargarTestimoniosPendientes();
     </script>
 </body>
 </html>
