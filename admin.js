@@ -131,32 +131,53 @@ window.borrarFoto = async (id) => {
   }
 };
 
-// 4. Gestión de Videos (Corregido con la columna "Url")
+// 4. Gestión de Videos (Subida directa desde dispositivo)
 const btnSubirVideo = document.getElementById("btnSubirVideo");
 if (btnSubirVideo) {
   btnSubirVideo.onclick = async () => {
+    const archivoInput = document.getElementById("videoArchivo");
     const tituloInput = document.getElementById("videoTitulo");
-    const urlInput = document.getElementById("videoUrl");
     
-    const titulo = tituloInput ? tituloInput.value : "Sin título";
-    const urlVideo = urlInput ? urlInput.value : "";
+    if (!archivoInput || !archivoInput.files[0]) return alert("Seleccioná un archivo de video primero.");
+    const archivo = archivoInput.files[0];
+    const titulo = tituloInput && tituloInput.value.trim() !== "" ? tituloInput.value : "Sin título";
 
-    if (!urlVideo) return alert("Ingresá la URL del video primero.");
+    // Indicador visual de progreso
+    btnSubirVideo.disabled = true;
+    const textoOriginal = btnSubirVideo.innerText;
+    btnSubirVideo.innerText = "Subiendo video... Por favor esperá.";
 
-    // Se guarda con "Url" (con mayúscula) respetando tu tabla en Supabase
-    const { error } = await supabase.from("videos").insert([{ 
-      Titulo: titulo, 
-      Url: urlVideo, 
-      user_id: usuario ? usuario.id : null 
-    }]);
+    try {
+      const path = `videos/${usuario ? usuario.id : 'general'}/${Date.now()}-${archivo.name}`;
+      const { error: uploadError } = await supabase.storage.from("Media").upload(path, archivo);
+      
+      if (uploadError) {
+        alert("Error al subir archivo de video: " + uploadError.message);
+        return;
+      }
 
-    if (error) {
-      alert("Error al subir video: " + error.message);
-    } else {
-      alert("¡Video agregado con éxito!");
-      if (tituloInput) tituloInput.value = "";
-      if (urlInput) urlInput.value = "";
-      cargarVideos();
+      const { data: urlData } = supabase.storage.from("Media").getPublicUrl(path);
+
+      const { error: dbError } = await supabase.from("videos").insert([{ 
+        Titulo: titulo, 
+        Url: urlData.publicUrl, 
+        user_id: usuario ? usuario.id : null 
+      }]);
+
+      if (dbError) {
+        alert("Error al registrar el video: " + dbError.message);
+      } else {
+        alert("¡Video subido con éxito!");
+        if (tituloInput) tituloInput.value = "";
+        archivoInput.value = "";
+        cargarVideos();
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error inesperado al subir el video.");
+    } finally {
+      btnSubirVideo.disabled = false;
+      btnSubirVideo.innerText = textoOriginal;
     }
   };
 }
@@ -182,9 +203,10 @@ async function cargarVideos() {
 
     if (vidUrl) {
       cont.innerHTML += `
-        <div style="background:#2a2a2a; padding:8px; border-radius:6px; text-align:center; border: 1px solid #444;">
-          <p style="font-size:11px; margin:5px 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${vidTitulo}">🎬 ${vidTitulo}</p>
-          <button onclick="window.borrarVideo(${vidId})" class="btn-danger" style="margin-top:2px; font-size:10px; padding:4px; width:100%;">Borrar</button>
+        <div style="background:#2a2a2a; padding:6px; border-radius:6px; text-align:center; border: 1px solid #444;">
+          <video src="${vidUrl}" style="width:100%; height:90px; object-fit:cover; border-radius:4px;" controls preload="metadata"></video>
+          <p style="font-size:11px; margin:4px 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${vidTitulo}">${vidTitulo}</p>
+          <button onclick="window.borrarVideo(${vidId})" class="btn-danger" style="margin-top:2px; font-size:10px; padding:4px 6px; width:100%;">Borrar</button>
         </div>`;
     }
   });
