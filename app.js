@@ -1,14 +1,24 @@
 import { supabase } from "./supabase.js";
 
-// 1. Enviar Reserva
+// 1. Enviar Reserva (IDs sincronizados con el HTML)
 document.getElementById("formReserva")?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const nombre = document.getElementById("reservaNombre").value;
-    const tipo = document.getElementById("reservaTipo").value;
-    const fecha = document.getElementById("reservaFecha").value;
-    const detalles = document.getElementById("reservaDetalles").value;
+    
+    // Captura los datos usando los IDs reales de tu index.html
+    const nombre = document.getElementById("reservaNombre")?.value || "";
+    const telefono = document.getElementById("reservaTelefono")?.value || "";
+    const evento = document.getElementById("reservaEvento")?.value || "";
+    const fecha = document.getElementById("reservaFecha")?.value || "";
+    const comentarios = document.getElementById("reservaComentarios")?.value || "";
 
-    const { error } = await supabase.from("reservas").insert([{ nombre, tipo, fecha, detalles }]);
+    // Mapea las variables a las columnas de Supabase
+    const { error } = await supabase.from("reservas").insert([{ 
+        nombre, 
+        telefono, 
+        tipo: evento, 
+        fecha, 
+        detalles: comentarios 
+    }]);
 
     if (error) {
         alert("Hubo un error al enviar la reserva: " + error.message);
@@ -18,12 +28,12 @@ document.getElementById("formReserva")?.addEventListener("submit", async (e) => 
     }
 });
 
-// 2. Subir Foto desde el Panel de Administración (SÚPER PROTEGIDO)
+// 2. Subir Foto desde el Panel de Administración (Protegido si no está en la página)
 document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const titulo = document.getElementById("adminTituloFoto").value;
+    const titulo = document.getElementById("adminTituloFoto")?.value || "";
     const archivoInput = document.getElementById("adminArchivoFoto");
-    const archivo = archivoInput.files[0];
+    const archivo = archivoInput?.files[0];
 
     if (!archivo) return alert("Seleccioná una imagen.");
 
@@ -58,8 +68,8 @@ document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e
 // 3. Guardar Video desde el Panel de Administración
 document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const titulo = document.getElementById("adminTituloVideo").value;
-    const urlVideo = document.getElementById("adminUrlVideo").value;
+    const titulo = document.getElementById("adminTituloVideo")?.value || "";
+    const urlVideo = document.getElementById("adminUrlVideo")?.value || "";
 
     const { error } = await supabase.from("videos").insert([{ Titulo: titulo, Url: urlVideo }]);
 
@@ -75,7 +85,7 @@ document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) 
 // 4. Cargar Galería de Fotos
 async function cargarGaleriaWeb() {
     const contenedor = document.getElementById("galeriaPublica");
-    if (!contenedor) return; // Si no existe el contenedor en el HTML, no hace nada
+    if (!contenedor) return;
 
     const { data, error } = await supabase.from("galeria").select("*");
 
@@ -97,10 +107,10 @@ async function cargarGaleriaWeb() {
     }).join("");
 }
 
-// 5. Cargar Videos
+// 5. Cargar Videos (Soporta YouTube y videos MP4 directos de Supabase Storage)
 async function cargarVideosWeb() {
     const contenedor = document.getElementById("videosPublicos");
-    if (!contenedor) return; // Si no existe el contenedor en el HTML, no hace nada
+    if (!contenedor) return;
 
     const { data, error } = await supabase.from("videos").select("*");
 
@@ -119,7 +129,12 @@ async function cargarVideosWeb() {
                 let ytId = vidUrl.includes('youtu.be') ? vidUrl.split('/').pop().split('?')[0] : new URLSearchParams(new URL(vidUrl).search).get('v');
                 contenidoVideo = `<iframe width="100%" height="180" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:6px; margin-bottom:10px;"></iframe>`;
             } else {
-                contenidoVideo = `<video src="${vidUrl}" controls style="width: 100%; height: 180px; border-radius: 6px; margin-bottom: 10px; background: #000;"></video>`;
+                contenidoVideo = `
+                    <video controls preload="metadata" style="width: 100%; max-height: 200px; border-radius: 6px; margin-bottom: 10px; background: #000; object-fit: cover;">
+                        <source src="${vidUrl}" type="video/mp4">
+                        Tu navegador no soporta reproducción de video.
+                    </video>
+                `;
             }
         }
 
@@ -135,7 +150,7 @@ async function cargarVideosWeb() {
 // 6. Cargar Testimonios Aprobados
 async function cargarTestimoniosWeb() {
     const contenedor = document.getElementById("testimoniosPublicos");
-    if (!contenedor) return; // Si no existe el contenedor en el HTML, no hace nada
+    if (!contenedor) return;
 
     const { data, error } = await supabase
         .from("testimonios")
@@ -160,7 +175,7 @@ async function cargarTestimoniosWeb() {
     }).join("");
 }
 
-// Ejecutar cargas
+// Ejecutar cargas iniciales
 cargarGaleriaWeb();
 cargarVideosWeb();
 cargarTestimoniosWeb();
