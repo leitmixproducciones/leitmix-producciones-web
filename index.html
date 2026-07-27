@@ -4,35 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leitmix Producciones | Sonido, Iluminación y DJs</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #f1f1f1; line-height: 1.6; padding-bottom: 40px; }
-        
-        header { background: #1e1e1e; padding: 30px 20px; text-align: center; border-bottom: 2px solid #ffc107; }
-        header h1 { color: #ffc107; font-size: 2.2rem; margin-bottom: 5px; }
-        header p { color: #aaa; font-size: 1.1rem; }
-
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-
-        section { background: #1e1e1e; border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        h2 { color: #ffc107; margin-bottom: 20px; text-align: center; font-size: 1.4rem; border-bottom: 1px solid #333; padding-bottom: 10px; }
-
-        /* Formulario de Reservas */
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.95rem; }
-        input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 1rem; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #ffc107; }
-        button.btn-main { background: #ffc107; color: #121212; border: none; padding: 12px; width: 100%; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.3s; }
-        button.btn-main:hover { background: #e0a800; }
-
-        /* Grillas */
-        .grid-galeria, .testimonios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
-        .media-card, .testimonio-card { background: #2a2a2a; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        .media-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: #000; display: block; }
-        .media-card video { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: #000; }
-        
-        footer { text-align: center; padding: 20px; color: #777; font-size: 0.9rem; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -102,113 +74,7 @@
         <p>&copy; 2026 Leitmix Producciones. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- SCRIPT DE SUPABASE -->
-    <script type="module">
-        import { supabase } from "./supabase.js";
-
-        // 1. Enviar Reserva
-        document.getElementById("formReserva").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const nombre = document.getElementById("reservaNombre").value;
-            const tipo = document.getElementById("reservaTipo").value;
-            const fecha = document.getElementById("reservaFecha").value;
-            const detalles = document.getElementById("reservaDetalles").value;
-
-            const { error } = await supabase.from("reservas").insert([{ nombre, tipo, fecha, detalles }]);
-
-            if (error) {
-                alert("Hubo un error al enviar la reserva: " + error.message);
-            } else {
-                alert("¡Reserva enviada con éxito! Nos pondremos en contacto pronto.");
-                document.getElementById("formReserva").reset();
-            }
-        });
-
-        // 2. Cargar Galería de Fotos
-        async function cargarGaleriaWeb() {
-            const contenedor = document.getElementById("galeriaPublica");
-            const { data, error } = await supabase.from("galeria").select("*");
-
-            if (error || !data || data.length === 0) {
-                contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>No hay fotos disponibles.</p>";
-                return;
-            }
-
-            contenedor.innerHTML = data.map(item => {
-                const titulo = item.Titulo || item.titulo || item.nombre || 'Evento Leitmix';
-                const imgUrl = item.Imagen || item.imagen || item.url || item.link || '';
-                
-                return `
-                    <div class="media-card">
-                        ${imgUrl ? `<img src="${imgUrl}" alt="${titulo}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; display: block;">` : '<div style="height:180px; background:#222; display:flex; align-items:center; justify-content:center; color:#777; border-radius:6px; margin-bottom:10px;">Sin imagen</div>'}
-                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107;">${titulo}</p>
-                    </div>
-                `;
-            }).join("");
-        }
-
-        // 3. Cargar Videos
-        async function cargarVideosWeb() {
-            const contenedor = document.getElementById("videosPublicos");
-            const { data, error } = await supabase.from("videos").select("*");
-
-            if (error || !data || data.length === 0) {
-                contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>No hay videos disponibles.</p>";
-                return;
-            }
-
-            contenedor.innerHTML = data.map(item => {
-                const titulo = item.Titulo || item.titulo || item.nombre || 'Video Leitmix';
-                const vidUrl = item.Video || item.video || item.url || item.link || '';
-
-                let contenidoVideo = '<p style="color: #aaa; font-size: 0.85rem;">Próximamente disponible</p>';
-                if (vidUrl) {
-                    if (vidUrl.includes('youtube.com') || vidUrl.includes('youtu.be')) {
-                        let ytId = vidUrl.includes('youtu.be') ? vidUrl.split('/').pop() : new URLSearchParams(new URL(vidUrl).search).get('v');
-                        contenidoVideo = `<iframe width="100%" height="180" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:6px; margin-bottom:10px;"></iframe>`;
-                    } else {
-                        contenidoVideo = `<video src="${vidUrl}" controls style="width: 100%; height: 180px; border-radius: 6px; margin-bottom: 10px;"></video>`;
-                    }
-                }
-
-                return `
-                    <div class="media-card">
-                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-bottom: 8px;">🎬 ${titulo}</p>
-                        ${contenidoVideo}
-                    </div>
-                `;
-            }).join("");
-        }
-
-        // 4. Cargar Testimonios Aprobados
-        async function cargarTestimoniosWeb() {
-            const contenedor = document.getElementById("testimoniosPublicos");
-            const { data, error } = await supabase
-                .from("testimonios")
-                .select("*")
-                .eq("aprobado", true)
-                .order("id", { ascending: false });
-
-            if (error || !data || data.length === 0) {
-                contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>Aún no hay testimonios publicados.</p>";
-                return;
-            }
-
-            contenedor.innerHTML = data.map(t => {
-                const estrellas = "⭐".repeat(t.estrellas || 5);
-                return `
-                    <div class="testimonio-card">
-                        <div style="font-size: 1rem; margin-bottom: 6px;">${estrellas}</div>
-                        <p style="font-style: italic; color: #ddd; margin-bottom: 10px; font-size: 0.9rem;">"${t.comentario}"</p>
-                        <h4 style="color: #ffc107; font-size: 0.9rem; font-weight: 600;">- ${t.nombre}</h4>
-                    </div>
-                `;
-            }).join("");
-        }
-
-        cargarGaleriaWeb();
-        cargarVideosWeb();
-        cargarTestimoniosWeb();
-    </script>
+    <!-- SCRIPT PRINCIPAL -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
