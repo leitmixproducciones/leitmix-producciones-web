@@ -34,7 +34,7 @@
     <!-- CABECERA / CERRAR SESIÓN -->
     <div class="admin-card" style="display: flex; justify-content: space-between; align-items: center;">
         <h2>Panel de Control</h2>
-        <button class="btn-danger" id="cerrarSesion" onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='login.html';" style="width: auto; padding: 8px 15px; font-size: 0.9rem; margin-top: 0;">Cerrar sesión</button>
+        <button class="btn-danger" id="cerrarSesion" style="width: auto; padding: 8px 15px; font-size: 0.9rem; margin-top: 0;">Cerrar sesión</button>
     </div>
 
     <!-- CONFIGURACIÓN DE LA WEB (MENÚ DESPLEGABLE) -->
@@ -100,7 +100,7 @@
         </div>
     </div>
 
-    <!-- Script principal -->
-    <script type="module" src="admin.js"></script>
+    <!-- Script principal corregido con ruta relativa hacia la raíz -->
+    <script type="module" src="../admin.js"></script>
 </body>
 </html>
