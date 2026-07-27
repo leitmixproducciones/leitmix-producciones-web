@@ -1,7 +1,7 @@
 import { supabase } from "./supabase.js";
 
 // ==========================================
-// 1. ENVIAR RESERVA
+// 1. ENVIAR RESERVA (CORREGIDO)
 // ==========================================
 document.getElementById("formReserva")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -10,14 +10,13 @@ document.getElementById("formReserva")?.addEventListener("submit", async (e) => 
     const telefono = document.getElementById("reservaTelefono")?.value || "";
     const evento = document.getElementById("reservaEvento")?.value || "";
     const fecha = document.getElementById("reservaFecha")?.value || "";
-    const comentarios = document.getElementById("reservaComentarios")?.value || "";
 
+    // Enviamos solo las columnas seguras que sí existen en Supabase
     const { error } = await supabase.from("reservas").insert([{ 
         nombre, 
         telefono, 
         tipo: evento, 
-        fecha, 
-        detalles: comentarios 
+        fecha
     }]);
 
     if (error) {
