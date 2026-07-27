@@ -53,18 +53,19 @@
         async function cargarTestimoniosPendientes() {
             const contenedor = document.getElementById("listaTestimonios");
             
+            // Usamos 'testimonios' en plural. Si tu tabla es singular, cambialo por 'testimonio'
             const { data, error } = await supabase
-                .from("testimonio")
+                .from("testimonios")
                 .select("*")
                 .order("id", { ascending: false });
 
             if (error) {
-                contenedor.textContent = "Error al cargar los testimonios.";
+                contenedor.innerHTML = `<p style="color: #dc3545;">Error de Supabase: ${error.message}</p>`;
                 return;
             }
 
             if (!data || data.length === 0) {
-                contenedor.textContent = "No hay testimonios registrados.";
+                contenedor.textContent = "No hay testimonios registrados en la tabla.";
                 return;
             }
 
@@ -94,7 +95,7 @@
         // Función global para cambiar estado
         window.cambiarEstado = async function(id, nuevoEstado) {
             const { error } = await supabase
-                .from("testimonio")
+                .from("testimonios")
                 .update({ aprobado: nuevoEstado })
                 .eq("id", id);
 
