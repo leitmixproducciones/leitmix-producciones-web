@@ -481,7 +481,13 @@ async function cargarVideosWeb() {
 
     contenedor.innerHTML = data.map(item => {
         const titulo = item.Titulo || 'Video';
-        const vidUrl = item.Url || '';
+        let vidUrl = item.Url || '';
+
+        // Limpieza y codificación segura para evitar el error 400 en archivos de Supabase Storage
+        vidUrl = vidUrl.trim();
+        if (vidUrl && !vidUrl.includes('youtube.com') && !vidUrl.includes('youtu.be')) {
+            vidUrl = encodeURI(decodeURI(vidUrl));
+        }
 
         let contenidoVideo = '<p style="color: #aaa; font-size: 0.85rem;">Próximamente disponible</p>';
         if (vidUrl) {
@@ -490,10 +496,11 @@ async function cargarVideosWeb() {
                 contenidoVideo = `<iframe width="100%" height="180" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:6px; margin-bottom:10px;"></iframe>`;
             } else {
                 contenidoVideo = `
-                    <video controls preload="metadata" style="width: 100%; max-height: 200px; border-radius: 6px; margin-bottom: 10px; background: #000; object-fit: cover;">
+                    <video controls preload="metadata" style="width: 100%; max-height: 200px; border-radius: 6px; margin-bottom: 10px; background: #000; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <source src="${vidUrl}" type="video/mp4">
                         Tu navegador no soporta reproducción de video.
                     </video>
+                    <p style="color: #ff5252; font-size: 0.8rem; display: none; text-align: center;">No se pudo cargar este archivo de video (Verificá el enlace en el panel admin).</p>
                 `;
             }
         }
