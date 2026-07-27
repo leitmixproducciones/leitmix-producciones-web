@@ -181,7 +181,7 @@
             alert("Recibo listo para imprimir/generar.");
         });
 
-        // 4. Cargar elementos de Galería y Videos
+        // 4. Cargar elementos de Galería y Videos con miniaturas
         async function cargarMedia() {
             // Galería
             const contGaleria = document.getElementById("listaGaleria");
@@ -192,9 +192,14 @@
             } else {
                 contGaleria.innerHTML = galData.map(item => {
                     const nombreItem = item.titulo || item.nombre || item.descripcion || `Elemento ID: ${item.id}`;
-                    return `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: #333; padding: 6px 10px; border-radius: 4px;">
-                        <span>• ${nombreItem}</span>
-                        <button onclick="window.eliminarMedia('galeria', ${item.id})" style="background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Eliminar</button>
+                    const imgUrl = item.url || item.imagen || item.link || '';
+                    
+                    return `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #333; padding: 8px; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            ${imgUrl ? `<img src="${imgUrl}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" alt="Miniatura">` : '<div style="width: 40px; height: 40px; background: #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #aaa;">Sin foto</div>'}
+                            <span>${nombreItem}</span>
+                        </div>
+                        <button onclick="window.eliminarMedia('galeria', ${item.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Eliminar</button>
                     </div>`;
                 }).join("");
             }
@@ -208,9 +213,9 @@
             } else {
                 contVideos.innerHTML = vidData.map(item => {
                     const nombreItem = item.titulo || item.nombre || item.descripcion || `Video ID: ${item.id}`;
-                    return `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: #333; padding: 6px 10px; border-radius: 4px;">
+                    return `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #333; padding: 8px; border-radius: 6px;">
                         <span>• ${nombreItem}</span>
-                        <button onclick="window.eliminarMedia('videos', ${item.id})" style="background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Eliminar</button>
+                        <button onclick="window.eliminarMedia('videos', ${item.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Eliminar</button>
                     </div>`;
                 }).join("");
             }
