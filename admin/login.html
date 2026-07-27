@@ -90,8 +90,9 @@
                 return;
             }
 
+            // Redirige de forma limpia al login para evitar el error 404 en GitHub Pages
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + "/admin/nueva-password.html", 
+                redirectTo: window.location.origin + "/login.html", 
             });
 
             if (error) {
