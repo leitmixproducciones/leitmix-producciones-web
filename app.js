@@ -18,7 +18,61 @@ document.getElementById("formReserva").addEventListener("submit", async (e) => {
     }
 });
 
-// 2. Cargar Galería de Fotos
+// 2. Subir Foto desde el Panel de Administración
+document.getElementById("formAdminGaleria").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const titulo = document.getElementById("adminTituloFoto").value;
+    const archivoInput = document.getElementById("adminArchivoFoto");
+    const archivo = archivoInput.files[0];
+
+    if (!archivo) return alert("Seleccioná una imagen.");
+
+    const nombreArchivo = `${Date.now()}_${archivo.name}`;
+
+    // Sube el archivo al Storage de Supabase (asegurate de tener un bucket llamado 'galeria' o ajusta el nombre)
+    const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("galeria")
+        .upload(nombreArchivo, archivo);
+
+    if (uploadError) {
+        alert("Error al subir la imagen al almacenamiento: " + uploadError.message);
+        return;
+    }
+
+    // Obtiene la URL pública del archivo subido
+    const { data: urlData } = supabase.storage.from("galeria").getPublicUrl(nombreArchivo);
+    const publicUrl = urlData.publicUrl;
+
+    // Guarda el registro en la tabla 'galeria'
+    const { error: dbError } = await supabase.from("galeria").insert([{ Titulo: titulo, Imagen: publicUrl }]);
+
+    if (dbError) {
+        alert("Error al guardar en la tabla: " + dbError.message);
+    } else {
+        alert("¡Foto subida y publicada con éxito!");
+        document.getElementById("formAdminGaleria").reset();
+        cargarGaleriaWeb();
+    }
+});
+
+// 3. Guardar Video desde el Panel de Administración
+document.getElementById("formAdminVideo").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const titulo = document.getElementById("adminTituloVideo").value;
+    const urlVideo = document.getElementById("adminUrlVideo").value;
+
+    const { error } = await supabase.from("videos").insert([{ Titulo: titulo, Url: urlVideo }]);
+
+    if (error) {
+        alert("Error al guardar el video: " + error.message);
+    } else {
+        alert("¡Video guardado con éxito!");
+        document.getElementById("formAdminVideo").reset();
+        cargarVideosWeb();
+    }
+});
+
+// 4. Cargar Galería de Fotos
 async function cargarGaleriaWeb() {
     const contenedor = document.getElementById("galeriaPublica");
     const { data, error } = await supabase.from("galeria").select("*");
@@ -41,7 +95,7 @@ async function cargarGaleriaWeb() {
     }).join("");
 }
 
-// 3. Cargar Videos
+// 5. Cargar Videos
 async function cargarVideosWeb() {
     const contenedor = document.getElementById("videosPublicos");
     const { data, error } = await supabase.from("videos").select("*");
@@ -74,7 +128,7 @@ async function cargarVideosWeb() {
     }).join("");
 }
 
-// 4. Cargar Testimonios Aprobados
+// 6. Cargar Testimonios Aprobados
 async function cargarTestimoniosWeb() {
     const contenedor = document.getElementById("testimoniosPublicos");
     const { data, error } = await supabase
