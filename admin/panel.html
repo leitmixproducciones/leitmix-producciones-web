@@ -20,7 +20,7 @@
         .btn-danger { background: #dc3545; color: white; }
         .btn-danger:hover { background: #c82333; }
 
-        .testimonio-item, .media-item { background: #2a2a2a; padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #444; text-align: left; }
+        .testimonio-item { background: #2a2a2a; padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #444; text-align: left; }
         .btn-accion { padding: 6px 12px; width: auto; font-size: 0.9rem; margin-top: 8px; display: inline-block; }
         .btn-aprobar { background: #28a745; color: white; }
         .btn-desaprobar { background: #dc3545; color: white; }
@@ -36,7 +36,7 @@
         <button class="btn-danger" id="btnCerrarSesion">Cerrar sesión</button>
     </div>
 
-    <!-- NUEVA SECCIÓN: MODERACIÓN DE TESTIMONIOS -->
+    <!-- SECCIÓN: MODERACIÓN DE TESTIMONIOS -->
     <div class="admin-card">
         <h3>⭐ Moderación de Testimonios</h3>
         <div id="listaTestimonios" style="color: #aaa;">Cargando testimonios...</div>
@@ -172,7 +172,6 @@
         inputTotal.addEventListener("input", calcularResto);
         inputSena.addEventListener("input", calcularResto);
 
-        // Generar Recibo Acción
         document.getElementById("btnGenerarRecibo").addEventListener("click", () => {
             const cliente = document.getElementById("reciboCliente").value;
             if (!cliente) {
@@ -186,24 +185,47 @@
         async function cargarMedia() {
             // Galería
             const contGaleria = document.getElementById("listaGaleria");
-            const { data: galData } = await supabase.from("galeria").select("*");
-            if (!galData || galData.length === 0) {
+            const { data: galData, error: galError } = await supabase.from("galeria").select("*");
+            
+            if (galError || !galData || galData.length === 0) {
                 contGaleria.textContent = "No hay fotos registradas.";
             } else {
-                contGaleria.innerHTML = galData.map(item => `<p>• ${item.titulo || 'Sin título'}</p>`).join("");
+                contGaleria.innerHTML = galData.map(item => {
+                    const nombreItem = item.titulo || item.nombre || item.descripcion || `Elemento ID: ${item.id}`;
+                    return `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: #333; padding: 6px 10px; border-radius: 4px;">
+                        <span>• ${nombreItem}</span>
+                        <button onclick="window.eliminarMedia('galeria', ${item.id})" style="background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Eliminar</button>
+                    </div>`;
+                }).join("");
             }
 
             // Videos
             const contVideos = document.getElementById("listaVideos");
-            const { data: vidData } = await supabase.from("videos").select("*");
-            if (!vidData || vidData.length === 0) {
+            const { data: vidData, error: vidError } = await supabase.from("videos").select("*");
+            
+            if (vidError || !vidData || vidData.length === 0) {
                 contVideos.textContent = "No hay videos registrados.";
             } else {
-                contVideos.innerHTML = vidData.map(item => `<p>• ${item.titulo || 'Sin título'}</p>`).join("");
+                contVideos.innerHTML = vidData.map(item => {
+                    const nombreItem = item.titulo || item.nombre || item.descripcion || `Video ID: ${item.id}`;
+                    return `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: #333; padding: 6px 10px; border-radius: 4px;">
+                        <span>• ${nombreItem}</span>
+                        <button onclick="window.eliminarMedia('videos', ${item.id})" style="background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Eliminar</button>
+                    </div>`;
+                }).join("");
             }
         }
 
-        // Subir Media Acción
+        window.eliminarMedia = async function(tabla, id) {
+            if(!confirm("¿Estás seguro de eliminar este elemento?")) return;
+            const { error } = await supabase.from(tabla).delete().eq("id", id);
+            if(error) {
+                alert("Error al eliminar: " + error.message);
+            } else {
+                cargarMedia();
+            }
+        };
+
         document.getElementById("btnSubirMedia").addEventListener("click", async () => {
             const titulo = document.getElementById("mediaTitulo").value;
             const tabla = document.getElementById("mediaTabla").value;
@@ -214,7 +236,7 @@
             alert(`Contenido preparado para la tabla '${tabla}'.`);
         });
 
-        // Inicializar funciones al cargar
+        // Inicializar
         cargarTestimonios();
         cargarMedia();
     </script>
