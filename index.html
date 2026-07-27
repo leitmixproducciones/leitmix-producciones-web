@@ -7,8 +7,6 @@
     
     <!-- FIX PARA EL ERROR 404 DEL FAVICON -->
     <link rel="icon" href="data:,">
-    <!-- Si tienes un archivo favicon.ico en tu carpeta raíz, usa en su lugar: -->
-    <!-- <link rel="icon" type="image/x-icon" href="./favicon.ico"> -->
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -21,7 +19,60 @@
 
     <div class="container">
 
-        <!-- SECCIÓN 1: RESERVAS -->
+        <!-- SECCIÓN 1: GALERÍA DE FOTOS -->
+        <section>
+            <h2>📸 Galería de Fotos</h2>
+            <div id="galeriaPublica" class="grid-galeria">
+                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando fotos...</p>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: VIDEOS -->
+        <section>
+            <h2>🎬 Videos de Eventos</h2>
+            <div id="videosPublicos" class="grid-galeria">
+                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando videos...</p>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: TESTIMONIOS Y DEJAR OPINIÓN -->
+        <section>
+            <h2>💬 Opiniones de Clientes</h2>
+            
+            <!-- Contenedor donde se cargan los comentarios públicos -->
+            <div id="testimoniosPublicos" class="grid-galeria" style="margin-bottom: 25px;">
+                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando opiniones...</p>
+            </div>
+
+            <!-- Formulario para enviar nuevo testimonio -->
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <h3 style="color: #ffc107; margin-bottom: 15px; font-size: 1.1rem; text-align: center;">✍️ Contanos tu experiencia</h3>
+                <form id="formTestimonio">
+                    <div class="form-group">
+                        <label>Tu Nombre o Apodo</label>
+                        <input type="text" id="testimonioNombre" required placeholder="Ej: Maria G.">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Puntuación</label>
+                        <select id="testimonioEstrellas" style="width: 100%; padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 4px;">
+                            <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
+                            <option value="4">⭐⭐⭐⭐ (Muy bueno)</option>
+                            <option value="3">⭐⭐⭐ (Bueno)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tu Comentario</label>
+                        <textarea id="testimonioComentario" rows="3" required placeholder="¿Qué te pareció la música, el sonido y el show?"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-main" style="background: #28a745;">Publicar Comentario</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: RESERVAS (AL FINAL) -->
         <section>
             <h2>📅 Reserva tu Fecha</h2>
             <form id="formReserva">
@@ -47,22 +98,6 @@
                 </div>
                 <button type="submit" class="btn-main">Enviar Solicitud de Reserva</button>
             </form>
-        </section>
-
-        <!-- SECCIÓN 2: GALERÍA DE FOTOS -->
-        <section>
-            <h2>📸 Galería de Fotos</h2>
-            <div id="galeriaPublica" class="grid-galeria">
-                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando fotos...</p>
-            </div>
-        </section>
-
-        <!-- SECCIÓN 3: VIDEOS -->
-        <section>
-            <h2>🎬 Videos de Eventos</h2>
-            <div id="videosPublicos" class="grid-galeria">
-                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando videos...</p>
-            </div>
         </section>
 
     </div>
