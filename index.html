@@ -15,7 +15,7 @@
 
     <div class="container">
 
-        <!-- SECCIÓN 1: RESERVAS (Para los clientes) -->
+        <!-- SECCIÓN 1: RESERVAS -->
         <section>
             <h2>📅 Reserva tu Fecha</h2>
             <form id="formReserva">
@@ -24,21 +24,20 @@
                     <input type="text" id="reservaNombre" required placeholder="Tu nombre completo">
                 </div>
                 <div class="form-group">
+                    <label>Teléfono / WhatsApp</label>
+                    <input type="text" id="reservaTelefono" required placeholder="Ej: 1123456789">
+                </div>
+                <div class="form-group">
                     <label>Tipo de Evento</label>
-                    <select id="reservaTipo">
-                        <option value="Casamiento">Casamiento</option>
-                        <option value="Cumpleaños / 15">Cumpleaños / 15 Años</option>
-                        <option value="Evento Corporativo">Evento Corporativo</option>
-                        <option value="Otro">Otro</option>
-                    </select>
+                    <input type="text" id="reservaEvento" placeholder="Ej: Casamiento / 15 Años">
                 </div>
                 <div class="form-group">
                     <label>Fecha del Evento</label>
                     <input type="date" id="reservaFecha" required>
                 </div>
                 <div class="form-group">
-                    <label>Detalles / Requerimientos</label>
-                    <textarea id="reservaDetalles" rows="3" placeholder="Contanos qué servicios necesitas..."></textarea>
+                    <label>Comentarios / Requerimientos</label>
+                    <textarea id="reservaComentarios" rows="3" placeholder="Contanos detalles de tu evento..."></textarea>
                 </div>
                 <button type="submit" class="btn-main">Enviar Solicitud de Reserva</button>
             </form>
