@@ -15,42 +15,9 @@
 
     <div class="container">
 
-        <!-- PANEL DE ADMINISTRACIÓN (Para subir contenido) -->
-        <section style="border: 2px dashed #ffc107;">
-            <h2>🛠️ Panel de Administración (Subir Contenido)</h2>
-            
-            <!-- Subir Foto a Galería -->
-            <form id="formAdminGaleria" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333;">
-                <h3 style="color: #ffc107; font-size: 1.1rem; margin-bottom: 10px;">📸 Subir Nueva Foto</h3>
-                <div class="form-group">
-                    <label>Título de la Foto</label>
-                    <input type="text" id="adminTituloFoto" required placeholder="Ej: Casamiento Juan y Sofía">
-                </div>
-                <div class="form-group">
-                    <label>Archivo de Imagen</label>
-                    <input type="file" id="adminArchivoFoto" accept="image/*" required style="background: #2a2a2a; padding: 10px;">
-                </div>
-                <button type="submit" class="btn-main">Subir Foto a Supabase</button>
-            </form>
-
-            <!-- Subir Video -->
-            <form id="formAdminVideo">
-                <h3 style="color: #ffc107; font-size: 1.1rem; margin-bottom: 10px;">🎬 Subir / Agregar Video</h3>
-                <div class="form-group">
-                    <label>Título del Video</label>
-                    <input type="text" id="adminTituloVideo" required placeholder="Ej: Show en Vivo">
-                </div>
-                <div class="form-group">
-                    <label>Link de YouTube o Archivo</label>
-                    <input type="text" id="adminUrlVideo" required placeholder="Pegá el link de YouTube o Supabase">
-                </div>
-                <button type="submit" class="btn-main">Guardar Video</button>
-            </form>
-        </section>
-
-        <!-- SECCIÓN 1: RESERVAS -->
+        <!-- SECCIÓN 1: RESERVAS (Para los clientes) -->
         <section>
-            <h2>📅 Reserva tu Fecha (Hoja de Ruta)</h2>
+            <h2>📅 Reserva tu Fecha</h2>
             <form id="formReserva">
                 <div class="form-group">
                     <label>Nombre y Apellido</label>
