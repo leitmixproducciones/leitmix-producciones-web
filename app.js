@@ -3,18 +3,29 @@ import { CONFIG } from "./config.js";
 
 let urlLogoPublica = "";
 
-// Cargar la URL del logo automáticamente desde Supabase Storage
+// Cargar la URL del logo automáticamente desde Supabase Storage probando variantes de nombre/extensión
 async function obtenerUrlLogo() {
     try {
-        const { data } = supabase.storage.from("Media").getPublicUrl("logo.png");
-        if (data && data.publicUrl) {
-            urlLogoPublica = data.publicUrl;
+        const nombresPosibles = ["logo.png", "Logo.png", "logo.jpg", "Logo.jpg", "logo.jpeg", "Logo.jpeg"];
+        let publicUrlFinal = "";
+
+        for (let nombreArchivo of nombresPosibles) {
+            const { data } = supabase.storage.from("Media").getPublicUrl(nombreArchivo);
+            if (data && data.publicUrl) {
+                // Verificamos si podemos obtenerla; asignamos y rompemos el bucle
+                publicUrlFinal = data.publicUrl;
+                break;
+            }
+        }
+
+        if (publicUrlFinal) {
+            urlLogoPublica = publicUrlFinal;
             
             const imgWeb = document.getElementById("logoWeb");
             const imgLogin = document.getElementById("logoLogin");
             const imgHeader = document.getElementById("logoHeader");
 
-            if (imgWeb) { imgWeb.src = urlLogoPublica; }
+            if (imgWeb) { imgWeb.src = urlLogoPublica; imgWeb.style.display = "block"; }
             if (imgLogin) { imgLogin.src = urlLogoPublica; imgLogin.style.display = "block"; }
             if (imgHeader) { imgHeader.src = urlLogoPublica; imgHeader.style.display = "block"; }
         }
@@ -204,8 +215,7 @@ async function cargarRecibosAdmin() {
 
     const { data: recibos, error } = await supabase
         .from("recibos")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*");
 
     if (error || !recibos || recibos.length === 0) {
         cont.innerHTML = "<p style='color:#888; font-size:0.9rem; text-align:center;'>No hay recibos generados.</p>";
@@ -260,7 +270,7 @@ window.generarImagenRecibo = function(nombre, evento, numeroRecibo, total, sena,
             <style>
                 body { font-family: Arial, sans-serif; background: #121212; color: #333; padding: 20px; display: flex; justify-content: center; }
                 .recibo-card { background: #fff; width: 340px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-top: 8px solid #ffc107; text-align: center; }
-                .logo-img { max-width: 120px; height: auto; margin-bottom: 8px; }
+                .logo-img { max-width: 120px; max-height: 80px; height: auto; margin-bottom: 8px; object-fit: contain; }
                 .logo { font-size: 1.2rem; font-weight: bold; color: #121212; margin-bottom: 2px; }
                 .sub { font-size: 0.8rem; color: #666; margin-bottom: 15px; }
                 .numero { font-size: 0.9rem; font-weight: bold; background: #eee; padding: 6px 12px; border-radius: 4px; display: inline-block; margin-bottom: 15px; }
