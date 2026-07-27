@@ -28,7 +28,8 @@
         /* Grillas */
         .grid-galeria, .testimonios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
         .media-card, .testimonio-card { background: #2a2a2a; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        .media-card img, .media-card video { width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; background: #000; }
+        .media-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: #000; display: block; }
+        .media-card video { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: #000; }
         
         footer { text-align: center; padding: 20px; color: #777; font-size: 0.9rem; }
     </style>
@@ -123,7 +124,7 @@
             }
         });
 
-        // 2. Cargar Galería de Fotos (Maneja múltiples variantes de nombres de columnas)
+        // 2. Cargar Galería de Fotos (Detecta automáticamente cualquier columna de imagen)
         async function cargarGaleriaWeb() {
             const contenedor = document.getElementById("galeriaPublica");
             const { data, error } = await supabase.from("galeria").select("*");
@@ -135,19 +136,19 @@
 
             contenedor.innerHTML = data.map(item => {
                 const titulo = item.titulo || item.nombre || item.descripcion || 'Evento Leitmix';
-                // Detecta automáticamente si guardaste la ruta en url, imagen, link o archivo
-                const imgUrl = item.url || item.imagen || item.link || item.archivo || item.src || '';
+                // Busca en todas las posibles variantes de nombres de columnas de imagen
+                const imgUrl = item.url || item.imagen || item.link || item.img || item.file || item.archivo || item.path || item.foto || '';
                 
                 return `
                     <div class="media-card">
-                        ${imgUrl ? `<img src="${imgUrl}" alt="${titulo}" onerror="this.style.display='none'">` : ''}
-                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-top: 5px;">${titulo}</p>
+                        ${imgUrl ? `<img src="${imgUrl}" alt="${titulo}" onerror="this.parentElement.style.display='none'">` : '<div style="height:180px; background:#222; display:flex; align-items:center; justify-content:center; color:#555; border-radius:6px; margin-bottom:10px;">Sin imagen</div>'}
+                        <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107;">${titulo}</p>
                     </div>
                 `;
             }).join("");
         }
 
-        // 3. Cargar Videos Públicos (Soporta reproducción si hay enlace)
+        // 3. Cargar Videos Públicos (Soporta links de video o muestra reproductor/aviso)
         async function cargarVideosWeb() {
             const contenedor = document.getElementById("videosPublicos");
             const { data, error } = await supabase.from("videos").select("*");
@@ -159,12 +160,23 @@
 
             contenedor.innerHTML = data.map(item => {
                 const titulo = item.titulo || item.nombre || item.descripcion || 'Video Leitmix';
-                const vidUrl = item.url || item.video || item.link || item.archivo || '';
+                const vidUrl = item.url || item.video || item.link || item.file || item.archivo || '';
+
+                let contenidoVideo = '<p style="color: #aaa; font-size: 0.85rem;">Próximamente disponible</p>';
+                if (vidUrl) {
+                    if (vidUrl.includes('youtube.com') || vidUrl.includes('youtu.be')) {
+                        // Extrae ID de YouTube de forma básica si se pegó un link de YT
+                        let ytId = vidUrl.includes('youtu.be') ? vidUrl.split('/').pop() : new URLSearchParams(new URL(vidUrl).search).get('v');
+                        contenidoVideo = `<iframe width="100%" height="180" src="https://www.youtube.com/embed/${ytId}" frameborder="allowfullscreen" style="border-radius:6px; margin-bottom:10px;"></iframe>`;
+                    } else {
+                        contenidoVideo = `<video src="${vidUrl}" controls style="width: 100%; height: 180px; border-radius: 6px; margin-bottom: 10px;"></video>`;
+                    }
+                }
 
                 return `
                     <div class="media-card">
                         <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-bottom: 8px;">🎬 ${titulo}</p>
-                        ${vidUrl ? `<video src="${vidUrl}" controls style="width: 100%; height: 150px; border-radius: 6px;"></video>` : '<p style="color: #aaa; font-size: 0.85rem;">Próximamente disponible</p>'}
+                        ${contenidoVideo}
                     </div>
                 `;
             }).join("");
