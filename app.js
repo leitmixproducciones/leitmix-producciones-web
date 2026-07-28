@@ -17,7 +17,6 @@ async function obtenerUrlLogo() {
             return;
         }
 
-        // Toma la URL de la columna 'logo_url' o 'logo' según cuál tenga datos
         urlLogoPublica = data.logo_url || data.logo || "";
         
         if (urlLogoPublica) {
@@ -368,7 +367,7 @@ async function cargarFotos() {
             <div style="background:#2a2a2a; padding:6px; border-radius:6px; text-align:center; border: 1px solid #444;">
                 <img src="${imgUrl}" style="width:100%; height:80px; object-fit:cover; border-radius:4px;" alt="Foto">
                 <p style="font-size:11px; margin:4px 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${imgTitulo}</p>
-                <button onclick="window.borrarFoto(${img.id})" class="btn-danger" style="margin-top:2px; font-size:10px; padding:4px 6px; width:100%;">Borrar</button>
+                <button onclick="window.borrarFoto(${img.id})" style="background: #dc3545; color: white; border: none; margin-top:2px; font-size:10px; padding:4px 6px; width:100%; border-radius:4px; cursor:pointer;">Borrar</button>
             </div>`;
     }).join("");
 }
@@ -492,23 +491,32 @@ async function cargarVideosAdmin() {
     const { data, error } = await supabase.from("videos").select("*").order("id", { ascending: false });
 
     if (error || !data || data.length === 0) {
-        contenedorAdmin.innerHTML = "<p style='color: #888; text-align:center;'>No hay videos para administrar.</p>";
+        contenedorAdmin.innerHTML = "<p style='color: #888; text-align:center; grid-column: 1/-1;'>No hay videos para administrar.</p>";
         return;
     }
 
+    // Usamos el mismo diseño en tarjetas igual que la galería de fotos
     contenedorAdmin.innerHTML = data.map(vid => {
         const titulo = vid.Titulo || 'Sin título';
-        const url = vid.Url || '';
+        let vidUrl = vid.Url || '';
+
+        vidUrl = vidUrl.trim();
+        let miniaturaVideo = '<div style="background:#000; height:80px; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#888; font-size:10px;">Sin vista previa</div>';
+
+        if (vidUrl) {
+            if (vidUrl.includes('youtube.com') || vidUrl.includes('youtu.be')) {
+                let ytId = vidUrl.includes('youtu.be') ? vidUrl.split('/').pop().split('?')[0] : new URLSearchParams(new URL(vidUrl).search).get('v');
+                miniaturaVideo = `<iframe width="100%" height="80" src="https://www.youtube.com/embed/${ytId}" frameborder="0" style="border-radius:4px; pointer-events: none;"></iframe>`;
+            } else {
+                miniaturaVideo = `<video style="width: 100%; height: 80px; border-radius: 4px; background: #000; object-fit: cover;"><source src="${vidUrl}" type="video/mp4"></video>`;
+            }
+        }
 
         return `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #333;">
-                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">
-                    <strong style="color: #ffc107;">🎬 ${titulo}</strong><br>
-                    <small style="color: #aaa;">${url}</small>
-                </div>
-                <button onclick="window.borrarVideo(${vid.id})" style="background: #e63946; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
-                    🗑️ Eliminar
-                </button>
+            <div style="background:#2a2a2a; padding:6px; border-radius:6px; text-align:center; border: 1px solid #444;">
+                ${miniaturaVideo}
+                <p style="font-size:11px; margin:4px 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${titulo}</p>
+                <button onclick="window.borrarVideo(${vid.id})" style="background: #dc3545; color: white; border: none; margin-top:2px; font-size:10px; padding:4px 6px; width:100%; border-radius:4px; cursor:pointer;">Borrar</button>
             </div>
         `;
     }).join("");
@@ -607,4 +615,3 @@ checkSession();
 cargarGaleriaWeb();
 cargarVideosWeb();
 cargarTestimoniosWeb();
-
