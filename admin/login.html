@@ -14,7 +14,7 @@
         input:focus { outline: none; border-color: #ffc107; }
         button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
         button:hover { background: #e0a800; }
-        .error-msg { color: #dc3545; font-size: 0.9rem; margin-bottom: 15px; display: none; }
+        .error-msg { color: #ff6b6b; font-size: 0.9rem; margin-bottom: 15px; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 6px; display: none; text-align: left; word-break: break-all; }
         .success-msg { color: #28a745; font-size: 0.9rem; margin-bottom: 15px; display: none; }
         .forgot-link { display: block; margin-top: 10px; color: #aaa; font-size: 0.85rem; text-decoration: none; transition: color 0.3s; }
         .forgot-link:hover { color: #ffc107; text-decoration: underline; }
@@ -28,8 +28,8 @@
         <div id="errorMsg" class="error-msg"></div>
         <div id="successMsg" class="success-msg"></div>
 
-        <input type="email" id="loginEmail" placeholder="Tu Email" autocomplete="email" required>
-        <input type="password" id="loginPassword" placeholder="Tu Contraseña" autocomplete="current-password" required>
+        <input type="text" id="loginEmail" placeholder="Tu Email" autocomplete="email" required>
+        <input type="text" id="loginPassword" placeholder="Tu Contraseña" autocomplete="current-password" required>
         
         <button id="btnLogin" type="button">Ingresar</button>
 
@@ -41,16 +41,13 @@
 
         const btnLogin = document.getElementById("btnLogin");
         const errorMsg = document.getElementById("errorMsg");
-        const successMsg = document.getElementById("successMsg");
         const btnForgot = document.getElementById("btnForgot");
 
-        // Iniciar Sesión al hacer clic en el botón
         btnLogin.addEventListener("click", async () => {
             const email = document.getElementById("loginEmail").value.trim();
             const password = document.getElementById("loginPassword").value.trim();
 
             errorMsg.style.display = "none";
-            successMsg.style.display = "none";
 
             if (!email || !password) {
                 errorMsg.textContent = "Por favor completa todos los campos.";
@@ -67,7 +64,8 @@
             });
 
             if (error) {
-                errorMsg.textContent = "Credenciales incorrectas o usuario no registrado.";
+                // AQUÍ VEMOS EL ERROR REAL EN LA PANTALLA DEL CELULAR
+                errorMsg.textContent = "Error de Supabase: " + error.message;
                 errorMsg.style.display = "block";
                 btnLogin.disabled = false;
                 btnLogin.textContent = "Ingresar";
@@ -76,31 +74,9 @@
             }
         });
 
-        // Recuperar Contraseña
         btnForgot.addEventListener("click", async (e) => {
             e.preventDefault();
-            const email = document.getElementById("loginEmail").value.trim();
-
-            errorMsg.style.display = "none";
-            successMsg.style.display = "none";
-
-            if (!email) {
-                errorMsg.textContent = "Por favor ingresa tu email arriba para recuperar la contraseña.";
-                errorMsg.style.display = "block";
-                return;
-            }
-
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + "/leitmix-producciones-web/admin/nueva-password.html", 
-            });
-
-            if (error) {
-                errorMsg.textContent = "Error al enviar correo: " + error.message;
-                errorMsg.style.display = "block";
-            } else {
-                successMsg.textContent = "¡Correo de recuperación enviado! Revisa tu bandeja de entrada.";
-                successMsg.style.display = "block";
-            }
+            alert("Usa el panel de Supabase para recuperar la clave.");
         });
     </script>
 </body>
