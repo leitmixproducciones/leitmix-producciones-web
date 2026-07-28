@@ -3,15 +3,24 @@ import { CONFIG } from "./config.js";
 
 let urlLogoPublica = "";
 
-// Cargar la URL del logo automáticamente desde Supabase Storage
+// Cargar la URL del logo automáticamente desde la tabla 'configuracion'
 async function obtenerUrlLogo() {
     try {
-        const nombreRuta = "logo/Logo-1784650941040-1000140956.jpg";
-        const { data } = supabase.storage.from("Media").getPublicUrl(nombreRuta);
+        const { data, error } = await supabase
+            .from("configuracion")
+            .select("logo, logo_url")
+            .limit(1)
+            .single();
+
+        if (error || !data) {
+            console.log("No se encontró configuración en la tabla.");
+            return;
+        }
+
+        // Toma la URL de la columna 'logo_url' o 'logo' según cuál tenga datos
+        urlLogoPublica = data.logo_url || data.logo || "";
         
-        if (data && data.publicUrl) {
-            urlLogoPublica = data.publicUrl;
-            
+        if (urlLogoPublica) {
             const imgWeb = document.getElementById("logoWeb");
             const imgLogin = document.getElementById("logoLogin");
             const imgHeader = document.getElementById("logoHeader");
@@ -21,7 +30,7 @@ async function obtenerUrlLogo() {
             if (imgHeader) { imgHeader.src = urlLogoPublica; imgHeader.style.display = "block"; }
         }
     } catch (err) {
-        console.log("No se pudo obtener el logo de Supabase:", err);
+        console.log("Error al obtener el logo de la base de datos:", err);
     }
 }
 
@@ -598,3 +607,4 @@ checkSession();
 cargarGaleriaWeb();
 cargarVideosWeb();
 cargarTestimoniosWeb();
+
