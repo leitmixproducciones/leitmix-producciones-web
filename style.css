@@ -62,3 +62,30 @@ footer { text-align: center; padding: 20px; color: #777; font-size: 0.9rem; }
 header, .header, nav {
     align-items: center !important;
 }
+
+/* Contenedor principal del header en columna para que el logo quede arriba y las letras abajo */
+header, .header, .nav-container, .logo-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 15px !important;
+}
+
+/* Logo bien grande y centrado */
+#logoHeader {
+    width: 220px !important; /* Podes subirlo a 250px si querés que ocupe más */
+    max-width: 80% !important;
+    height: auto !important;
+    object-fit: contain;
+    margin-bottom: 10px !important;
+}
+
+/* Estilo para que las letras queden prolijas abajo en fila o bloque ordenado */
+.header-text, .logo-text-container, h1, .nombre-empresa {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px !important;
+}
