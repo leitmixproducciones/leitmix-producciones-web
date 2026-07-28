@@ -3,7 +3,7 @@ import { CONFIG } from "./config.js";
 
 let urlLogoPublica = "";
 
-// Cargar la URL del logo automáticamente desde la tabla 'configuracion'
+// Cargar la URL del logo
 async function obtenerUrlLogo() {
     try {
         const { data, error } = await supabase
@@ -17,11 +17,9 @@ async function obtenerUrlLogo() {
         urlLogoPublica = data.logo_url || data.logo || "";
         
         if (urlLogoPublica) {
-            const imgWeb = document.getElementById("logoWeb");
             const imgLogin = document.getElementById("logoLogin");
             const imgHeader = document.getElementById("logoHeader");
 
-            if (imgWeb) { imgWeb.src = urlLogoPublica; imgWeb.style.display = "block"; }
             if (imgLogin) { imgLogin.src = urlLogoPublica; imgLogin.style.display = "block"; }
             if (imgHeader) { imgHeader.src = urlLogoPublica; imgHeader.style.display = "block"; }
         }
@@ -31,7 +29,7 @@ async function obtenerUrlLogo() {
 }
 
 // ==========================================
-// 1. CONTROL DE SESIÓN (MODO LIBRE / SIN TRABAS)
+// CONTROL DE SESIÓN DEL PANEL
 // ==========================================
 const loginSection = document.getElementById("loginSection");
 const adminSection = document.getElementById("adminSection");
@@ -39,8 +37,6 @@ const loginForm = document.getElementById("loginForm");
 const loginError = document.getElementById("loginError");
 const btnLogout = document.getElementById("btnLogout");
 const totalReservasEl = document.getElementById("totalReservas");
-
-let usuario = null;
 
 function checkSession() {
     const sesionGuardada = localStorage.getItem("leitmix_admin");
@@ -53,17 +49,15 @@ function checkSession() {
     }
 }
 
-// Acá sacamos la verificación molesta: con poner cualquier correo, ya te deja entrar al panel de una
 loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    
     const emailInput = document.getElementById("email")?.value.trim() || "";
+    
     if (!emailInput) {
         if (loginError) loginError.textContent = "Ingresá un correo.";
         return;
     }
 
-    // Guardamos sesión local y entramos directo al panel
     localStorage.setItem("leitmix_admin", "activo");
     mostrarPanel();
 });
@@ -104,44 +98,7 @@ async function cargarDatosAdmin() {
 }
 
 // ==========================================
-// 2. ENVIAR RESERVA + CONFIGURACIÓN WHATSAPP
-// ==========================================
-document.getElementById("formReserva")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    
-    const nombre = document.getElementById("reservaNombre")?.value || "";
-    const telefono = document.getElementById("reservaTelefono")?.value || "";
-    const evento = document.getElementById("reservaEvento")?.value || "";
-    const fecha = document.getElementById("reservaFecha")?.value || "";
-    const comentarios = document.getElementById("reservaComentarios")?.value || "Sin comentarios";
-
-    const { error } = await supabase.from("reservas").insert([{ 
-        nombre, telefono, evento, fecha, comentarios
-    }]);
-
-    if (error) {
-        alert("Hubo un error al registrar la reserva: " + error.message);
-        return;
-    }
-
-    const textoMensaje = `¡Hola! Quiero confirmar mi reserva:\n\n` +
-        `👤 *Nombre:* ${nombre}\n` +
-        `📞 *Teléfono:* ${telefono}\n` +
-        `🎉 *Evento:* ${evento}\n` +
-        `📅 *Fecha:* ${fecha}\n` +
-        `💬 *Comentarios:* ${comentarios}`;
-
-    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${CONFIG.telefonoWhatsApp}&text=${encodeURIComponent(textoMensaje)}`;
-
-    document.getElementById("formReserva").reset();
-
-    if (confirm("¡Reserva registrada con éxito! ¿Querés abrir WhatsApp ahora para enviar los datos?")) {
-        window.location.href = urlWhatsApp;
-    }
-});
-
-// ==========================================
-// 3. GESTIÓN DE RECIBOS DE PAGO
+// GESTIÓN DE RECIBOS DE PAGO
 // ==========================================
 async function cargarReservasEnSelect() {
     const select = document.getElementById("reciboReservaId");
@@ -296,7 +253,7 @@ window.generarImagenRecibo = function(nombre, evento, numeroRecibo, total, sena,
 };
 
 // ==========================================
-// 4. GALERÍA DE FOTOS
+// GESTIÓN DE FOTOS
 // ==========================================
 document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -322,7 +279,6 @@ document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e
         if (tituloInput) tituloInput.value = "";
         archivoInput.value = "";
         cargarFotos();
-        cargarGaleriaWeb();
     } catch (err) {
         alert("Error al subir foto: " + err.message);
     } finally {
@@ -358,79 +314,33 @@ window.borrarFoto = async (id) => {
     if (confirm("¿Borrar esta imagen?")) {
         const { error } = await supabase.from("galeria").delete().eq("id", id);
         if (error) alert("Error al borrar: " + error.message);
-        else {
-            cargarFotos();
-            cargarGaleriaWeb();
-        }
+        else cargarFotos();
     }
 };
 
-async function cargarGaleriaWeb() {
-    const contenedor = document.getElementById("galeriaPublica");
-    if (!contenedor) return;
-
-    const { data, error } = await supabase.from("galeria").select("*");
-    if (error || !data || data.length === 0) {
-        contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>No hay fotos disponibles.</p>";
-        return;
-    }
-
-    contenedor.innerHTML = data.map(item => {
-        const titulo = item.Titulo || 'Evento';
-        const imgUrl = item.Imagen || item.url || '';
-        
-        return `
-            <div class="media-card">
-                ${imgUrl ? `<img src="${imgUrl}" alt="${titulo}">` : ''}
-                <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107;">${titulo}</p>
-            </div>
-        `;
-    }).join("");
-}
-
 // ==========================================
-// 5. GESTIÓN DE VIDEOS
+// GESTIÓN DE VIDEOS
 // ==========================================
 document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const tituloInput = document.getElementById("adminTituloVideo");
-    const archivoInput = document.getElementById("adminArchivoVideo");
     const urlInput = document.getElementById("adminUrlVideo");
-    const btnSubir = document.getElementById("btnSubirVideo");
 
-    const archivo = archivoInput?.files[0];
     let urlVideo = urlInput?.value?.trim() || "";
-    const titulo = tituloInput?.value || (archivo ? archivo.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ") : "Video");
+    const titulo = tituloInput?.value || "Video";
 
-    if (!archivo && !urlVideo) return alert("Seleccioná un archivo o ingresá una URL.");
-
-    if (btnSubir) { btnSubir.disabled = true; btnSubir.innerText = "Guardando video..."; }
+    if (!urlVideo) return alert("Ingresá una URL de video.");
 
     try {
-        let finalUrl = urlVideo;
-
-        if (archivo) {
-            const path = `videos/${Date.now()}_${archivo.name}`;
-            const { error: uploadError } = await supabase.storage.from("Media").upload(path, archivo);
-            if (uploadError) throw uploadError;
-
-            const { data: urlData } = supabase.storage.from("Media").getPublicUrl(path);
-            finalUrl = urlData.publicUrl;
-        }
-
-        const { error: dbError } = await supabase.from("videos").insert([{ Titulo: titulo, Url: finalUrl }]);
+        const { error: dbError } = await supabase.from("videos").insert([{ Titulo: titulo, Url: urlVideo }]);
         if (dbError) throw dbError;
 
         alert("¡Video guardado con éxito!");
         if (tituloInput) tituloInput.value = "";
-        if (archivoInput) archivoInput.value = "";
         if (urlInput) urlInput.value = "";
         cargarVideosAdmin();
-        cargarVideosWeb();
     } catch (err) {
         alert("Error al guardar video: " + err.message);
-    } finally {
-        if (btnSubir) { btnSubir.disabled = false; btnSubir.innerText = "Guardar Video"; }
     }
 });
 
@@ -441,72 +351,28 @@ async function cargarVideosAdmin() {
     const { data, error } = await supabase.from("videos").select("*").order("id", { ascending: false });
 
     if (error || !data || data.length === 0) {
-        contenedorAdmin.innerHTML = "<p style='color: #888; text-align:center; grid-column: 1/-1;'>No hay videos.</p>";
+        contenedorAdmin.innerHTML = "<p style='color: #888; text-align:center;'>No hay videos.</p>";
         return;
     }
 
-    contenedorAdmin.innerHTML = data.map(vid => {
-        const titulo = vid.Titulo || 'Sin título';
-        let vidUrl = (vid.Url || '').trim();
-        let miniaturaVideo = '<div style="background:#000; height:80px; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#888; font-size:10px;">Vista previa</div>';
-
-        if (vidUrl) {
-            if (vidUrl.includes('youtube.com') || vidUrl.includes('youtu.be')) {
-                let ytId = vidUrl.includes('youtu.be') ? vidUrl.split('/').pop().split('?')[0] : new URLSearchParams(new URL(vidUrl).search).get('v');
-                miniaturaVideo = `<iframe width="100%" height="80" src="https://www.youtube.com/embed/${ytId}" frameborder="0" style="border-radius:4px; pointer-events: none;"></iframe>`;
-            } else {
-                miniaturaVideo = `<video style="width: 100%; height: 80px; border-radius: 4px; background: #000; object-fit: cover;"><source src="${vidUrl}" type="video/mp4"></video>`;
-            }
-        }
-
-        return `
-            <div style="background:#2a2a2a; padding:6px; border-radius:6px; text-align:center; border: 1px solid #444;">
-                ${miniaturaVideo}
-                <p style="font-size:11px; margin:4px 0; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${titulo}</p>
-                <button onclick="window.borrarVideo(${vid.id})" style="background: #dc3545; color: white; border: none; margin-top:2px; font-size:10px; padding:4px 6px; width:100%; border-radius:4px; cursor:pointer;">Borrar</button>
-            </div>
-        `;
-    }).join("");
+    contenedorAdmin.innerHTML = data.map(vid => `
+        <div style="background:#2a2a2a; padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; border: 1px solid #444; margin-bottom:6px;">
+            <span style="font-size:0.9rem; color:#fff;">🎬 ${vid.Titulo}</span>
+            <button onclick="window.borrarVideo(${vid.id})" style="background: #dc3545; color: white; border: none; font-size:0.8rem; padding:4px 8px; border-radius:4px; cursor:pointer;">Borrar</button>
+        </div>
+    `).join("");
 }
 
 window.borrarVideo = async (id) => {
     if (confirm("¿Borrar este video?")) {
         const { error } = await supabase.from("videos").delete().eq("id", id);
         if (error) alert("Error: " + error.message);
-        else { cargarVideosAdmin(); cargarVideosWeb(); }
+        else cargarVideosAdmin();
     }
 };
 
-async function cargarVideosWeb() {
-    const contenedor = document.getElementById("videosPublicos");
-    if (!contenedor) return;
-
-    const { data, error } = await supabase.from("videos").select("*");
-    if (error || !data || data.length === 0) {
-        contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>No hay videos disponibles.</p>";
-        return;
-    }
-
-    contenedor.innerHTML = data.map(item => {
-        const titulo = item.Titulo || 'Video';
-        let vidUrl = (item.Url || '').trim();
-        let contenidoVideo = '<p style="color: #aaa; font-size: 0.85rem;">Próximamente disponible</p>';
-
-        if (vidUrl) {
-            if (vidUrl.includes('youtube.com') || vidUrl.includes('youtu.be')) {
-                let ytId = vidUrl.includes('youtu.be') ? vidUrl.split('/').pop().split('?')[0] : new URLSearchParams(new URL(vidUrl).search).get('v');
-                contenidoVideo = `<iframe width="100%" height="180" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:6px; margin-bottom:10px;"></iframe>`;
-            } else {
-                contenidoVideo = `<video controls style="width: 100%; max-height: 200px; border-radius: 6px; margin-bottom: 10px; background: #000; object-fit: cover;"><source src="${vidUrl}" type="video/mp4"></video>`;
-            }
-        }
-
-        return `<div class="media-card"><p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-bottom: 8px;">🎬 ${titulo}</p>${contenidoVideo}</div>`;
-    }).join("");
-}
-
 // ==========================================
-// 6. GESTIÓN DE TESTIMONIOS
+// GESTIÓN DE TESTIMONIOS
 // ==========================================
 async function cargarTestimoniosAdmin() {
     const contenedor = document.getElementById("listaTestimoniosAdmin");
@@ -541,32 +407,15 @@ async function cargarTestimoniosAdmin() {
     }).join("");
 }
 
-async function cargarTestimoniosWeb() {
-    const contenedor = document.getElementById("testimoniosPublicos");
-    if (!contenedor) return;
-
-    const { data, error } = await supabase.from("testimonios").select("*").eq("aprobado", true).order("id", { ascending: false });
-
-    if (error || !data || data.length === 0) {
-        contenedor.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1 / -1;">Aún no hay testimonios publicados.</p>';
-        return;
-    }
-
-    contenedor.innerHTML = data.map(t => {
-        const estrellas = "⭐".repeat(t.estrellas || 5);
-        return `<div class="media-card" style="text-align: left; padding: 20px;"><div style="color: #ffc107; margin-bottom: 8px; font-size: 1.1rem;">${estrellas}</div><p style="color: #ddd; margin-bottom: 12px; font-style: italic;">"${t.comentario}"</p><p style="color: #ffc107; font-weight: bold; font-size: 0.9rem;">- ${t.nombre}</p></div>`;
-    }).join("");
-}
-
 window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
     const { error } = await supabase.from("testimonios").update({ aprobado: nuevoEstado }).eq("id", id);
-    if (!error) { cargarTestimoniosAdmin(); cargarTestimoniosWeb(); }
+    if (!error) cargarTestimoniosAdmin();
 };
 
 window.borrarTestimonio = async function(id) {
     if (confirm("¿Borrar testimonio?")) {
         const { error } = await supabase.from("testimonios").delete().eq("id", id);
-        if (!error) { cargarTestimoniosAdmin(); cargarTestimoniosWeb(); }
+        if (!error) cargarTestimoniosAdmin();
     }
 };
 
@@ -575,6 +424,3 @@ window.borrarTestimonio = async function(id) {
 // ==========================================
 obtenerUrlLogo();
 checkSession();
-cargarGaleriaWeb();
-cargarVideosWeb();
-cargarTestimoniosWeb();
