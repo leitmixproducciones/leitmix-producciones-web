@@ -98,6 +98,7 @@ function mostrarPanel() {
     cargarRecibosAdmin();
     cargarFotos();
     cargarVideosAdmin();
+    cargarTestimoniosAdmin(); // <-- Acá se cargan los testimonios en el panel
 }
 
 function mostrarLogin() {
@@ -432,7 +433,6 @@ document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) 
     try {
         let finalUrl = urlVideo;
 
-        // Si subió un archivo desde el celular, lo guardamos en el Storage
         if (archivo) {
             const path = `videos/${Date.now()}_${archivo.name}`;
             const { error: uploadError } = await supabase.storage.from("Media").upload(path, archivo);
@@ -559,8 +559,71 @@ async function cargarVideosWeb() {
 }
 
 // ==========================================
-// 6. TESTIMONIOS (PÚBLICO)
+// 6. GESTIÓN Y CARGA DE TESTIMONIOS (ADMIN Y WEB)
 // ==========================================
+async function cargarTestimoniosAdmin() {
+    const contenedorAdmin = document.getElementById("listaTestimoniosAdmin");
+    if (!contenedorAdmin) return;
+
+    const { data, error } = await supabase
+        .from("testimonios")
+        .select("*")
+        .order("id", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        contenedorAdmin.innerHTML = "<p style='color: #888; text-align:center; font-size: 0.9rem;'>No hay testimonios para administrar.</p>";
+        return;
+    }
+
+    contenedorAdmin.innerHTML = data.map(t => {
+        const estrellas = "⭐".repeat(t.estrellas || 5);
+        const estaAprobado = t.aprobado;
+
+        return `
+            <div style="background:#222; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #333;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <strong style="color: #ffc107; font-size: 0.95rem;">${t.nombre}</strong>
+                    <span style="font-size: 0.8rem;">${estrellas}</span>
+                </div>
+                <p style="color: #ddd; font-size: 0.85rem; font-style: italic; margin-bottom: 8px;">"${t.comentario}"</p>
+                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                    ${estaAprobado 
+                        ? `<button onclick="window.cambiarEstadoTestimonio(${t.id}, false)" style="background: #ff9800; color: #121212; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">Ocultar de la Web</button>`
+                        : `<button onclick="window.cambiarEstadoTestimonio(${t.id}, true)" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">✔️ Aprobar y Publicar</button>`
+                    }
+                    <button onclick="window.borrarTestimonio(${t.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Borrar</button>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+window.cambiarEstadoTestimonio = async (id, nuevoEstado) => {
+    const { error } = await supabase
+        .from("testimonios")
+        .update({ aprobado: nuevoEstado })
+        .eq("id", id);
+
+    if (error) {
+        alert("Error al actualizar el testimonio: " + error.message);
+    } else {
+        cargarTestimoniosAdmin();
+        cargarTestimoniosWeb();
+    }
+};
+
+window.borrarTestimonio = async (id) => {
+    if (confirm("¿Estás seguro de que querés borrar este testimonio?")) {
+        const { error } = await supabase.from("testimonios").delete().eq("id", id);
+        if (error) {
+            alert("Error al borrar: " + error.message);
+        } else {
+            cargarTestimoniosAdmin();
+            cargarTestimoniosWeb();
+        }
+    }
+};
+
 async function cargarTestimoniosWeb() {
     const contenedor = document.getElementById("testimoniosPublicos");
     if (!contenedor) return;
