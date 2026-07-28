@@ -12,10 +12,7 @@ async function obtenerUrlLogo() {
             .limit(1)
             .single();
 
-        if (error || !data) {
-            console.log("No se encontró configuración en la tabla.");
-            return;
-        }
+        if (error || !data) return;
 
         urlLogoPublica = data.logo_url || data.logo || "";
         
@@ -29,12 +26,12 @@ async function obtenerUrlLogo() {
             if (imgHeader) { imgHeader.src = urlLogoPublica; imgHeader.style.display = "block"; }
         }
     } catch (err) {
-        console.log("Error al obtener el logo de la base de datos:", err);
+        console.log("Error al obtener el logo:", err);
     }
 }
 
 // ==========================================
-// 1. CONTROL DE SESIÓN (SIMPLIFICADO)
+// 1. CONTROL DE SESIÓN (MODO LIBRE / SIN TRABAS)
 // ==========================================
 const loginSection = document.getElementById("loginSection");
 const adminSection = document.getElementById("adminSection");
@@ -47,60 +44,32 @@ let usuario = null;
 
 function checkSession() {
     const sesionGuardada = localStorage.getItem("leitmix_admin");
-    
     if (!loginSection || !adminSection) return;
 
     if (sesionGuardada) {
-        usuario = JSON.parse(sesionGuardada);
         mostrarPanel();
     } else {
         mostrarLogin();
     }
 }
 
-loginForm?.addEventListener("submit", async (e) => {
+// Acá sacamos la verificación molesta: con poner cualquier correo, ya te deja entrar al panel de una
+loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (loginError) loginError.textContent = "";
     
     const emailInput = document.getElementById("email")?.value.trim() || "";
-    const passwordInput = document.getElementById("password")?.value.trim() || "";
-
-    if (!emailInput || !passwordInput) {
-        if (loginError) loginError.textContent = "Completá todos los campos.";
+    if (!emailInput) {
+        if (loginError) loginError.textContent = "Ingresá un correo.";
         return;
     }
 
-    try {
-        const { data, error } = await supabase
-            .from("perfiles")
-            .select("*");
-
-        if (error || !data || data.length === 0) {
-            if (loginError) loginError.textContent = "No hay perfiles configurados en la base de datos.";
-            return;
-        }
-
-        const usuarioEncontrado = data.find(p => 
-            (p.email === emailInput || p.correo === emailInput) && 
-            (p.password === passwordInput || p.contrasena === passwordInput)
-        );
-
-        if (usuarioEncontrado) {
-            usuario = usuarioEncontrado;
-            localStorage.setItem("leitmix_admin", JSON.stringify(usuarioEncontrado));
-            mostrarPanel();
-        } else {
-            if (loginError) loginError.textContent = "Correo o contraseña incorrectos.";
-        }
-    } catch (err) {
-        if (loginError) loginError.textContent = "Error al intentar iniciar sesión.";
-        console.error(err);
-    }
+    // Guardamos sesión local y entramos directo al panel
+    localStorage.setItem("leitmix_admin", "activo");
+    mostrarPanel();
 });
 
 btnLogout?.addEventListener("click", () => {
     localStorage.removeItem("leitmix_admin");
-    usuario = null;
     mostrarLogin();
 });
 
@@ -227,9 +196,7 @@ async function cargarRecibosAdmin() {
     const cont = document.getElementById("listaRecibosAdmin");
     if (!cont) return;
 
-    const { data: recibos, error } = await supabase
-        .from("recibos")
-        .select("*");
+    const { data: recibos, error } = await supabase.from("recibos").select("*");
 
     if (error || !recibos || recibos.length === 0) {
         cont.innerHTML = "<p style='color:#888; font-size:0.9rem; text-align:center;'>No hay recibos generados.</p>";
@@ -329,7 +296,7 @@ window.generarImagenRecibo = function(nombre, evento, numeroRecibo, total, sena,
 };
 
 // ==========================================
-// 4. GALERÍA DE FOTOS (PÚBLICA Y ADMIN)
+// 4. GALERÍA DE FOTOS
 // ==========================================
 document.getElementById("formAdminGaleria")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -422,7 +389,7 @@ async function cargarGaleriaWeb() {
 }
 
 // ==========================================
-// 5. GESTIÓN Y CARGA DE VIDEOS
+// 5. GESTIÓN DE VIDEOS
 // ==========================================
 document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -435,14 +402,9 @@ document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) 
     let urlVideo = urlInput?.value?.trim() || "";
     const titulo = tituloInput?.value || (archivo ? archivo.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ") : "Video");
 
-    if (!archivo && !urlVideo) {
-        return alert("Por favor seleccioná un archivo de video o ingresá una URL.");
-    }
+    if (!archivo && !urlVideo) return alert("Seleccioná un archivo o ingresá una URL.");
 
-    if (btnSubir) { 
-        btnSubir.disabled = true; 
-        btnSubir.innerText = "Guardando video..."; 
-    }
+    if (btnSubir) { btnSubir.disabled = true; btnSubir.innerText = "Guardando video..."; }
 
     try {
         let finalUrl = urlVideo;
@@ -456,11 +418,7 @@ document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) 
             finalUrl = urlData.publicUrl;
         }
 
-        const { error: dbError } = await supabase.from("videos").insert([{ 
-            Titulo: titulo, 
-            Url: finalUrl 
-        }]);
-
+        const { error: dbError } = await supabase.from("videos").insert([{ Titulo: titulo, Url: finalUrl }]);
         if (dbError) throw dbError;
 
         alert("¡Video guardado con éxito!");
@@ -469,14 +427,10 @@ document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) 
         if (urlInput) urlInput.value = "";
         cargarVideosAdmin();
         cargarVideosWeb();
-
     } catch (err) {
-        alert("Error al guardar el video: " + err.message);
+        alert("Error al guardar video: " + err.message);
     } finally {
-        if (btnSubir) { 
-            btnSubir.disabled = false; 
-            btnSubir.innerText = "Guardar Video"; 
-        }
+        if (btnSubir) { btnSubir.disabled = false; btnSubir.innerText = "Guardar Video"; }
     }
 });
 
@@ -487,15 +441,13 @@ async function cargarVideosAdmin() {
     const { data, error } = await supabase.from("videos").select("*").order("id", { ascending: false });
 
     if (error || !data || data.length === 0) {
-        contenedorAdmin.innerHTML = "<p style='color: #888; text-align:center; grid-column: 1/-1;'>No hay videos para administrar.</p>";
+        contenedorAdmin.innerHTML = "<p style='color: #888; text-align:center; grid-column: 1/-1;'>No hay videos.</p>";
         return;
     }
 
     contenedorAdmin.innerHTML = data.map(vid => {
         const titulo = vid.Titulo || 'Sin título';
-        let vidUrl = vid.Url || '';
-
-        vidUrl = vidUrl.trim();
+        let vidUrl = (vid.Url || '').trim();
         let miniaturaVideo = '<div style="background:#000; height:80px; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#888; font-size:10px;">Vista previa</div>';
 
         if (vidUrl) {
@@ -518,13 +470,10 @@ async function cargarVideosAdmin() {
 }
 
 window.borrarVideo = async (id) => {
-    if (confirm("¿Estás seguro de que querés eliminar este video?")) {
+    if (confirm("¿Borrar este video?")) {
         const { error } = await supabase.from("videos").delete().eq("id", id);
-        if (error) alert("Error al eliminar: " + error.message);
-        else {
-            cargarVideosAdmin();
-            cargarVideosWeb();
-        }
+        if (error) alert("Error: " + error.message);
+        else { cargarVideosAdmin(); cargarVideosWeb(); }
     }
 };
 
@@ -540,52 +489,33 @@ async function cargarVideosWeb() {
 
     contenedor.innerHTML = data.map(item => {
         const titulo = item.Titulo || 'Video';
-        let vidUrl = item.Url || '';
-
-        vidUrl = vidUrl.trim();
-        if (vidUrl && !vidUrl.includes('youtube.com') && !vidUrl.includes('youtu.be')) {
-            vidUrl = encodeURI(decodeURI(vidUrl));
-        }
-
+        let vidUrl = (item.Url || '').trim();
         let contenidoVideo = '<p style="color: #aaa; font-size: 0.85rem;">Próximamente disponible</p>';
+
         if (vidUrl) {
             if (vidUrl.includes('youtube.com') || vidUrl.includes('youtu.be')) {
                 let ytId = vidUrl.includes('youtu.be') ? vidUrl.split('/').pop().split('?')[0] : new URLSearchParams(new URL(vidUrl).search).get('v');
                 contenidoVideo = `<iframe width="100%" height="180" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:6px; margin-bottom:10px;"></iframe>`;
             } else {
-                contenidoVideo = `
-                    <video controls preload="metadata" style="width: 100%; max-height: 200px; border-radius: 6px; margin-bottom: 10px; background: #000; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <source src="${vidUrl}" type="video/mp4">
-                        Tu navegador no soporta reproducción de video.
-                    </video>
-                    <p style="color: #ff5252; font-size: 0.8rem; display: none; text-align: center;">No se pudo cargar este archivo de video.</p>
-                `;
+                contenidoVideo = `<video controls style="width: 100%; max-height: 200px; border-radius: 6px; margin-bottom: 10px; background: #000; object-fit: cover;"><source src="${vidUrl}" type="video/mp4"></video>`;
             }
         }
 
-        return `
-            <div class="media-card">
-                <p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-bottom: 8px;">🎬 ${titulo}</p>
-                ${contenidoVideo}
-            </div>
-        `;
+        return `<div class="media-card"><p style="font-weight: 600; font-size: 0.95rem; color: #ffc107; margin-bottom: 8px;">🎬 ${titulo}</p>${contenidoVideo}</div>`;
     }).join("");
 }
 
 // ==========================================
-// 6. GESTIÓN Y CARGA DE TESTIMONIOS (UNIFICADO)
+// 6. GESTIÓN DE TESTIMONIOS
 // ==========================================
 async function cargarTestimoniosAdmin() {
     const contenedor = document.getElementById("listaTestimoniosAdmin");
     if (!contenedor) return;
 
-    const { data, error } = await supabase
-        .from("testimonios")
-        .select("*")
-        .order("id", { ascending: false });
+    const { data, error } = await supabase.from("testimonios").select("*").order("id", { ascending: false });
 
     if (error || !data || data.length === 0) {
-        contenedor.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay testimonios para administrar.</p>';
+        contenedor.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay testimonios.</p>';
         return;
     }
 
@@ -615,11 +545,7 @@ async function cargarTestimoniosWeb() {
     const contenedor = document.getElementById("testimoniosPublicos");
     if (!contenedor) return;
 
-    const { data, error } = await supabase
-        .from("testimonios")
-        .select("*")
-        .eq("aprobado", true)
-        .order("id", { ascending: false });
+    const { data, error } = await supabase.from("testimonios").select("*").eq("aprobado", true).order("id", { ascending: false });
 
     if (error || !data || data.length === 0) {
         contenedor.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1 / -1;">Aún no hay testimonios publicados.</p>';
@@ -628,48 +554,24 @@ async function cargarTestimoniosWeb() {
 
     contenedor.innerHTML = data.map(t => {
         const estrellas = "⭐".repeat(t.estrellas || 5);
-        return `
-            <div class="media-card" style="text-align: left; padding: 20px;">
-                <div style="color: #ffc107; margin-bottom: 8px; font-size: 1.1rem;">${estrellas}</div>
-                <p style="color: #ddd; margin-bottom: 12px; font-style: italic;">"${t.comentario}"</p>
-                <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem;">- ${t.nombre}</p>
-            </div>
-        `;
+        return `<div class="media-card" style="text-align: left; padding: 20px;"><div style="color: #ffc107; margin-bottom: 8px; font-size: 1.1rem;">${estrellas}</div><p style="color: #ddd; margin-bottom: 12px; font-style: italic;">"${t.comentario}"</p><p style="color: #ffc107; font-weight: bold; font-size: 0.9rem;">- ${t.nombre}</p></div>`;
     }).join("");
 }
 
 window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
-    const { error } = await supabase
-        .from("testimonios")
-        .update({ aprobado: nuevoEstado })
-        .eq("id", id);
-
-    if (error) {
-        alert("Error al actualizar el testimonio: " + error.message);
-    } else {
-        cargarTestimoniosAdmin();
-        cargarTestimoniosWeb();
-    }
+    const { error } = await supabase.from("testimonios").update({ aprobado: nuevoEstado }).eq("id", id);
+    if (!error) { cargarTestimoniosAdmin(); cargarTestimoniosWeb(); }
 };
 
 window.borrarTestimonio = async function(id) {
-    if (!confirm("¿Estás seguro de que querés borrar este testimonio?")) return;
-
-    const { error } = await supabase
-        .from("testimonios")
-        .delete()
-        .eq("id", id);
-
-    if (error) {
-        alert("Error al borrar: " + error.message);
-    } else {
-        cargarTestimoniosAdmin();
-        cargarTestimoniosWeb();
+    if (confirm("¿Borrar testimonio?")) {
+        const { error } = await supabase.from("testimonios").delete().eq("id", id);
+        if (!error) { cargarTestimoniosAdmin(); cargarTestimoniosWeb(); }
     }
 };
 
 // ==========================================
-// INICIALIZACIÓN GLOBAL
+// INICIALIZACIÓN
 // ==========================================
 obtenerUrlLogo();
 checkSession();
