@@ -3,16 +3,15 @@ import { CONFIG } from "./config.js";
 
 let urlLogoPublica = "";
 
-// Cargar la URL del logo automáticamente desde Supabase Storage probando variantes de nombre/extensión
+// Cargar la URL del logo automáticamente desde Supabase Storage
 async function obtenerUrlLogo() {
     try {
-        const nombresPosibles = ["logo.png", "Logo.png", "logo.jpg", "Logo.jpg", "logo.jpeg", "Logo.jpeg"];
+        const nombresPosibles = ["Leitmix-logo.png", "leitmix-logo.png", "Leitmix-logo.jpg", "logo.png", "Logo.png"];
         let publicUrlFinal = "";
 
         for (let nombreArchivo of nombresPosibles) {
             const { data } = supabase.storage.from("Media").getPublicUrl(nombreArchivo);
             if (data && data.publicUrl) {
-                // Verificamos si podemos obtenerla; asignamos y rompemos el bucle
                 publicUrlFinal = data.publicUrl;
                 break;
             }
@@ -408,7 +407,7 @@ async function cargarGaleriaWeb() {
 }
 
 // ==========================================
-// 5. GESTIÓN Y CARGA DE VIDEOS
+// 5. GESTIÓN Y CARGA DE VIDEOS + SINCRONIZACIÓN
 // ==========================================
 document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -426,6 +425,62 @@ document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) 
         document.getElementById("formAdminVideo").reset();
         cargarVideosWeb();
         cargarVideosAdmin();
+    }
+});
+
+// Botón para sincronizar videos automáticamente desde el Storage
+document.getElementById("btnSincronizarVideos")?.addEventListener("click", async () => {
+    const btn = document.getElementById("btnSincronizarVideos");
+    if (btn) { btn.disabled = true; btn.innerText = "Sincronizando..."; }
+
+    try {
+        const { data: archivos, error: listError } = await supabase.storage
+            .from("Media")
+            .list("videos", { limit: 100, sortBy: { column: 'name', order: 'asc' } });
+
+        if (listError) throw listError;
+
+        if (!archivos || archivos.length === 0) {
+            alert("No se encontraron archivos en la carpeta 'videos' del Storage.");
+            return;
+        }
+
+        const { data: videosActuales } = await supabase.from("videos").select("Url");
+        const urlsExistentes = new Set(videosActuales ? videosActuales.map(v => v.Url) : []);
+
+        let agregadosCount = 0;
+
+        for (let archivo of archivos) {
+            if (!archivo.name || archivo.name === ".emptyFolderPlaceholder") continue;
+
+            const pathCompleto = `videos/${archivo.name}`;
+            const { data: urlData } = supabase.storage.from("Media").getPublicUrl(pathCompleto);
+            const publicUrl = urlData.publicUrl;
+
+            if (!urlsExistentes.has(publicUrl)) {
+                let tituloLimpio = archivo.name
+                    .replace(/\.[^/.]+$/, "")
+                    .replace(/[-_]/g, " ");
+
+                const { error: insertError } = await supabase.from("videos").insert([{
+                    Titulo: tituloLimpio,
+                    Url: publicUrl
+                }]);
+
+                if (!insertError) {
+                    agregadosCount++;
+                }
+            }
+        }
+
+        alert(`¡Sincronización completada! Se añadieron ${agregadosCount} videos nuevos.`);
+        cargarVideosAdmin();
+        cargarVideosWeb();
+
+    } catch (err) {
+        alert("Error al sincronizar: " + err.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerText = "🔄 Sincronizar Videos de Storage"; }
     }
 });
 
@@ -483,7 +538,6 @@ async function cargarVideosWeb() {
         const titulo = item.Titulo || 'Video';
         let vidUrl = item.Url || '';
 
-        // Limpieza y codificación segura para evitar el error 400 en archivos de Supabase Storage
         vidUrl = vidUrl.trim();
         if (vidUrl && !vidUrl.includes('youtube.com') && !vidUrl.includes('youtu.be')) {
             vidUrl = encodeURI(decodeURI(vidUrl));
@@ -500,7 +554,7 @@ async function cargarVideosWeb() {
                         <source src="${vidUrl}" type="video/mp4">
                         Tu navegador no soporta reproducción de video.
                     </video>
-                    <p style="color: #ff5252; font-size: 0.8rem; display: none; text-align: center;">No se pudo cargar este archivo de video (Verificá el enlace en el panel admin).</p>
+                    <p style="color: #ff5252; font-size: 0.8rem; display: none; text-align: center;">No se pudo cargar este archivo de video.</p>
                 `;
             }
         }
