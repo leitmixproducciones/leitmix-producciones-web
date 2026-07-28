@@ -28,10 +28,10 @@
         <div id="errorMsg" class="error-msg"></div>
         <div id="successMsg" class="success-msg"></div>
 
-        <input type="email" id="loginEmail" placeholder="Tu Email" required>
-        <input type="password" id="loginPassword" placeholder="Tu Contraseña" required>
+        <input type="email" id="loginEmail" placeholder="Tu Email" autocomplete="email" required>
+        <input type="password" id="loginPassword" placeholder="Tu Contraseña" autocomplete="current-password" required>
         
-        <button id="btnLogin">Ingresar</button>
+        <button id="btnLogin" type="button">Ingresar</button>
 
         <a href="#" id="btnForgot" class="forgot-link">¿Olvidaste tu contraseña?</a>
     </div>
@@ -44,7 +44,7 @@
         const successMsg = document.getElementById("successMsg");
         const btnForgot = document.getElementById("btnForgot");
 
-        // Iniciar Sesión
+        // Iniciar Sesión al hacer clic en el botón
         btnLogin.addEventListener("click", async () => {
             const email = document.getElementById("loginEmail").value.trim();
             const password = document.getElementById("loginPassword").value.trim();
