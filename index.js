@@ -1,0 +1,76 @@
+import { supabase } from "./supabase.js";
+
+// 1. Enviar Reserva y abrir WhatsApp
+document.getElementById("formReserva")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nombre = document.getElementById("reservaNombre").value;
+    const telefono = document.getElementById("reservaTelefono").value;
+    const evento = document.getElementById("reservaEvento").value;
+    const fecha = document.getElementById("reservaFecha").value;
+    const comentarios = document.getElementById("reservaComentarios").value;
+
+    const { error } = await supabase.from("reservas").insert([{
+        nombre, telefono, evento, fecha, comentarios
+    }]);
+
+    if (error) {
+        alert("Error al guardar reserva: " + error.message);
+    } else {
+        alert("¡Reserva guardada con éxito!");
+        document.getElementById("formReserva").reset();
+        
+        // Redirigir a WhatsApp
+        const mensaje = `Hola! Quiero confirmar una reserva.%0A*Nombre:* ${nombre}%0A*Evento:* ${evento}%0A*Fecha:* ${fecha}%0A*Teléfono:* ${telefono}%0A*Comentarios:* ${comentarios}`;
+        window.open(`https://wa.me/?text=${mensaje}`, '_blank');
+    }
+});
+
+// 2. Enviar Testimonio Pùblico
+document.getElementById("formTestimonioPublico")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nombre = document.getElementById("testimonioNombre").value;
+    const estrellas = parseInt(document.getElementById("testimonioEstrellas").value);
+    const comentario = document.getElementById("testimonioComentario").value;
+
+    const { error } = await supabase.from("testimonios").insert([{
+        nombre, estrellas, comentario, aprobado: false
+    }]);
+
+    if (error) {
+        alert("Error al enviar comentario.");
+    } else {
+        alert("¡Gracias! Tu comentario fue enviado y será publicado pronto.");
+        document.getElementById("formTestimonioPublico").reset();
+    }
+});
+
+// 3. Cargar Galería, Videos y Testimonios Aprobados
+async function cargarPublico() {
+    // Galería
+    const { data: fotos } = await supabase.from("galeria").select("*");
+    const contGaleria = document.getElementById("galeriaPublica");
+    if (fotos && fotos.length > 0 && contGaleria) {
+        contGaleria.innerHTML = fotos.map(f => `
+            <div style="background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center;">
+                <img src="${f.Imagen || f.url}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px;" alt="Foto">
+                <p style="margin-top: 8px; font-size: 0.9rem; color: #fff;">${f.Titulo || ''}</p>
+            </div>
+        `).join("");
+    }
+
+    // Testimonios aprobados
+    const { data: tests } = await supabase.from("testimonios").select("*").eq("aprobado", true);
+    const contTest = document.getElementById("testimoniosPublicos");
+    if (tests && tests.length > 0 && contTest) {
+        contTest.innerHTML = tests.map(t => `
+            <div style="background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #333;">
+                <strong style="color: #ffc107;">${t.nombre}</strong>
+                <p style="color: #aaa; font-size: 0.85rem; margin: 4px 0;">${"⭐".repeat(t.estrellas)}</p>
+                <p style="color: #ddd; font-size: 0.95rem;">"${t.comentario}"</p>
+            </div>
+        `).join("");
+    }
+}
+
+cargarPublico();
+
