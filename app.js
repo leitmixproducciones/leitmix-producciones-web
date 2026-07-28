@@ -42,7 +42,7 @@ function checkSession() {
     const sesionGuardada = localStorage.getItem("leitmix_admin");
     if (!loginSection || !adminSection) return;
 
-    if (sesionGuardada) {
+    if (sesionGuardada === "activo") {
         mostrarPanel();
     } else {
         mostrarLogin();
@@ -52,12 +52,14 @@ function checkSession() {
 loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const emailInput = document.getElementById("email")?.value.trim() || "";
+    const passwordInput = document.getElementById("password")?.value.trim() || "";
     
-    if (!emailInput) {
-        if (loginError) loginError.textContent = "Ingresá un correo.";
+    if (!emailInput || !passwordInput) {
+        if (loginError) loginError.textContent = "Completá todos los campos.";
         return;
     }
 
+    // Guardamos la sesión y abrimos el panel de inmediato
     localStorage.setItem("leitmix_admin", "activo");
     mostrarPanel();
 });
