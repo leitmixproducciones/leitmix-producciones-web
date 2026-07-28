@@ -6,8 +6,8 @@ let urlLogoPublica = "";
 // Cargar la URL del logo automáticamente desde Supabase Storage
 async function obtenerUrlLogo() {
     try {
-        const nombreLogo = "Logo-1784650941040-1000140956.jpg";
-        const { data } = supabase.storage.from("Media").getPublicUrl(nombreLogo);
+        const nombreRuta = "logo/Logo-1784650941040-1000140956.jpg";
+        const { data } = supabase.storage.from("Media").getPublicUrl(nombreRuta);
         
         if (data && data.publicUrl) {
             urlLogoPublica = data.publicUrl;
