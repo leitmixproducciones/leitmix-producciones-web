@@ -659,3 +659,106 @@ checkSession();
 cargarGaleriaWeb();
 cargarVideosWeb();
 cargarTestimoniosWeb();
+
+// ==========================================
+// 9. CARGAR Y GESTIONAR TESTIMONIOS
+// ==========================================
+
+// Cargar testimonios aprobados en la web pública
+async function cargarTestimoniosPublicos() {
+    const contenedor = document.getElementById("testimoniosPublicos");
+    if (!contenedor) return;
+
+    const { data, error } = await supabase
+        .from("testimonios")
+        .select("*")
+        .eq("aprobado", true)
+        .order("created_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        contenedor.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1 / -1;">Aún no hay testimonios publicados.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = data.map(t => `
+        <div class="media-card" style="text-align: left; padding: 20px;">
+            <div style="color: #ffc107; margin-bottom: 8px; font-size: 1.1rem;">
+                ${'⭐'.repeat(t.estrellas)}
+            </div>
+            <p style="color: #ddd; margin-bottom: 12px; font-style: italic;">"${t.comentario}"</p>
+            <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem;">- ${t.nombre}</p>
+        </div>
+    `).join("");
+}
+
+// Cargar testimonios en el Panel de Administración
+async function cargarTestimoniosAdmin() {
+    const contenedor = document.getElementById("listaTestimoniosAdmin");
+    if (!contenedor) return;
+
+    const { data, error } = await supabase
+        .from("testimonios")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        contenedor.innerHTML = '<p style="color: #888; text-align: center;">No hay testimonios para administrar.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = data.map(t => `
+        <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; border: 1px solid #444; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: #ffc107;">${t.nombre}</strong>
+                <span style="font-size: 0.85rem; color: #aaa;">${'⭐'.repeat(t.estrellas)}</span>
+            </div>
+            <p style="color: #ddd; font-size: 0.95rem;">"${t.comentario}"</p>
+            <div style="display: flex; gap: 8px; margin-top: 5px;">
+                <button onclick="cambiarEstadoTestimonio('${t.id}', ${!t.aprobado})" style="background: ${t.aprobado ? '#ffc107' : '#28a745'}; color: #121212; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; font-size: 0.85rem;">
+                    ${t.aprobado ? 'Ocultar' : 'Aprobar'}
+                </button>
+                <button onclick="eliminarTestimonio('${t.id}')" style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
+                    Borrar
+                </button>
+            </div>
+        </div>
+    `).join("");
+}
+
+// Cambiar estado (Aprobar / Ocultar)
+window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
+    const { error } = await supabase
+        .from("testimonios")
+        .update({ aprobado: nuevoEstado })
+        .eq("id", id);
+
+    if (error) {
+        alert("Error al actualizar: " + error.message);
+    } else {
+        cargarTestimoniosAdmin();
+        cargarTestimoniosPublicos();
+    }
+};
+
+// Eliminar testimonio
+window.eliminarTestimonio = async function(id) {
+    if (!confirm("¿Estás seguro querés borrar este testimonio?")) return;
+
+    const { error } = await supabase
+        .from("testimonios")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        alert("Error al borrar: " + error.message);
+    } else {
+        cargarTestimoniosAdmin();
+        cargarTestimoniosPublicos();
+    }
+};
+
+// Ejecutar al iniciar la página
+document.addEventListener("DOMContentLoaded", () => {
+    cargarTestimoniosPublicos();
+});
+
