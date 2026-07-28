@@ -27,10 +27,6 @@
         .card-form input, .card-form textarea, .card-form select { width: 100%; padding: 12px; margin-bottom: 15px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; font-size: 1rem; }
         .card-form button { background: #ffc107; color: #121212; border: none; padding: 12px; width: 100%; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: background 0.3s; }
         .card-form button:hover { background: #e0a800; }
-
-        /* Panel de Administración */
-        .hidden { display: none !important; }
-        .admin-card { background: #1a1a1a; border: 2px solid #ffc107; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
         
         footer { text-align: center; padding: 20px; background: #1a1a1a; color: #888; border-top: 1px solid #333; margin-top: 40px; }
     </style>
@@ -49,7 +45,7 @@
             <a href="#videos">Videos</a>
             <a href="#reservas">Reservas</a>
             <a href="#testimonios">Testimonios</a>
-            <a href="#admin">Admin</a>
+            <a href="panel.html" style="color: #ffc107; font-weight: bold;">Admin 🔒</a>
         </nav>
     </header>
 
@@ -84,7 +80,7 @@
             </div>
         </section>
 
-        <!-- TESTIMONIOS (PÚBLICO + FORMULARIO) -->
+        <!-- TESTIMONIOS (PÚBLICO + FORMULARIO DE ENVÍO) -->
         <section id="testimonios">
             <h2 class="section-title">⭐ Testimonios</h2>
             <div id="testimoniosPublicos" class="grid-media" style="margin-bottom: 30px;">
@@ -105,92 +101,6 @@
                     <textarea id="testimonioComentario" placeholder="Escribí tu comentario sobre el evento..." rows="3" required></textarea>
                     <button type="submit">Enviar Comentario</button>
                 </form>
-            </div>
-        </section>
-
-        <!-- PANEL DE ADMINISTRACIÓN -->
-        <section id="admin" class="card-form" style="border-color: #ffc107; margin-top: 50px;">
-            <h2 class="section-title">🔒 Panel de Administración</h2>
-
-            <!-- LOGIN ADMIN -->
-            <div id="loginSection">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <img id="logoLogin" class="logo-img" style="display:inline-block; max-height:60px;" alt="Logo">
-                </div>
-                <form id="loginForm">
-                    <input type="email" id="email" placeholder="Correo electrónico" required>
-                    <input type="password" id="password" placeholder="Contraseña" required>
-                    <button type="submit">Ingresar al Panel</button>
-                    <p id="loginError" style="color: #ff5252; text-align: center; margin-top: 10px; font-size: 0.9rem;"></p>
-                </form>
-            </div>
-
-            <!-- CONTENIDO DEL PANEL (OCULTO HASTA LOGuearse) -->
-            <div id="adminSection" class="hidden">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #222; padding: 12px; border-radius: 6px;">
-                    <span style="font-weight: bold; color: #ffc107;">Panel Activo</span>
-                    <button id="btnLogout" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; width: auto;">Cerrar Sesión</button>
-                </div>
-
-                <div style="margin-bottom: 20px; background: #222; padding: 15px; border-radius: 6px; text-align: center;">
-                    <p style="font-size: 0.9rem; color: #aaa;">Total de Reservas Registradas:</p>
-                    <h3 id="totalReservas" style="font-size: 1.8rem; color: #ffc107;">0</h3>
-                </div>
-
-                <!-- GESTIÓN DE VIDEOS (ADMIN) -->
-                <div class="admin-card">
-                    <h3 style="color: #ffc107; margin-bottom: 15px; font-size: 1.2rem;">🎬 Gestión de Videos</h3>
-                    
-                    <form id="formAdminVideo" style="margin-bottom: 12px;">
-                        <input type="text" id="adminTituloVideo" placeholder="Título del video" required>
-                        <input type="text" id="adminUrlVideo" placeholder="URL del video (Supabase o YouTube)" required>
-                        <button type="submit">Guardar Video</button>
-                    </form>
-
-                    <!-- BOTÓN DE SINCRONIZAR DESDE STORAGE -->
-                    <button id="btnSincronizarVideos" style="background: #17a2b8; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 15px;">
-                        🔄 Sincronizar Videos de Storage
-                    </button>
-
-                    <div id="adminListaVideos" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                </div>
-
-                <!-- GESTIÓN DE FOTOS (ADMIN) -->
-                <div class="admin-card">
-                    <h3 style="color: #ffc107; margin-bottom: 15px; font-size: 1.2rem;">📸 Gestión de Fotos</h3>
-                    <form id="formAdminGaleria">
-                        <input type="text" id="adminTituloFoto" placeholder="Título de la foto" required>
-                        <input type="file" id="adminArchivoFoto" accept="image/*" required style="padding: 8px;">
-                        <button type="submit" id="btnSubirFoto">Subir Foto a la Galería</button>
-                    </form>
-                    <div id="listaFotos" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px;"></div>
-                </div>
-
-                <!-- GENERADOR DE RECIBOS -->
-                <div class="admin-card">
-                    <h3 style="color: #ffc107; margin-bottom: 15px; font-size: 1.2rem;">🧾 Generar Recibo de Pago</h3>
-                    <form id="formRecibo">
-                        <select id="reciboReservaId">
-                            <option value="">-- Seleccionar Reserva a Vincular --</option>
-                        </select>
-                        <input type="text" id="reciboNombre" placeholder="Nombre del Cliente" required>
-                        <input type="text" id="reciboEvento" placeholder="Evento" required>
-                        <input type="number" id="reciboTotal" placeholder="Precio Total ($)" required>
-                        <input type="number" id="reciboSena" placeholder="Monto Abonado / Seña ($)" required>
-                        <input type="text" id="reciboConcepto" placeholder="Concepto (Ej: Seña de evento)" value="Seña de evento" required>
-                        <button type="submit">Crear Recibo</button>
-                    </form>
-                    <div id="listaRecibosAdmin" style="margin-top: 15px;"></div>
-                </div>
-
-                <!-- GESTIÓN DE TESTIMONIOS (ADMIN) -->
-                <div class="admin-card">
-                    <h3 style="color: #ffc107; margin-bottom: 15px; font-size: 1.2rem;">💬 Gestión de Testimonios</h3>
-                    <div id="listaTestimoniosAdmin" style="display: flex; flex-direction: column; gap: 10px;">
-                        <p style="color: #888; text-align: center;">No hay testimonios para administrar.</p>
-                    </div>
-                </div>
-
             </div>
         </section>
 
