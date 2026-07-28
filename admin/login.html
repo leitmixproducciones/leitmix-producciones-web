@@ -3,80 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión | Leitmix Producciones</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #f1f1f1; display: flex; align-items: center; justify-content: center; height: 100vh; padding: 20px; }
-        .login-card { background: #1e1e1e; border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); text-align: center; border: 1px solid #333; }
-        h2 { color: #ffc107; margin-bottom: 20px; font-size: 1.6rem; }
-        input, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: none; font-size: 1rem; }
-        input { background: #2a2a2a; color: #fff; border: 1px solid #444; }
-        input:focus { outline: none; border-color: #ffc107; }
-        button { background: #ffc107; color: #121212; font-weight: bold; cursor: pointer; transition: background 0.3s; }
-        button:hover { background: #e0a800; }
-        .error-msg { color: #ff6b6b; font-size: 0.9rem; margin-bottom: 15px; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 6px; display: none; text-align: left; word-break: break-all; }
-        .success-msg { color: #28a745; font-size: 0.9rem; margin-bottom: 15px; display: none; }
-        .forgot-link { display: block; margin-top: 10px; color: #aaa; font-size: 0.85rem; text-decoration: none; transition: color 0.3s; }
-        .forgot-link:hover { color: #ffc107; text-decoration: underline; }
-    </style>
+    <title>Prueba Login</title>
 </head>
-<body>
-
-    <div class="login-card">
-        <h2>🎧 Iniciar Sesión</h2>
-        
-        <div id="errorMsg" class="error-msg"></div>
-        <div id="successMsg" class="success-msg"></div>
-
-        <input type="text" id="loginEmail" placeholder="Tu Email" autocomplete="email" required>
-        <input type="text" id="loginPassword" placeholder="Tu Contraseña" autocomplete="current-password" required>
-        
-        <button id="btnLogin" type="button">Ingresar</button>
-
-        <a href="#" id="btnForgot" class="forgot-link">¿Olvidaste tu contraseña?</a>
-    </div>
+<body style="background: #121212; color: white; text-align: center; padding-top: 50px;">
+    <h2>Prueba de Carga</h2>
+    <button id="btnPrueba" style="padding: 15px; font-size: 18px;">Toca este botón</button>
+    <p id="texto" style="margin-top: 20px; font-size: 20px; color: yellow;"></p>
 
     <script type="module">
         import { supabase } from "../supabase.js";
 
-        const btnLogin = document.getElementById("btnLogin");
-        const errorMsg = document.getElementById("errorMsg");
-        const btnForgot = document.getElementById("btnForgot");
-
-        btnLogin.addEventListener("click", async () => {
-            const email = document.getElementById("loginEmail").value.trim();
-            const password = document.getElementById("loginPassword").value.trim();
-
-            errorMsg.style.display = "none";
-
-            if (!email || !password) {
-                errorMsg.textContent = "Por favor completa todos los campos.";
-                errorMsg.style.display = "block";
-                return;
+        document.getElementById("btnPrueba").addEventListener("click", async () => {
+            document.getElementById("texto").textContent = "¡El script funciona perfecto!";
+            
+            // Probamos conexión con Supabase
+            try {
+                const { data, error } = await supabase.auth.getSession();
+                alert("Conexión con Supabase OK");
+            } catch (err) {
+                alert("Error de conexión: " + err.message);
             }
-
-            btnLogin.disabled = true;
-            btnLogin.textContent = "Ingresando...";
-
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
-
-            if (error) {
-                // AQUÍ VEMOS EL ERROR REAL EN LA PANTALLA DEL CELULAR
-                errorMsg.textContent = "Error de Supabase: " + error.message;
-                errorMsg.style.display = "block";
-                btnLogin.disabled = false;
-                btnLogin.textContent = "Ingresar";
-            } else {
-                window.location.href = "panel.html";
-            }
-        });
-
-        btnForgot.addEventListener("click", async (e) => {
-            e.preventDefault();
-            alert("Usa el panel de Supabase para recuperar la clave.");
         });
     </script>
 </body>
