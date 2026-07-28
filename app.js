@@ -6,19 +6,11 @@ let urlLogoPublica = "";
 // Cargar la URL del logo automáticamente desde Supabase Storage
 async function obtenerUrlLogo() {
     try {
-        const nombresPosibles = ["Leitmix-logo.png", "leitmix-logo.png", "Leitmix-logo.jpg", "logo.png", "Logo.png"];
-        let publicUrlFinal = "";
-
-        for (let nombreArchivo of nombresPosibles) {
-            const { data } = supabase.storage.from("Media").getPublicUrl(nombreArchivo);
-            if (data && data.publicUrl) {
-                publicUrlFinal = data.publicUrl;
-                break;
-            }
-        }
-
-        if (publicUrlFinal) {
-            urlLogoPublica = publicUrlFinal;
+        const nombreLogo = "Logo-1784650941040-1000140956.jpg";
+        const { data } = supabase.storage.from("Media").getPublicUrl(nombreLogo);
+        
+        if (data && data.publicUrl) {
+            urlLogoPublica = data.publicUrl;
             
             const imgWeb = document.getElementById("logoWeb");
             const imgLogin = document.getElementById("logoLogin");
