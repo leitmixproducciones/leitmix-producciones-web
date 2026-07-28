@@ -48,3 +48,17 @@ footer { text-align: center; padding: 20px; color: #777; font-size: 0.9rem; }
     max-height: 120px !important; 
     object-fit: contain;
 }
+
+/* Forzar un tamaño grande para que el logo se luzca en el header */
+#logoHeader {
+    width: 140px !important;
+    min-width: 140px !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: contain;
+}
+
+/* Asegurar que el contenedor del header alinee bien el logo grande con el texto */
+header, .header, nav {
+    align-items: center !important;
+}
