@@ -28,7 +28,7 @@
 <body>
 
     <div class="container">
-        <!-- Sección de Login (Conecta con tu tabla 'perfiles') -->
+        <!-- Sección de Login -->
         <div id="loginSection" class="card">
             <div style="text-align: center;">
                 <img id="logoLogin" src="" alt="Leitmix Producciones" class="logo-panel" style="display:none;">
@@ -109,7 +109,6 @@
                     <button type="submit" class="btn-main">Guardar Video</button>
                 </form>
 
-                <!-- Botón de Sincronización de Storage -->
                 <button id="btnSincronizarVideos" style="background: #17a2b8; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;">
                     🔄 Sincronizar Videos de Storage
                 </button>
@@ -122,14 +121,12 @@
             <!-- 5. Gestión de Testimonios -->
             <div>
                 <h2>💬 Gestión de Testimonios</h2>
-                <div id="listaTestimoniosAdmin" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                    <!-- Los testimonios se cargarán automáticamente aquí -->
-                </div>
+                <div id="listaTestimoniosAdmin" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
         </div>
     </div>
 
-    <!-- Carga del JS Modular Principal (Ajustar la ruta si app.js está en la raíz) -->
+    <!-- Carga del JS Principal -->
     <script type="module" src="./app.js"></script>
 </body>
 </html>
