@@ -1,114 +1,18 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitmix Producciones | Sonido, Iluminación y DJs</title>
+<!-- Ejemplo de cómo debe verse en tu HTML dentro del panel de administración -->
+<div class="admin-card">
+    <h3>Gestión de Videos</h3>
     
-    <!-- FIX PARA EL ERROR 404 DEL FAVICON -->
-    <link rel="icon" href="data:,">
+    <!-- Formulario existente -->
+    <form id="formAdminVideo">
+        <input type="text" id="adminTituloVideo" placeholder="Título del video" required>
+        <input type="text" id="adminUrlVideo" placeholder="URL del video (Supabase o YouTube)" required>
+        <button type="submit">Guardar Video</button>
+    </form>
 
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <!-- Botón nuevo para sincronizar desde Storage -->
+    <button id="btnSincronizarVideos" style="background: #17a2b8; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; margin-top: 10px; width: 100%;">
+        🔄 Sincronizar Videos de Storage
+    </button>
 
-    <header style="text-align: center; padding: 20px 10px;">
-        <!-- LOGO PRINCIPAL DINÁMICO -->
-        <img id="logoHeader" src="" alt="Leitmix Producciones Logo" style="max-width: 250px; height: auto; margin-bottom: 15px; display: none;">
-        
-        <h1>Leitmix Producciones</h1>
-        <p>Sonido, Iluminación y DJs para eventos inolvidables</p>
-    </header>
-
-    <div class="container">
-
-        <!-- SECCIÓN 1: GALERÍA DE FOTOS -->
-        <section>
-            <h2>📸 Galería de Fotos</h2>
-            <div id="galeriaPublica" class="grid-galeria">
-                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando fotos...</p>
-            </div>
-        </section>
-
-        <!-- SECCIÓN 2: VIDEOS -->
-        <section>
-            <h2>🎬 Videos de Eventos</h2>
-            <div id="videosPublicos" class="grid-galeria">
-                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando videos...</p>
-            </div>
-        </section>
-
-        <!-- SECCIÓN 3: TESTIMONIOS Y DEJAR OPINIÓN -->
-        <section>
-            <h2>💬 Opiniones de Clientes</h2>
-            
-            <!-- Contenedor donde se cargan los comentarios públicos -->
-            <div id="testimoniosPublicos" class="grid-galeria" style="margin-bottom: 25px;">
-                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando opiniones...</p>
-            </div>
-
-            <!-- Formulario para enviar nuevo testimonio -->
-            <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                <h3 style="color: #ffc107; margin-bottom: 15px; font-size: 1.1rem; text-align: center;">✍️ Contanos tu experiencia</h3>
-                <form id="formTestimonio">
-                    <div class="form-group">
-                        <label>Tu Nombre o Apodo</label>
-                        <input type="text" id="testimonioNombre" required placeholder="Ej: Maria G.">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Puntuación</label>
-                        <select id="testimonioEstrellas" style="width: 100%; padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 4px;">
-                            <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
-                            <option value="4">⭐⭐⭐⭐ (Muy bueno)</option>
-                            <option value="3">⭐⭐⭐ (Bueno)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Tu Comentario</label>
-                        <textarea id="testimonioComentario" rows="3" required placeholder="¿Qué te pareció la música, el sonido y el show?"></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn-main" style="background: #28a745;">Publicar Comentario</button>
-                </form>
-            </div>
-        </section>
-
-        <!-- SECCIÓN 4: RESERVAS (AL FINAL) -->
-        <section>
-            <h2>📅 Reserva tu Fecha</h2>
-            <form id="formReserva">
-                <div class="form-group">
-                    <label>Nombre y Apellido</label>
-                    <input type="text" id="reservaNombre" required placeholder="Tu nombre completo">
-                </div>
-                <div class="form-group">
-                    <label>Teléfono / WhatsApp</label>
-                    <input type="text" id="reservaTelefono" required placeholder="Ej: 1123456789">
-                </div>
-                <div class="form-group">
-                    <label>Tipo de Evento</label>
-                    <input type="text" id="reservaEvento" placeholder="Ej: Casamiento / 15 Años">
-                </div>
-                <div class="form-group">
-                    <label>Fecha del Evento</label>
-                    <input type="date" id="reservaFecha" required>
-                </div>
-                <div class="form-group">
-                    <label>Comentarios / Requerimientos</label>
-                    <textarea id="reservaComentarios" rows="3" placeholder="Contanos detalles de tu evento..."></textarea>
-                </div>
-                <button type="submit" class="btn-main">Enviar Solicitud de Reserva</button>
-            </form>
-        </section>
-
-    </div>
-
-    <footer>
-        <p>&copy; 2026 Leitmix Producciones. Todos los derechos reservados.</p>
-    </footer>
-
-    <script type="module" src="app.js"></script>
-</body>
-</html>
+    <div id="adminListaVideos" style="margin-top: 15px;"></div>
+</div>
