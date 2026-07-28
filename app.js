@@ -34,7 +34,7 @@ async function obtenerUrlLogo() {
 }
 
 // ==========================================
-// 1. CONTROL DE SESIÓN (AUTENTICACIÓN OFICIAL DE SUPABASE)
+// 1. CONTROL DE SESIÓN (SIMPLIFICADO)
 // ==========================================
 const loginSection = document.getElementById("loginSection");
 const adminSection = document.getElementById("adminSection");
@@ -45,14 +45,13 @@ const totalReservasEl = document.getElementById("totalReservas");
 
 let usuario = null;
 
-async function checkSession() {
+function checkSession() {
+    const sesionGuardada = localStorage.getItem("leitmix_admin");
+    
     if (!loginSection || !adminSection) return;
 
-    // Verificamos si hay sesión activa en Supabase Auth
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session) {
-        usuario = session.user;
+    if (sesionGuardada) {
+        usuario = JSON.parse(sesionGuardada);
         mostrarPanel();
     } else {
         mostrarLogin();
@@ -72,19 +71,26 @@ loginForm?.addEventListener("submit", async (e) => {
     }
 
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: emailInput,
-            password: passwordInput,
-        });
+        const { data, error } = await supabase
+            .from("perfiles")
+            .select("*");
 
-        if (error) {
-            if (loginError) loginError.textContent = "Correo o contraseña incorrectos.";
+        if (error || !data || data.length === 0) {
+            if (loginError) loginError.textContent = "No hay perfiles configurados en la base de datos.";
             return;
         }
 
-        if (data.session) {
-            usuario = data.session.user;
+        const usuarioEncontrado = data.find(p => 
+            (p.email === emailInput || p.correo === emailInput) && 
+            (p.password === passwordInput || p.contrasena === passwordInput)
+        );
+
+        if (usuarioEncontrado) {
+            usuario = usuarioEncontrado;
+            localStorage.setItem("leitmix_admin", JSON.stringify(usuarioEncontrado));
             mostrarPanel();
+        } else {
+            if (loginError) loginError.textContent = "Correo o contraseña incorrectos.";
         }
     } catch (err) {
         if (loginError) loginError.textContent = "Error al intentar iniciar sesión.";
@@ -92,8 +98,8 @@ loginForm?.addEventListener("submit", async (e) => {
     }
 });
 
-btnLogout?.addEventListener("click", async () => {
-    await supabase.auth.signOut();
+btnLogout?.addEventListener("click", () => {
+    localStorage.removeItem("leitmix_admin");
     usuario = null;
     mostrarLogin();
 });
