@@ -26,3 +26,17 @@ button.btn-main:hover { background: #e0a800; }
 .media-card video { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: #000; }
 
 footer { text-align: center; padding: 20px; color: #777; font-size: 0.9rem; }
+
+/* Ajuste de tamaño para el logo en el header (podés cambiar 70px por 80px o 90px si lo querés aún más grande) */
+#logoHeader {
+    width: 70px !important;
+    height: 70px !important;
+    object-fit: contain;
+}
+
+/* Si querés que en la vista general o en la web también se agande */
+#logoWeb {
+    width: 70px !important;
+    height: auto !important;
+    object-fit: contain;
+}
