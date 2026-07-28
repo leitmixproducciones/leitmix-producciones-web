@@ -46,9 +46,11 @@ const totalReservasEl = document.getElementById("totalReservas");
 let usuario = null;
 
 function checkSession() {
+    const sesionGuardada = localStorage.getItem("leitmix_admin");
+    
+    // Si no existen las secciones de login en esta página (ej: estás en el index público), salimos sin romper nada
     if (!loginSection || !adminSection) return;
 
-    const sesionGuardada = localStorage.getItem("leitmix_admin");
     if (sesionGuardada) {
         usuario = JSON.parse(sesionGuardada);
         mostrarPanel();
@@ -61,26 +63,36 @@ loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (loginError) loginError.textContent = "";
     
-    const emailInput = document.getElementById("email").value.trim();
-    const passwordInput = document.getElementById("password").value.trim();
+    const emailInput = document.getElementById("email")?.value.trim() || "";
+    const passwordInput = document.getElementById("password")?.value.trim() || "";
 
-    const { data, error } = await supabase
-        .from("perfiles")
-        .select("*")
-        .eq("email", emailInput)
-        .single();
-
-    if (error || !data) {
-        if (loginError) loginError.textContent = "Usuario no encontrado.";
+    if (!emailInput || !passwordInput) {
+        if (loginError) loginError.textContent = "Completá todos los campos.";
         return;
     }
 
-    if (data.password === passwordInput || data.contrasena === passwordInput) {
-        usuario = data;
-        localStorage.setItem("leitmix_admin", JSON.stringify(data));
-        mostrarPanel();
-    } else {
-        if (loginError) loginError.textContent = "Contraseña incorrecta.";
+    try {
+        const { data, error } = await supabase
+            .from("perfiles")
+            .select("*")
+            .eq("email", emailInput)
+            .single();
+
+        if (error || !data) {
+            if (loginError) loginError.textContent = "Usuario no encontrado.";
+            return;
+        }
+
+        if (data.password === passwordInput || data.contrasena === passwordInput) {
+            usuario = data;
+            localStorage.setItem("leitmix_admin", JSON.stringify(data));
+            mostrarPanel();
+        } else {
+            if (loginError) loginError.textContent = "Contraseña incorrecta.";
+        }
+    } catch (err) {
+        if (loginError) loginError.textContent = "Error al intentar iniciar sesión.";
+        console.error(err);
     }
 });
 
@@ -91,8 +103,8 @@ btnLogout?.addEventListener("click", () => {
 });
 
 function mostrarPanel() {
-    loginSection?.classList.add("hidden");
-    adminSection?.classList.remove("hidden");
+    if (loginSection) loginSection.classList.add("hidden");
+    if (adminSection) adminSection.classList.remove("hidden");
     cargarDatosAdmin();
     cargarReservasEnSelect();
     cargarRecibosAdmin();
@@ -102,8 +114,8 @@ function mostrarPanel() {
 }
 
 function mostrarLogin() {
-    adminSection?.classList.add("hidden");
-    loginSection?.classList.remove("hidden");
+    if (adminSection) adminSection.classList.add("hidden");
+    if (loginSection) loginSection.classList.remove("hidden");
 }
 
 async function cargarDatosAdmin() {
