@@ -407,80 +407,62 @@ async function cargarGaleriaWeb() {
 }
 
 // ==========================================
-// 5. GESTIÓN Y CARGA DE VIDEOS + SINCRONIZACIÓN
+// 5. GESTIÓN Y CARGA DE VIDEOS (SUBIR ARCHIVO O LINK)
 // ==========================================
 document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const titulo = document.getElementById("adminTituloVideo")?.value || "";
-    const urlVideo = document.getElementById("adminUrlVideo")?.value || "";
+    const tituloInput = document.getElementById("adminTituloVideo");
+    const archivoInput = document.getElementById("adminArchivoVideo");
+    const urlInput = document.getElementById("adminUrlVideo");
+    const btnSubir = document.getElementById("btnSubirVideo");
 
-    if (!urlVideo) return alert("Por favor ingresá la URL del video.");
+    const archivo = archivoInput?.files[0];
+    let urlVideo = urlInput?.value?.trim() || "";
+    const titulo = tituloInput?.value || (archivo ? archivo.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ") : "Video");
 
-    const { error } = await supabase.from("videos").insert([{ Titulo: titulo, Url: urlVideo }]);
-
-    if (error) {
-        alert("Error al guardar el video: " + error.message);
-    } else {
-        alert("¡Video guardado con éxito!");
-        document.getElementById("formAdminVideo").reset();
-        cargarVideosWeb();
-        cargarVideosAdmin();
+    if (!archivo && !urlVideo) {
+        return alert("Por favor seleccioná un archivo de video de tu celular o ingresá una URL.");
     }
-});
 
-// Botón para sincronizar videos automáticamente desde el Storage
-document.getElementById("btnSincronizarVideos")?.addEventListener("click", async () => {
-    const btn = document.getElementById("btnSincronizarVideos");
-    if (btn) { btn.disabled = true; btn.innerText = "Sincronizando..."; }
+    if (btnSubir) { 
+        btnSubir.disabled = true; 
+        btnSubir.innerText = "Guardando video..."; 
+    }
 
     try {
-        const { data: archivos, error: listError } = await supabase.storage
-            .from("Media")
-            .list("videos", { limit: 100, sortBy: { column: 'name', order: 'asc' } });
+        let finalUrl = urlVideo;
 
-        if (listError) throw listError;
+        // Si subió un archivo desde el celular, lo guardamos en el Storage
+        if (archivo) {
+            const path = `videos/${Date.now()}_${archivo.name}`;
+            const { error: uploadError } = await supabase.storage.from("Media").upload(path, archivo);
+            if (uploadError) throw uploadError;
 
-        if (!archivos || archivos.length === 0) {
-            alert("No se encontraron archivos en la carpeta 'videos' del Storage.");
-            return;
+            const { data: urlData } = supabase.storage.from("Media").getPublicUrl(path);
+            finalUrl = urlData.publicUrl;
         }
 
-        const { data: videosActuales } = await supabase.from("videos").select("Url");
-        const urlsExistentes = new Set(videosActuales ? videosActuales.map(v => v.Url) : []);
+        const { error: dbError } = await supabase.from("videos").insert([{ 
+            Titulo: titulo, 
+            Url: finalUrl 
+        }]);
 
-        let agregadosCount = 0;
+        if (dbError) throw dbError;
 
-        for (let archivo of archivos) {
-            if (!archivo.name || archivo.name === ".emptyFolderPlaceholder") continue;
-
-            const pathCompleto = `videos/${archivo.name}`;
-            const { data: urlData } = supabase.storage.from("Media").getPublicUrl(pathCompleto);
-            const publicUrl = urlData.publicUrl;
-
-            if (!urlsExistentes.has(publicUrl)) {
-                let tituloLimpio = archivo.name
-                    .replace(/\.[^/.]+$/, "")
-                    .replace(/[-_]/g, " ");
-
-                const { error: insertError } = await supabase.from("videos").insert([{
-                    Titulo: tituloLimpio,
-                    Url: publicUrl
-                }]);
-
-                if (!insertError) {
-                    agregadosCount++;
-                }
-            }
-        }
-
-        alert(`¡Sincronización completada! Se añadieron ${agregadosCount} videos nuevos.`);
+        alert("¡Video guardado con éxito!");
+        if (tituloInput) tituloInput.value = "";
+        if (archivoInput) archivoInput.value = "";
+        if (urlInput) urlInput.value = "";
         cargarVideosAdmin();
         cargarVideosWeb();
 
     } catch (err) {
-        alert("Error al sincronizar: " + err.message);
+        alert("Error al guardar el video: " + err.message);
     } finally {
-        if (btn) { btn.disabled = false; btn.innerText = "🔄 Sincronizar Videos de Storage"; }
+        if (btnSubir) { 
+            btnSubir.disabled = false; 
+            btnSubir.innerText = "Guardar Video"; 
+        }
     }
 });
 
@@ -495,13 +477,12 @@ async function cargarVideosAdmin() {
         return;
     }
 
-    // Usamos el mismo diseño en tarjetas igual que la galería de fotos
     contenedorAdmin.innerHTML = data.map(vid => {
         const titulo = vid.Titulo || 'Sin título';
         let vidUrl = vid.Url || '';
 
         vidUrl = vidUrl.trim();
-        let miniaturaVideo = '<div style="background:#000; height:80px; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#888; font-size:10px;">Sin vista previa</div>';
+        let miniaturaVideo = '<div style="background:#000; height:80px; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#888; font-size:10px;">Vista previa</div>';
 
         if (vidUrl) {
             if (vidUrl.includes('youtube.com') || vidUrl.includes('youtu.be')) {
