@@ -34,7 +34,7 @@ async function obtenerUrlLogo() {
 }
 
 // ==========================================
-// 1. CONTROL DE SESIÓN (TABLA PERFILES)
+// 1. CONTROL DE SESIÓN (AUTENTICACIÓN OFICIAL DE SUPABASE)
 // ==========================================
 const loginSection = document.getElementById("loginSection");
 const adminSection = document.getElementById("adminSection");
@@ -45,14 +45,14 @@ const totalReservasEl = document.getElementById("totalReservas");
 
 let usuario = null;
 
-function checkSession() {
-    const sesionGuardada = localStorage.getItem("leitmix_admin");
-    
-    // Si no existen las secciones de login en esta página (ej: estás en el index público), salimos sin romper nada
+async function checkSession() {
     if (!loginSection || !adminSection) return;
 
-    if (sesionGuardada) {
-        usuario = JSON.parse(sesionGuardada);
+    // Verificamos si hay sesión activa en Supabase Auth
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+        usuario = session.user;
         mostrarPanel();
     } else {
         mostrarLogin();
@@ -72,23 +72,19 @@ loginForm?.addEventListener("submit", async (e) => {
     }
 
     try {
-        const { data, error } = await supabase
-            .from("perfiles")
-            .select("*")
-            .eq("email", emailInput)
-            .single();
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: emailInput,
+            password: passwordInput,
+        });
 
-        if (error || !data) {
-            if (loginError) loginError.textContent = "Usuario no encontrado.";
+        if (error) {
+            if (loginError) loginError.textContent = "Correo o contraseña incorrectos.";
             return;
         }
 
-        if (data.password === passwordInput || data.contrasena === passwordInput) {
-            usuario = data;
-            localStorage.setItem("leitmix_admin", JSON.stringify(data));
+        if (data.session) {
+            usuario = data.session.user;
             mostrarPanel();
-        } else {
-            if (loginError) loginError.textContent = "Contraseña incorrecta.";
         }
     } catch (err) {
         if (loginError) loginError.textContent = "Error al intentar iniciar sesión.";
@@ -96,8 +92,8 @@ loginForm?.addEventListener("submit", async (e) => {
     }
 });
 
-btnLogout?.addEventListener("click", () => {
-    localStorage.removeItem("leitmix_admin");
+btnLogout?.addEventListener("click", async () => {
+    await supabase.auth.signOut();
     usuario = null;
     mostrarLogin();
 });
@@ -434,7 +430,7 @@ document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) 
     const titulo = tituloInput?.value || (archivo ? archivo.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ") : "Video");
 
     if (!archivo && !urlVideo) {
-        return alert("Por favor seleccioná un archivo de video de tu celular o ingresá una URL.");
+        return alert("Por favor seleccioná un archivo de video o ingresá una URL.");
     }
 
     if (btnSubir) { 
