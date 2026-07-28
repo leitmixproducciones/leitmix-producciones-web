@@ -109,7 +109,12 @@
                     <button type="submit" class="btn-main">Guardar Video</button>
                 </form>
 
-                <div id="adminListaVideos" style="margin-top: 15px;"></div>
+                <!-- Botón de Sincronización de Storage -->
+                <button id="btnSincronizarVideos" style="background: #17a2b8; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;">
+                    🔄 Sincronizar Videos de Storage
+                </button>
+
+                <div id="adminListaVideos" style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;"></div>
             </div>
 
             <hr style="border-color:#333; margin: 25px 0;">
@@ -117,14 +122,14 @@
             <!-- 5. Gestión de Testimonios -->
             <div>
                 <h2>💬 Gestión de Testimonios</h2>
-                <div id="listaTestimoniosAdmin" style="margin-top: 15px;">
+                <div id="listaTestimoniosAdmin" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
                     <!-- Los testimonios se cargarán automáticamente aquí -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Carga del JS Modular Principal -->
-    <script type="module" src="../app.js"></script>
+    <!-- Carga del JS Modular Principal (Ajustar la ruta si app.js está en la raíz) -->
+    <script type="module" src="./app.js"></script>
 </body>
 </html>
