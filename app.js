@@ -98,7 +98,7 @@ function mostrarPanel() {
     cargarRecibosAdmin();
     cargarFotos();
     cargarVideosAdmin();
-    cargarTestimoniosAdmin(); // <-- Acá se cargan los testimonios en el panel
+    cargarTestimoniosAdmin();
 }
 
 function mostrarLogin() {
@@ -408,7 +408,7 @@ async function cargarGaleriaWeb() {
 }
 
 // ==========================================
-// 5. GESTIÓN Y CARGA DE VIDEOS (SUBIR ARCHIVO O LINK)
+// 5. GESTIÓN Y CARGA DE VIDEOS
 // ==========================================
 document.getElementById("formAdminVideo")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -559,11 +559,11 @@ async function cargarVideosWeb() {
 }
 
 // ==========================================
-// 6. GESTIÓN Y CARGA DE TESTIMONIOS (ADMIN Y WEB)
+// 6. GESTIÓN Y CARGA DE TESTIMONIOS (UNIFICADO)
 // ==========================================
 async function cargarTestimoniosAdmin() {
-    const contenedorAdmin = document.getElementById("listaTestimoniosAdmin");
-    if (!contenedorAdmin) return;
+    const contenedor = document.getElementById("listaTestimoniosAdmin");
+    if (!contenedor) return;
 
     const { data, error } = await supabase
         .from("testimonios")
@@ -571,34 +571,60 @@ async function cargarTestimoniosAdmin() {
         .order("id", { ascending: false });
 
     if (error || !data || data.length === 0) {
-        contenedorAdmin.innerHTML = "<p style='color: #888; text-align:center; font-size: 0.9rem;'>No hay testimonios para administrar.</p>";
+        contenedor.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay testimonios para administrar.</p>';
         return;
     }
 
-    contenedorAdmin.innerHTML = data.map(t => {
+    contenedor.innerHTML = data.map(t => {
         const estrellas = "⭐".repeat(t.estrellas || 5);
-        const estaAprobado = t.aprobado;
-
         return `
-            <div style="background:#222; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #333;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <strong style="color: #ffc107; font-size: 0.95rem;">${t.nombre}</strong>
-                    <span style="font-size: 0.8rem;">${estrellas}</span>
+            <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; border: 1px solid #444; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="color: #ffc107;">${t.nombre}</strong>
+                    <span style="font-size: 0.85rem; color: #aaa;">${estrellas}</span>
                 </div>
-                <p style="color: #ddd; font-size: 0.85rem; font-style: italic; margin-bottom: 8px;">"${t.comentario}"</p>
-                <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                    ${estaAprobado 
-                        ? `<button onclick="window.cambiarEstadoTestimonio(${t.id}, false)" style="background: #ff9800; color: #121212; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">Ocultar de la Web</button>`
-                        : `<button onclick="window.cambiarEstadoTestimonio(${t.id}, true)" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">✔️ Aprobar y Publicar</button>`
-                    }
-                    <button onclick="window.borrarTestimonio(${t.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Borrar</button>
+                <p style="color: #ddd; font-size: 0.95rem;">"${t.comentario}"</p>
+                <div style="display: flex; gap: 8px; margin-top: 5px;">
+                    <button onclick="window.cambiarEstadoTestimonio('${t.id}', ${!t.aprobado})" style="background: ${t.aprobado ? '#ffc107' : '#28a745'}; color: #121212; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; font-size: 0.85rem;">
+                        ${t.aprobado ? 'Ocultar' : 'Aprobar'}
+                    </button>
+                    <button onclick="window.borrarTestimonio('${t.id}')" style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
+                        Borrar
+                    </button>
                 </div>
             </div>
         `;
     }).join("");
 }
 
-window.cambiarEstadoTestimonio = async (id, nuevoEstado) => {
+async function cargarTestimoniosWeb() {
+    const contenedor = document.getElementById("testimoniosPublicos");
+    if (!contenedor) return;
+
+    const { data, error } = await supabase
+        .from("testimonios")
+        .select("*")
+        .eq("aprobado", true)
+        .order("id", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        contenedor.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1 / -1;">Aún no hay testimonios publicados.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = data.map(t => {
+        const estrellas = "⭐".repeat(t.estrellas || 5);
+        return `
+            <div class="media-card" style="text-align: left; padding: 20px;">
+                <div style="color: #ffc107; margin-bottom: 8px; font-size: 1.1rem;">${estrellas}</div>
+                <p style="color: #ddd; margin-bottom: 12px; font-style: italic;">"${t.comentario}"</p>
+                <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem;">- ${t.nombre}</p>
+            </div>
+        `;
+    }).join("");
+}
+
+window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
     const { error } = await supabase
         .from("testimonios")
         .update({ aprobado: nuevoEstado })
@@ -612,137 +638,8 @@ window.cambiarEstadoTestimonio = async (id, nuevoEstado) => {
     }
 };
 
-window.borrarTestimonio = async (id) => {
-    if (confirm("¿Estás seguro de que querés borrar este testimonio?")) {
-        const { error } = await supabase.from("testimonios").delete().eq("id", id);
-        if (error) {
-            alert("Error al borrar: " + error.message);
-        } else {
-            cargarTestimoniosAdmin();
-            cargarTestimoniosWeb();
-        }
-    }
-};
-
-async function cargarTestimoniosWeb() {
-    const contenedor = document.getElementById("testimoniosPublicos");
-    if (!contenedor) return;
-
-    const { data, error } = await supabase
-        .from("testimonios")
-        .select("*")
-        .eq("aprobado", true)
-        .order("id", { ascending: false });
-
-    if (error || !data || data.length === 0) {
-        contenedor.innerHTML = "<p style='color: #888; text-align: center; grid-column: 1 / -1;'>Aún no hay testimonios publicados.</p>";
-        return;
-    }
-
-    contenedor.innerHTML = data.map(t => {
-        const estrellas = "⭐".repeat(t.estrellas || 5);
-        return `
-            <div class="testimonio-card">
-                <div style="font-size: 1rem; margin-bottom: 6px;">${estrellas}</div>
-                <p style="font-style: italic; color: #ddd; margin-bottom: 10px; font-size: 0.9rem;">"${t.comentario}"</p>
-                <h4 style="color: #ffc107; font-size: 0.9rem; font-weight: 600;">- ${t.nombre}</h4>
-            </div>
-        `;
-    }).join("");
-}
-
-// ==========================================
-// INICIALIZACIÓN GLOBAL
-// ==========================================
-obtenerUrlLogo();
-checkSession();
-cargarGaleriaWeb();
-cargarVideosWeb();
-cargarTestimoniosWeb();
-
-// ==========================================
-// 9. CARGAR Y GESTIONAR TESTIMONIOS
-// ==========================================
-
-// Cargar testimonios aprobados en la web pública
-async function cargarTestimoniosPublicos() {
-    const contenedor = document.getElementById("testimoniosPublicos");
-    if (!contenedor) return;
-
-    const { data, error } = await supabase
-        .from("testimonios")
-        .select("*")
-        .eq("aprobado", true)
-        .order("created_at", { ascending: false });
-
-    if (error || !data || data.length === 0) {
-        contenedor.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1 / -1;">Aún no hay testimonios publicados.</p>';
-        return;
-    }
-
-    contenedor.innerHTML = data.map(t => `
-        <div class="media-card" style="text-align: left; padding: 20px;">
-            <div style="color: #ffc107; margin-bottom: 8px; font-size: 1.1rem;">
-                ${'⭐'.repeat(t.estrellas)}
-            </div>
-            <p style="color: #ddd; margin-bottom: 12px; font-style: italic;">"${t.comentario}"</p>
-            <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem;">- ${t.nombre}</p>
-        </div>
-    `).join("");
-}
-
-// Cargar testimonios en el Panel de Administración
-async function cargarTestimoniosAdmin() {
-    const contenedor = document.getElementById("listaTestimoniosAdmin");
-    if (!contenedor) return;
-
-    const { data, error } = await supabase
-        .from("testimonios")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-    if (error || !data || data.length === 0) {
-        contenedor.innerHTML = '<p style="color: #888; text-align: center;">No hay testimonios para administrar.</p>';
-        return;
-    }
-
-    contenedor.innerHTML = data.map(t => `
-        <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; border: 1px solid #444; display: flex; flex-direction: column; gap: 6px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong style="color: #ffc107;">${t.nombre}</strong>
-                <span style="font-size: 0.85rem; color: #aaa;">${'⭐'.repeat(t.estrellas)}</span>
-            </div>
-            <p style="color: #ddd; font-size: 0.95rem;">"${t.comentario}"</p>
-            <div style="display: flex; gap: 8px; margin-top: 5px;">
-                <button onclick="cambiarEstadoTestimonio('${t.id}', ${!t.aprobado})" style="background: ${t.aprobado ? '#ffc107' : '#28a745'}; color: #121212; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; font-size: 0.85rem;">
-                    ${t.aprobado ? 'Ocultar' : 'Aprobar'}
-                </button>
-                <button onclick="eliminarTestimonio('${t.id}')" style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
-                    Borrar
-                </button>
-            </div>
-        </div>
-    `).join("");
-}
-
-// Cambiar estado (Aprobar / Ocultar)
-window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
-    const { error } = await supabase
-        .from("testimonios")
-        .update({ aprobado: nuevoEstado })
-        .eq("id", id);
-
-    if (error) {
-        alert("Error al actualizar: " + error.message);
-    } else {
-        cargarTestimoniosAdmin();
-        cargarTestimoniosPublicos();
-    }
-};
-
-// Eliminar testimonio
-window.eliminarTestimonio = async function(id) {
-    if (!confirm("¿Estás seguro querés borrar este testimonio?")) return;
+window.borrarTestimonio = async function(id) {
+    if (!confirm("¿Estás seguro de que querés borrar este testimonio?")) return;
 
     const { error } = await supabase
         .from("testimonios")
@@ -753,12 +650,15 @@ window.eliminarTestimonio = async function(id) {
         alert("Error al borrar: " + error.message);
     } else {
         cargarTestimoniosAdmin();
-        cargarTestimoniosPublicos();
+        cargarTestimoniosWeb();
     }
 };
 
-// Ejecutar al iniciar la página
-document.addEventListener("DOMContentLoaded", () => {
-    cargarTestimoniosPublicos();
-});
-
+// ==========================================
+// INICIALIZACIÓN GLOBAL
+// ==========================================
+obtenerUrlLogo();
+checkSession();
+cargarGaleriaWeb();
+cargarVideosWeb();
+cargarTestimoniosWeb();
