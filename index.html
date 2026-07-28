@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitmix Producciones</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #121212; color: #e0e0e0; line-height: 1.6; }
+        header { background: #1a1a1a; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; position: sticky; top: 0; z-index: 100; }
+        .logo-text { font-size: 1.5rem; font-weight: bold; color: #ffc107; }
+        nav a { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 500; transition: color 0.3s; }
+        nav a:hover { color: #ffc107; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .section-title { font-size: 1.8rem; color: #ffc107; margin-bottom: 20px; text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .grid-media { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .card-form { background: #1e1e1e; padding: 25px; border-radius: 10px; border: 1px solid #333; margin-bottom: 30px; }
+        .card-form input, .card-form textarea, .card-form select { width: 100%; padding: 12px; margin-bottom: 15px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; font-size: 1rem; }
+        .card-form button { background: #ffc107; color: #121212; border: none; padding: 12px; width: 100%; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+        .card-form button:hover { background: #e0a800; }
+        footer { text-align: center; padding: 20px; background: #1a1a1a; color: #888; border-top: 1px solid #333; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-text">Leitmix Producciones</div>
+        <nav>
+            <a href="#reservas">Reservas</a>
+            <a href="#galeria">Galería</a>
+            <a href="#videos">Videos</a>
+            <a href="#testimonios">Testimonios</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- SECCIÓN RESERVAS -->
+        <section id="reservas" class="card-form">
+            <h2 class="section-title" style="border:none; margin-bottom:10px;">📅 Reservá tu Fecha</h2>
+            <form id="formReserva">
+                <input type="text" id="reservaNombre" placeholder="Tu Nombre y Apellido" required>
+                <input type="tel" id="reservaTelefono" placeholder="Teléfono / WhatsApp" required>
+                <input type="text" id="reservaEvento" placeholder="Tipo de Evento (Casamiento, Cumpleaños, etc.)" required>
+                <input type="date" id="reservaFecha" required>
+                <textarea id="reservaComentarios" placeholder="Comentarios adicionales..." rows="3"></textarea>
+                <button type="submit">Enviar Reserva</button>
+            </form>
+        </section>
+
+        <!-- GALERÍA -->
+        <section id="galeria">
+            <h2 class="section-title">📸 Galería de Fotos</h2>
+            <div id="galeriaPublica" class="grid-media">
+                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando fotos...</p>
+            </div>
+        </section>
+
+        <!-- VIDEOS -->
+        <section id="videos">
+            <h2 class="section-title">🎬 Videos Recientes</h2>
+            <div id="videosPublicos" class="grid-media">
+                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Cargando videos...</p>
+            </div>
+        </section>
+
+        <!-- TESTIMONIOS -->
+        <section id="testimonios">
+            <h2 class="section-title">⭐ Testimonios</h2>
+            <div id="testimoniosPublicos" class="grid-media" style="margin-bottom: 30px;">
+                <p style="color: #888; text-align: center; grid-column: 1 / -1;">Aún no hay testimonios publicados.</p>
+            </div>
+
+            <div class="card-form" style="max-width: 600px; margin: 0 auto;">
+                <h3 style="color: #ffc107; font-size: 1.2rem; margin-bottom: 15px; text-align: center;">💬 Dejanos tu opinión</h3>
+                <form id="formTestimonioPublico">
+                    <input type="text" id="testimonioNombre" placeholder="Tu Nombre y Apellido" required>
+                    <select id="testimonioEstrellas" required>
+                        <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
+                        <option value="4">⭐⭐⭐⭐ (Muy bueno)</option>
+                        <option value="3">⭐⭐⭐ (Bueno)</option>
+                    </select>
+                    <textarea id="testimonioComentario" placeholder="Escribí tu comentario..." rows="3" required></textarea>
+                    <button type="submit">Enviar Comentario</button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Leitmix Producciones - Todos los derechos reservados.</p>
+    </footer>
+
+    <script type="module" src="./index.js"></script>
+</body>
+</html>
