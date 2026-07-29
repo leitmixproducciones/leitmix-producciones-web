@@ -60,7 +60,7 @@ async function cargarDatosAdmin() {
     if (totalReservasEl) totalReservasEl.textContent = count || 0;
 }
 
-// Subida inteligente: detecta si es foto o video y va a su tabla respectiva
+// Subida directa a tus tablas existentes 'fotos' o 'videos'
 const mediaForm = document.getElementById("mediaForm");
 mediaForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -72,6 +72,7 @@ mediaForm?.addEventListener("submit", async (e) => {
     const tablaDestino = esVideo ? 'videos' : 'fotos';
     const fileName = `${Date.now()}_${file.name}`;
     
+    // 1. Subir al Storage
     const { error: uploadError } = await supabase.storage
         .from('media')
         .upload(fileName, file);
@@ -81,16 +82,18 @@ mediaForm?.addEventListener("submit", async (e) => {
         return;
     }
 
+    // 2. Obtener la URL pública
     const { data: { publicUrl } } = supabase.storage
         .from('media')
         .getPublicUrl(fileName);
 
+    // 3. Guardar en tu tabla correspondiente ('fotos' o 'videos')
     const { error: dbError } = await supabase
         .from(tablaDestino)
         .insert([{ url: publicUrl }]);
 
     if (dbError) {
-        alert("Error al guardar en la tabla: " + dbError.message);
+        alert(`Error al guardar en la tabla ${tablaDestino}: ` + dbError.message);
     } else {
         alert(`¡${esVideo ? 'Video' : 'Foto'} subido con éxito!`);
         fileInput.value = "";
