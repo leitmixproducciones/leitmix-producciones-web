@@ -1,6 +1,6 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const SUPABASE_URL = 'https://frmtmjonzwdpdzpuhfdw.supabase.co';
-const SUPABASE_ANON_KEY = 'Sb_publishable_1GqwIW44gpYMvHby2-Aw6Q_qouik6Ax';
+const supabaseUrl = 'https://frmtmjonzwdpdzpuhfdw.supabase.co'
+const supabaseKey = 'Sb_publishable_1GqwIW44gpYMvHby2-Aw6Q_qouik6Ax'
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const supabase = createClient(supabaseUrl, supabaseKey)
