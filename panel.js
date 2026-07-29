@@ -48,6 +48,7 @@ function mostrarPanel(user) {
     if (userLoggedEmail) userLoggedEmail.textContent = `Conectado como: ${user.email}`;
     
     cargarDatosAdmin();
+    cargarMediaAdmin();
     cargarTestimoniosAdmin();
 }
 
@@ -62,6 +63,69 @@ async function cargarDatosAdmin() {
     const { count } = await supabase.from('reservas').select('*', { count: 'exact', head: true });
     if (totalReservasEl) totalReservasEl.textContent = count || 0;
 }
+
+// 5. Manejar subida de archivos multimedia (Storage + Tabla multimedia)
+const mediaForm = document.getElementById("mediaForm");
+mediaForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById("mediaFile");
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const fileName = `${Date.now()}_${file.name}`;
+    
+    const { error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(fileName, file);
+
+    if (uploadError) {
+        alert("Error al subir el archivo: " + uploadError.message);
+        return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+        .from('media')
+        .getPublicUrl(fileName);
+
+    const { error: dbError } = await supabase
+        .from('multimedia')
+        .insert([{ url: publicUrl, tipo: file.type.startsWith('video') ? 'video' : 'imagen' }]);
+
+    if (dbError) {
+        alert("Error al guardar en la tabla: " + dbError.message);
+    } else {
+        alert("¡Archivo subido con éxito!");
+        fileInput.value = "";
+        cargarMediaAdmin();
+    }
+});
+
+async function cargarMediaAdmin() {
+    const contenedor = document.getElementById("listaMediaAdmin");
+    if (!contenedor) return;
+
+    const { data: items } = await supabase.from("multimedia").select("*").order("id", { ascending: false });
+
+    if (!items || items.length === 0) {
+        contenedor.innerHTML = '<p style="color: #888; text-align: center;">No hay archivos subidos.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = items.map(m => `
+        <div style="background: #2a2a2a; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444;">
+            <a href="${m.url}" target="_blank" style="color: #ffc107; text-decoration: none; font-size: 0.9rem;">Ver archivo (${m.tipo})</a>
+            <button onclick="window.eliminarMedia(${m.id})" style="background: #dc3545; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Eliminar</button>
+        </div>
+    `).join("");
+}
+
+window.eliminarMedia = async function(id) {
+    if (confirm("¿Estás seguro de borrar este archivo?")) {
+        const { error } = await supabase.from("multimedia").delete().eq("id", id);
+        if (!error) cargarMediaAdmin();
+        else alert("Error al eliminar.");
+    }
+};
 
 async function cargarTestimoniosAdmin() {
     const contenedor = document.getElementById("listaTestimoniosAdmin");
@@ -90,7 +154,6 @@ async function cargarTestimoniosAdmin() {
     `).join("");
 }
 
-// Función global para cambiar el estado del testimonio desde los botones generados
 window.cambiarEstado = async function(id, nuevoEstado) {
     const { error } = await supabase.from("testimonios").update({ aprobado: nuevoEstado }).eq("id", id);
     if (!error) {
