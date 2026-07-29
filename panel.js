@@ -8,7 +8,6 @@ const btnLogout = document.getElementById("btnLogout");
 const userLoggedEmail = document.getElementById("userLoggedEmail");
 const totalReservasEl = document.getElementById("totalReservas");
 
-// 1. Verificar si hay sesión activa en Supabase al cargar
 async function verificarSesion() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
@@ -18,7 +17,6 @@ async function verificarSesion() {
     }
 }
 
-// 2. Manejar el inicio de sesión real multiusuario
 loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("loginEmail").value.trim();
@@ -36,7 +34,6 @@ loginForm?.addEventListener("submit", async (e) => {
     }
 });
 
-// 3. Cerrar sesión
 btnLogout?.addEventListener("click", async () => {
     await supabase.auth.signOut();
     mostrarLogin();
@@ -58,13 +55,12 @@ function mostrarLogin() {
     if (loginError) loginError.textContent = "";
 }
 
-// 4. Cargar métricas y gestiones del panel
 async function cargarDatosAdmin() {
     const { count } = await supabase.from('reservas').select('*', { count: 'exact', head: true });
     if (totalReservasEl) totalReservasEl.textContent = count || 0;
 }
 
-// 5. Manejar subida de archivos multimedia (Storage + Tabla multimedia)
+// Subida inteligente: detecta si es foto o video y va a su tabla respectiva
 const mediaForm = document.getElementById("mediaForm");
 mediaForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -72,6 +68,8 @@ mediaForm?.addEventListener("submit", async (e) => {
     const file = fileInput.files[0];
     if (!file) return;
 
+    const esVideo = file.type.startsWith('video');
+    const tablaDestino = esVideo ? 'videos' : 'fotos';
     const fileName = `${Date.now()}_${file.name}`;
     
     const { error: uploadError } = await supabase.storage
@@ -88,13 +86,13 @@ mediaForm?.addEventListener("submit", async (e) => {
         .getPublicUrl(fileName);
 
     const { error: dbError } = await supabase
-        .from('multimedia')
-        .insert([{ url: publicUrl, tipo: file.type.startsWith('video') ? 'video' : 'imagen' }]);
+        .from(tablaDestino)
+        .insert([{ url: publicUrl }]);
 
     if (dbError) {
         alert("Error al guardar en la tabla: " + dbError.message);
     } else {
-        alert("¡Archivo subido con éxito!");
+        alert(`¡${esVideo ? 'Video' : 'Foto'} subido con éxito!`);
         fileInput.value = "";
         cargarMediaAdmin();
     }
@@ -104,24 +102,31 @@ async function cargarMediaAdmin() {
     const contenedor = document.getElementById("listaMediaAdmin");
     if (!contenedor) return;
 
-    const { data: items } = await supabase.from("multimedia").select("*").order("id", { ascending: false });
+    const { data: fotos } = await supabase.from("fotos").select("*").order("id", { ascending: false });
+    const { data: videos } = await supabase.from("videos").select("*").order("id", { ascending: false });
 
-    if (!items || items.length === 0) {
+    const totalItems = [
+        ...(fotos || []).map(f => ({ ...f, tipo: 'foto' })),
+        ...(videos || []).map(v => ({ ...v, tipo: 'video' }))
+    ].sort((a, b) => b.id - a.id);
+
+    if (totalItems.length === 0) {
         contenedor.innerHTML = '<p style="color: #888; text-align: center;">No hay archivos subidos.</p>';
         return;
     }
 
-    contenedor.innerHTML = items.map(m => `
+    contenedor.innerHTML = totalItems.map(m => `
         <div style="background: #2a2a2a; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444;">
-            <a href="${m.url}" target="_blank" style="color: #ffc107; text-decoration: none; font-size: 0.9rem;">Ver archivo (${m.tipo})</a>
-            <button onclick="window.eliminarMedia(${m.id})" style="background: #dc3545; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Eliminar</button>
+            <a href="${m.url}" target="_blank" style="color: #ffc107; text-decoration: none; font-size: 0.9rem;">Ver ${m.tipo}</a>
+            <button onclick="window.eliminarMedia(${m.id}, '${m.tipo}')" style="background: #dc3545; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Eliminar</button>
         </div>
     `).join("");
 }
 
-window.eliminarMedia = async function(id) {
+window.eliminarMedia = async function(id, tipo) {
     if (confirm("¿Estás seguro de borrar este archivo?")) {
-        const { error } = await supabase.from("multimedia").delete().eq("id", id);
+        const tabla = tipo === 'video' ? 'videos' : 'fotos';
+        const { error } = await supabase.from(tabla).delete().eq("id", id);
         if (!error) cargarMediaAdmin();
         else alert("Error al eliminar.");
     }
