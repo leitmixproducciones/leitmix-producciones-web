@@ -30,7 +30,7 @@ loginForm?.addEventListener("submit", async (e) => {
     });
 
     if (error) {
-        if (loginError) loginError.textContent = "Credenciales incorrectas o usuario no autorizado.";
+        if (loginError) loginError.textContent = "Error: " + error.message;
     } else {
         mostrarPanel(data.user);
     }
