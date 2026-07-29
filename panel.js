@@ -73,7 +73,8 @@ mediaForm?.addEventListener("submit", async (e) => {
     
     // Configuración de Cloudinary
     const CLOUD_NAME = "exzcoeyi";
-    const UPLOAD_PRESET = "preajuste leitmix";
+    const UPLOAD_PRESET = "leitmix_preset";
+
     
     const formData = new FormData();
     formData.append("file", file);
