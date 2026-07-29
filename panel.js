@@ -60,7 +60,7 @@ async function cargarDatosAdmin() {
     if (totalReservasEl) totalReservasEl.textContent = count || 0;
 }
 
-// Subida directa a tus tablas existentes 'fotos' o 'videos'
+// Subida directa a Cloudinary
 const mediaForm = document.getElementById("mediaForm");
 mediaForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -70,34 +70,50 @@ mediaForm?.addEventListener("submit", async (e) => {
 
     const esVideo = file.type.startsWith('video');
     const tablaDestino = esVideo ? 'videos' : 'fotos';
-    const fileName = `${Date.now()}_${file.name}`;
     
-    // 1. Subir al Storage
-    const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(fileName, file);
+    // Configuración de Cloudinary
+    const CLOUD_NAME = "exzcoeyi";
+    const UPLOAD_PRESET = "preajuste leitmix";
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
 
-    if (uploadError) {
-        alert("Error al subir el archivo: " + uploadError.message);
-        return;
-    }
+    try {
+        // Indicador visual opcional o alerta de carga
+        const submitBtn = mediaForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
 
-    // 2. Obtener la URL pública
-    const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(fileName);
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
+            method: "POST",
+            body: formData
+        });
 
-    // 3. Guardar en tu tabla correspondiente ('fotos' o 'videos')
-    const { error: dbError } = await supabase
-        .from(tablaDestino)
-        .insert([{ url: publicUrl }]);
+        const data = await response.json();
 
-    if (dbError) {
-        alert(`Error al guardar en la tabla ${tablaDestino}: ` + dbError.message);
-    } else {
-        alert(`¡${esVideo ? 'Video' : 'Foto'} subido con éxito!`);
-        fileInput.value = "";
-        cargarMediaAdmin();
+        if (!response.ok) {
+            throw new Error(data.error?.message || "Error al subir a Cloudinary");
+        }
+
+        const publicUrl = data.secure_url;
+
+        // Guardar la URL pública en tu base de datos de Supabase ('fotos' o 'videos')
+        const { error: dbError } = await supabase
+            .from(tablaDestino)
+            .insert([{ url: publicUrl }]);
+
+        if (dbError) {
+            alert(`Error al guardar en la tabla ${tablaDestino}: ` + dbError.message);
+        } else {
+            alert(`¡${esVideo ? 'Video' : 'Foto'} subido con éxito a Cloudinary!`);
+            fileInput.value = "";
+            cargarMediaAdmin();
+        }
+    } catch (err) {
+        alert("Error en la subida: " + err.message);
+    } finally {
+        const submitBtn = mediaForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = false;
     }
 });
 
