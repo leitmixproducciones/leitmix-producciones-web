@@ -32,14 +32,14 @@ document.getElementById("formTestimonioPublico")?.addEventListener("submit", asy
     e.preventDefault();
     const nombre = document.getElementById("testimonioNombre").value;
     const estrellas = parseInt(document.getElementById("testimonioEstrellas").value);
-    const comentario = document.getElementById("testimonioComentario").value;
+    const mensaje = document.getElementById("testimonioComentario").value;
 
     const { error } = await supabase.from("testimonios").insert([{
-        nombre, estrellas, comentario, aprobado: false
+        nombre, estrellas, mensaje, activo: false
     }]);
 
     if (error) {
-        alert("Error al enviar comentario.");
+        alert("Error al enviar comentario: " + error.message);
     } else {
         alert("¡Gracias! Tu comentario fue enviado y será publicado pronto.");
         document.getElementById("formTestimonioPublico").reset();
@@ -78,15 +78,15 @@ async function cargarPublico() {
         }
     }
 
-    // Testimonios aprobados
-    const { data: tests } = await supabase.from("testimonios").select("*").eq("aprobado", true);
+    // Testimonios aprobados (usando la columna 'activo' y mapeando 'mensaje')
+    const { data: tests } = await supabase.from("testimonios").select("*").eq("activo", true);
     const contTest = document.getElementById("testimoniosPublicos");
     if (tests && tests.length > 0 && contTest) {
         contTest.innerHTML = tests.map(t => `
             <div style="background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #333;">
                 <strong style="color: #ffc107;">${t.nombre}</strong>
                 <p style="color: #aaa; font-size: 0.85rem; margin: 4px 0;">${"⭐".repeat(t.estrellas)}</p>
-                <p style="color: #ddd; font-size: 0.95rem;">"${t.comentario}"</p>
+                <p style="color: #ddd; font-size: 0.95rem;">"${t.mensaje}"</p>
             </div>
         `).join("");
     }
