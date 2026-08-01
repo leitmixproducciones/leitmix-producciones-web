@@ -20,9 +20,9 @@
         .btn-link:hover { color: #e0a800; }
         .hidden { display: none !important; }
         .error-msg { color: #ff6b6b; text-align: center; margin-bottom: 10px; font-size: 0.9rem; }
-        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: #2a2a2a; padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-box h3 { font-size: 1.8rem; color: #ffc107; margin-top: 5px; }
+        .stat-box h3 { font-size: 1.5rem; color: #ffc107; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -47,19 +47,42 @@
             <button id="btnLogout" class="btn-danger">Cerrar Sesión</button>
 
             <div style="margin-top: 20px;">
-                <h2>📊 Resumen</h2>
+                <h2>📊 Resumen General</h2>
                 <div class="stats-grid">
                     <div class="stat-box">
-                        <p>Total de Reservas Registradas</p>
+                        <p style="font-size: 0.85rem;">Reservas</p>
                         <h3 id="totalReservas">0</h3>
                     </div>
+                    <div class="stat-box">
+                        <p style="font-size: 0.85rem;">Total Recaudado</p>
+                        <h3 id="totalRecibos">$0</h3>
+                    </div>
                 </div>
-                <!-- Lista de Reservas Registradas -->
+
+                <!-- Listado de Reservas -->
                 <div style="margin-top: 15px;">
                     <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 10px;">📅 Listado de Reservas</h3>
-                    <div id="listaReservasAdmin" style="display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto;">
+                    <div id="listaReservasAdmin" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;">
                         <p style="color: #888; text-align: center; font-size: 0.9rem;">Cargando reservas...</p>
                     </div>
+                </div>
+            </div>
+
+            <hr style="border-color:#333; margin: 25px 0;">
+
+            <!-- Gestión y Carga de Recibos -->
+            <div>
+                <h2>💵 Gestión de Recibos</h2>
+                <form id="reciboForm" style="display: flex; flex-direction: column; gap: 8px; background: #2a2a2a; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                    <input type="text" id="reciboCliente" placeholder="Nombre del cliente" required style="margin-bottom: 0;">
+                    <input type="number" step="0.01" id="reciboMonto" placeholder="Monto ($)" required style="margin-bottom: 0;">
+                    <input type="text" id="reciboDetalle" placeholder="Detalle o concepto" required style="margin-bottom: 0;">
+                    <button type="submit" class="btn-main" style="margin-top: 4px; margin-bottom: 0;">Crear Recibo</button>
+                </form>
+
+                <h3 style="color: #fff; font-size: 1.1rem; margin-bottom: 10px;">📋 Recibos Emitidos</h3>
+                <div id="listaRecibosAdmin" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;">
+                    <p style="color: #888; text-align: center;">Cargando recibos...</p>
                 </div>
             </div>
 
