@@ -116,7 +116,7 @@ window.eliminarReserva = async function(id) {
     }
 };
 
-// Cargar, crear, sumar y listar Recibos
+// Cargar, crear, sumar y listar Recibos con opción de Ver Recibo Formal
 const reciboForm = document.getElementById("reciboForm");
 reciboForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -152,20 +152,81 @@ async function cargarRecibosAdmin() {
         return;
     }
 
-    // Hace la cuenta sola sumando todos los montos de la tabla
     const sumaTotal = recibos.reduce((acc, curr) => acc + (Number(curr.monto) || 0), 0);
     if (totalRecibosEl) totalRecibosEl.textContent = `$${sumaTotal.toLocaleString('es-AR')}`;
 
-    contenedorRecibos.innerHTML = recibos.map(rec => `
-        <div style="background: #2a2a2a; padding: 10px; border-radius: 6px; border: 1px solid #444; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <strong style="color: #ffc107; font-size: 0.95rem;">${rec.cliente}</strong> - <span style="color: #28a745; font-weight: bold;">$${Number(rec.monto).toLocaleString('es-AR')}</span>
-                <p style="color: #bbb; font-size: 0.85rem; margin: 2px 0;">📝 ${rec.detalle || 'Sin detalle'}</p>
+    contenedorRecibos.innerHTML = recibos.map(rec => {
+        const fechaFormateada = new Date(rec.created_at).toLocaleDateString('es-AR');
+        return `
+            <div style="background: #2a2a2a; padding: 10px; border-radius: 6px; border: 1px solid #444; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <strong style="color: #ffc107; font-size: 0.95rem;">${rec.cliente}</strong> 
+                    <span style="color: #28a745; font-weight: bold; font-size: 1rem;">$${Number(rec.monto).toLocaleString('es-AR')}</span>
+                </div>
+                <p style="color: #bbb; font-size: 0.85rem; margin: 2px 0;">📝 ${rec.detalle || 'Sin detalle'} (${fechaFormateada})</p>
+                <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <button onclick="window.verRecibo('${rec.cliente.replace(/'/g, "\\'")}', ${rec.monto}, '${(rec.detalle || '').replace(/'/g, "\\'")}', '${fechaFormateada}', ${rec.id})" style="background: #ffc107; color: #121212; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; flex: 1;">Ver Recibo / Enviar</button>
+                    <button onclick="window.eliminarRecibo(${rec.id})" style="background: #dc3545; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Borrar</button>
+                </div>
             </div>
-            <button onclick="window.eliminarRecibo(${rec.id})" style="background: #dc3545; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; height: fit-content;">Borrar</button>
-        </div>
-    `).join("");
+        `;
+    }).join("");
 }
+
+// Ventana Emergente con el Recibo Profesional y Botón de WhatsApp
+window.verRecibo = function(cliente, monto, detalle, fecha, id) {
+    const ventanaRecibo = window.open('', '_blank', 'width=500,height=650');
+    ventanaRecibo.document.write(`
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <title>Recibo Oficial #${id} - Leitmix Producciones</title>
+            <style>
+                body { background: #f4f4f4; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                .receipt { background: #ffffff; width: 100%; max-width: 420px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #ffc107; color: #333; }
+                .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+                .header h2 { margin: 5px 0 0 0; color: #121212; font-size: 1.4rem; }
+                .header p { color: #666; font-size: 0.85rem; margin: 2px 0; }
+                .info-group { margin-bottom: 12px; font-size: 0.95rem; }
+                .info-group span { font-weight: bold; color: #444; }
+                .monto-box { background: #fff9e6; border: 1px dashed #ffc107; padding: 12px; text-align: center; border-radius: 8px; margin: 20px 0; }
+                .monto-box h3 { color: #d48806; margin: 0; font-size: 1.6rem; }
+                .footer { text-align: center; font-size: 0.75rem; color: #888; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; }
+                .btn-whatsapp { background: #25d366; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; text-align: center; display: block; text-decoration: none; }
+                .btn-whatsapp:hover { background: #1ebe5d; }
+                .btn-print { background: #333; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-top: 8px; }
+            </style>
+        </head>
+        <body>
+            <div class="receipt">
+                <div class="header">
+                    <h2>LEITMIX PRODUCCIONES</h2>
+                    <p>Comprobante de Pago / Recibo Oficial</p>
+                    <p>Fecha: <b>${fecha}</b> | Recibo N°: <b>#000${id}</b></p>
+                </div>
+                <div class="info-group">
+                    <p><span>Cliente:</span> ${cliente}</p>
+                </div>
+                <div class="info-group">
+                    <p><span>Concepto / Detalle:</span> ${detalle}</p>
+                </div>
+                <div class="monto-box">
+                    <p style="margin: 0 0 5px 0; font-size: 0.85rem; color: #666;">Monto Recibido</p>
+                    <h3>$${Number(monto).toLocaleString('es-AR')}</h3>
+                </div>
+                <a href="https://api.whatsapp.com/send?text=Hola%20*${encodeURIComponent(cliente)}*,%20te%20env%C3%ADo%20el%20comprobante%20de%20pago%20de%20Leitmix%20Producciones.%0A%0A*Recibo%20N%C2%B0:*%20%23000${id}%0A*Fecha:*%20${fecha}%0A*Concepto:*%20${encodeURIComponent(detalle)}%0A*Monto:*%20%24${Number(monto).toLocaleString('es-AR')}%0A%0A%C2%A1Muchas%20gracias%20por%20confiar%20en%20nosotros!" target="_blank" class="btn-whatsapp">
+                    📲 Enviar Comprobante por WhatsApp
+                </a>
+                <button onclick="window.print()" class="btn-print">🖨️ Imprimir / Guardar PDF</button>
+                <div class="footer">
+                    <p>Leitmix Producciones - Panel Multiusuario Profesional</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `);
+};
 
 window.eliminarRecibo = async function(id) {
     if (confirm("¿Estás seguro de eliminar este recibo?")) {
