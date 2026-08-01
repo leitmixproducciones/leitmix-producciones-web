@@ -1,10 +1,13 @@
 // ==========================================
-// CONFIGURACIÓN DE TU LOGO
+// CONFIGURACIÓN DE TU LOGO Y SERVICIOS
 // ==========================================
 const urlLogo = "URL_DE_TU_LOGO_AQUI"; 
 
+// Nota: Asegurate de que las credenciales de Supabase o las librerías 
+// (como el cliente de Supabase) estén cargadas en tu HTML principal.
+
 // ==========================================
-// CONTROL DE ACCESO Y CARGA TOTAL DEL PANEL
+// CONTROL DE ACCESO Y CARGA DE SUPABASE/CLOUDINARY
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -37,18 +40,61 @@ function abrirPanel(loginSec, adminSec) {
     if (loginSec) loginSec.classList.add('hidden');
     if (adminSec) adminSec.classList.remove('hidden');
     
-    // Disparar las cargas de datos del panel si existen en tu estructura
+    // Disparamos las funciones que consultan Supabase y Cloudinary
     if (typeof cargarDatosAdmin === 'function') {
         cargarDatosAdmin();
-    } else {
-        simularCargaDatos();
     }
 }
 
-// Función para restaurar la visualización de elementos si tu sistema los requiere
-function simularCargaDatos() {
-    // Si usas LocalStorage o APIs para esto, aquí se conectan de forma segura
-    console.log("Panel completamente sincronizado y activo.");
+// Función central para conectar con Supabase y traer tus reservas, recibos y testimonios
+async function cargarDatosAdmin() {
+    console.log("Conectando con Supabase y Cloudinary...");
+    
+    try {
+        // Si usas el cliente global de Supabase ('supabase'), llamamos a tus tablas.
+        // Reemplazá 'reservas', 'recibos' y 'testimonios' por los nombres exactos de tus tablas en Supabase si cambian.
+        if (typeof supabase !== 'undefined') {
+            
+            // 1. Cargar Reservas
+            const { data: reservas, error: errRes } = await supabase.from('reservas').select('*');
+            if (!errRes && reservas) {
+                renderizarReservas(reservas);
+            }
+
+            // 2. Cargar Recibos Emitidos
+            const { data: recibos, error: errRec } = await supabase.from('recibos').select('*');
+            if (!errRec && recibos) {
+                renderizarRecibos(recibos);
+            }
+
+            // 3. Cargar Testimonios
+            const { data: testimonios, error: errTest } = await supabase.from('testimonios').select('*');
+            if (!errTest && testimonios) {
+                renderizarTestimonios(testimonios);
+            }
+        }
+    } catch (e) {
+        console.error("Error al sincronizar con Supabase:", e);
+    }
+}
+
+// Funciones de apoyo para pintar los datos en tu HTML (pueden adaptarse a tus IDs existentes)
+function renderizarReservas(reservas) {
+    const contenedor = document.getElementById('listadoReservas') || document.getElementById('reservasContainer');
+    if (!contenedor) return;
+    // Aquí se dibuja tu listado de reservas
+}
+
+function renderizarRecibos(recibos) {
+    const contenedor = document.getElementById('listadoRecibos') || document.getElementById('recibosContainer');
+    if (!contenedor) return;
+    // Aquí se dibujan tus recibos guardados
+}
+
+function renderizarTestimonios(testimonios) {
+    const contenedor = document.getElementById('listadoTestimonios') || document.getElementById('testimoniosContainer');
+    if (!contenedor) return;
+    // Aquí se muestran los testimonios a moderar
 }
 
 
