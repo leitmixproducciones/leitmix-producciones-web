@@ -19,16 +19,11 @@ document.getElementById("formReserva")?.addEventListener("submit", async (e) => 
         alert("¡Reserva guardada con éxito!");
         document.getElementById("formReserva").reset();
         
-        // Redirigir a tu WhatsApp con los datos listos
-        const numeroWhatsApp = "5491150480339"; // Tu número con código de país y área
-        const textoMensaje = `Hola! Nueva reserva de:
-*Nombre:* ${nombre}
-*Evento:* ${evento}
-*Fecha:* ${fecha}
-*Teléfono:* ${telefono}
-*Comentarios:* ${comentarios}`;
+        // Redirigir a tu WhatsApp con los datos listos de forma directa
+        const numeroWhatsApp = "5491150480339"; 
+        const textoMensaje = `Hola! Nueva reserva de:\n*Nombre:* ${nombre}\n*Evento:* ${evento}\n*Fecha:* ${fecha}\n*Teléfono:* ${telefono}\n*Comentarios:* ${comentarios}`;
 
-        window.open(`https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(textoMensaje)}`, '_blank');
+        window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(textoMensaje)}`, '_blank');
     }
 });
 
