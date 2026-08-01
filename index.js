@@ -63,14 +63,14 @@ async function cargarPublico() {
         }
     }
 
-    // Cargar Videos en su propia sección
+    // Cargar Videos en su propia sección con diseño mejorado
     const { data: videos } = await supabase.from("videos").select("*").order("id", { ascending: false });
     const contVideos = document.getElementById("videosPublicos");
     if (contVideos) {
         if (videos && videos.length > 0) {
             contVideos.innerHTML = videos.map(v => `
-                <div style="background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center;">
-                    <video src="${v.url}" controls style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px;"></video>
+                <div style="background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center; overflow: hidden;">
+                    <video src="${v.url}" controls preload="metadata" style="width: 100%; max-height: 250px; object-fit: contain; border-radius: 6px; background: #000;"></video>
                 </div>
             `).join("");
         } else {
