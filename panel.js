@@ -44,7 +44,7 @@ function mostrarPanel(user) {
     if (adminSection) adminSection.classList.remove("hidden");
     if (userLoggedEmail) userLoggedEmail.textContent = `Conectado como: ${user.email}`;
     
-    cargarDatosAdmin();
+    cargarReservasAdmin();
     cargarMediaAdmin();
     cargarTestimoniosAdmin();
 }
@@ -55,10 +55,45 @@ function mostrarLogin() {
     if (loginError) loginError.textContent = "";
 }
 
-async function cargarDatosAdmin() {
-    const { count } = await supabase.from('reservas').select('*', { count: 'exact', head: true });
+// Cargar y listar Reservas en el Panel
+async function cargarReservasAdmin() {
+    const { data: reservas, count } = await supabase
+        .from('reservas')
+        .select('*', { count: 'exact' })
+        .order('id', { ascending: false });
+
     if (totalReservasEl) totalReservasEl.textContent = count || 0;
+
+    const contenedorReservas = document.getElementById("listaReservasAdmin");
+    if (!contenedorReservas) return;
+
+    if (!reservas || reservas.length === 0) {
+        contenedorReservas.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay reservas registradas.</p>';
+        return;
+    }
+
+    contenedorReservas.innerHTML = reservas.map(r => `
+        <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; border: 1px solid #444; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: #ffc107; font-size: 1rem;">${r.nombre}</strong>
+                <span style="font-size: 0.8rem; color: #aaa;">📅 ${r.fecha || 'Sin fecha'}</span>
+            </div>
+            <p style="color: #ddd; font-size: 0.9rem; margin: 4px 0;">🎉 <b>Evento:</b> ${r.evento || 'No especificado'}</p>
+            <p style="color: #ddd; font-size: 0.9rem; margin: 4px 0;">📞 <b>Teléfono:</b> ${r.telefono || 'Sin teléfono'}</p>
+            ${r.comentarios ? `<p style="color: #bbb; font-size: 0.85rem; margin: 4px 0; font-style: italic;">"${r.comentarios}"</p>` : ''}
+            <div style="text-align: right; margin-top: 6px;">
+                <button onclick="window.eliminarReserva(${r.id})" style="background: #dc3545; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Eliminar Reserva</button>
+            </div>
+        </div>
+    `).join("");
 }
+
+window.eliminarReserva = async function(id) {
+    if (confirm("¿Estás seguro de eliminar esta reserva?")) {
+        const { error } = await supabase.from("reservas").delete().eq("id", id);
+        if (!error) cargarReservasAdmin();
+        else alert("Error al eliminar la reserva.");
+};
 
 // Subida directa a Cloudinary
 const mediaForm = document.getElementById("mediaForm");
@@ -71,7 +106,6 @@ mediaForm?.addEventListener("submit", async (e) => {
     const esVideo = file.type.startsWith('video');
     const tablaDestino = esVideo ? 'videos' : 'fotos';
     
-    // Configuración de Cloudinary
     const CLOUD_NAME = "exzcoeyi";
     const UPLOAD_PRESET = "leitmix_preset";
 
@@ -141,7 +175,7 @@ async function cargarMediaAdmin() {
         }
 
         return `
-            <div style="background: #2a2a2a; padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; gap: 10px;">
+            <div style="background: #2a2a2a; padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; gap: 10px; margin-bottom: 6px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     ${vistaPrevia}
                     <a href="${m.url}" target="_blank" style="color: #ffc107; text-decoration: none; font-size: 0.85rem;">Ver ${m.tipo}</a>
@@ -168,19 +202,19 @@ async function cargarTestimoniosAdmin() {
     const { data: tests } = await supabase.from("testimonios").select("*").order("id", { ascending: false });
 
     if (!tests || tests.length === 0) {
-        contenedor.innerHTML = '<p style="color: #888; text-align: center;">No hay testimonios para moderar.</p>';
+        contenedor.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay testimonios para moderar.</p>';
         return;
     }
 
     contenedor.innerHTML = tests.map(t => `
-        <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; border: 1px solid #444;">
+        <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; border: 1px solid #444; margin-bottom: 8px;">
             <div style="display: flex; justify-content: space-between;">
                 <strong style="color: #ffc107;">${t.nombre}</strong>
                 <span style="font-size: 0.85rem; color: #aaa;">${"⭐".repeat(t.estrellas)}</span>
             </div>
             <p style="color: #ddd; font-size: 0.95rem; margin: 6px 0;">"${t.comentario}"</p>
             <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button onclick="window.cambiarEstado(${t.id}, ${!t.aprobado})" style="background: ${t.aprobado ? '#ffc107' : '#28a745'}; color: #121212; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1;">
+                <button onclick="window.cambiarEstado(${t.id}, ${!t.aprobado})" style="background: ${t.aprobado ? '#ffc107' : '#28a745'}; color: #121212; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; font-size: 0.85rem;">
                     ${t.aprobado ? 'Ocultar' : 'Aprobar'}
                 </button>
             </div>
