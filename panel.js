@@ -1,9 +1,11 @@
 import { supabase } from "./supabase.js";
 
 // ==========================================
-// CONFIGURACIÓN DE TU LOGO
+// CONFIGURACIÓN DE TU LOGO Y CLOUDINARY
 // ==========================================
 const urlLogo = "URL_DE_TU_LOGO_AQUI"; 
+const CLOUD_NAME = 'TU_CLOUD_NAME'; // Tu cloud name real de Cloudinary
+const UPLOAD_PRESET = 'TU_UPLOAD_PRESET'; // Tu preset real de Cloudinary
 
 // ==========================================
 // CONTROL DE ACCESO Y CARGA DEL PANEL
@@ -96,7 +98,10 @@ async function cargarDatosAdmin() {
             if (contRecibos) contRecibos.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay recibos emitidos todavía.</p>';
         }
 
-        // 3. Cargar Testimonios para moderar
+        // 3. Cargar Fotos y Videos (Cloudinary / Supabase)
+        await cargarMultimediaAdmin();
+
+        // 4. Cargar Testimonios para moderar
         const { data: testimonios } = await supabase.from('testimonios').select('*').order('id', { ascending: false });
         const contTest = document.getElementById('listaTestimoniosAdmin');
         if (contTest) {
@@ -129,6 +134,105 @@ window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
         cargarDatosAdmin();
     } else {
         alert("Error al actualizar testimonio");
+    }
+};
+
+// ==========================================
+// GESTIÓN DE FOTOS Y VIDEOS (Cloudinary)
+// ==========================================
+async function cargarMultimediaAdmin() {
+    const contMedia = document.getElementById('listaMediaAdmin');
+    if (!contMedia) return;
+
+    const { data: fotos } = await supabase.from('fotos').select('*').order('id', { ascending: false });
+    const { data: videos } = await supabase.from('videos').select('*').order('id', { ascending: false });
+    
+    let htmlContenido = '';
+
+    if (fotos && fotos.length > 0) {
+        htmlContenido += `<h4 style="color: #ffc107; font-size: 0.9rem; margin-bottom: 5px;">📷 Fotos Cargadas</h4>`;
+        htmlContenido += fotos.map(f => `
+            <div style="background: #2a2a2a; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <img src="${f.url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" alt="Foto">
+                <button type="button" onclick="eliminarMedia('${f.id}', 'fotos')" style="background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; width: auto; margin-bottom: 0; font-size: 0.8rem;">Eliminar</button>
+            </div>
+        `).join('');
+    }
+
+    if (videos && videos.length > 0) {
+        htmlContenido += `<h4 style="color: #ffc107; font-size: 0.9rem; margin: 10px 0 5px 0;">🎥 Videos Cargados</h4>`;
+        htmlContenido += videos.map(v => `
+            <div style="background: #2a2a2a; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <video src="${v.url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #000;" preload="metadata"></video>
+                <button type="button" onclick="eliminarMedia('${v.id}', 'videos')" style="background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; width: auto; margin-bottom: 0; font-size: 0.8rem;">Eliminar</button>
+            </div>
+        `).join('');
+    }
+
+    if ((!fotos || fotos.length === 0) && (!videos || videos.length === 0)) {
+        contMedia.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay archivos multimedia cargados.</p>';
+    } else {
+        contMedia.innerHTML = htmlContenido;
+    }
+}
+
+// Subir a Cloudinary y guardar en Supabase
+document.getElementById('mediaForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById('mediaFile');
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const btnSubir = e.target.querySelector('button');
+    btnSubir.textContent = "Subiendo...";
+    btnSubir.disabled = true;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+
+    try {
+        const tipoEsVideo = file.type.startsWith('video');
+        const resourceType = tipoEsVideo ? 'video' : 'image';
+
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.secure_url) {
+            const tabla = tipoEsVideo ? 'videos' : 'fotos';
+            const { error } = await supabase.from(tabla).insert([{ url: data.secure_url }]);
+
+            if (error) {
+                alert("Error al guardar en la base de datos: " + error.message);
+            } else {
+                alert("¡Archivo subido con éxito!");
+                fileInput.value = '';
+                cargarMultimediaAdmin();
+            }
+        } else {
+            alert("Error al subir a Cloudinary.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Hubo un error en la subida.");
+    } finally {
+        btnSubir.textContent = "Subir Archivo";
+        btnSubir.disabled = false;
+    }
+});
+
+// Eliminar archivo multimedia
+window.eliminarMedia = async function(id, tabla) {
+    if (confirm("¿Estás seguro de eliminar este archivo?")) {
+        const { error } = await supabase.from(tabla).delete().eq('id', id);
+        if (!error) {
+            cargarMultimediaAdmin();
+        } else {
+            alert("Error al eliminar el archivo.");
+        }
     }
 };
 
