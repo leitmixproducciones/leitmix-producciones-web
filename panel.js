@@ -75,13 +75,11 @@ mediaForm?.addEventListener("submit", async (e) => {
     const CLOUD_NAME = "exzcoeyi";
     const UPLOAD_PRESET = "leitmix_preset";
 
-    
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", UPLOAD_PRESET);
 
     try {
-        // Indicador visual opcional o alerta de carga
         const submitBtn = mediaForm.querySelector('button[type="submit"]');
         if (submitBtn) submitBtn.disabled = true;
 
@@ -98,7 +96,6 @@ mediaForm?.addEventListener("submit", async (e) => {
 
         const publicUrl = data.secure_url;
 
-        // Guardar la URL pública en tu base de datos de Supabase ('fotos' o 'videos')
         const { error: dbError } = await supabase
             .from(tablaDestino)
             .insert([{ url: publicUrl }]);
@@ -135,12 +132,24 @@ async function cargarMediaAdmin() {
         return;
     }
 
-    contenedor.innerHTML = totalItems.map(m => `
-        <div style="background: #2a2a2a; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444;">
-            <a href="${m.url}" target="_blank" style="color: #ffc107; text-decoration: none; font-size: 0.9rem;">Ver ${m.tipo}</a>
-            <button onclick="window.eliminarMedia(${m.id}, '${m.tipo}')" style="background: #dc3545; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Eliminar</button>
-        </div>
-    `).join("");
+    contenedor.innerHTML = totalItems.map(m => {
+        let vistaPrevia = '';
+        if (m.tipo === 'foto') {
+            vistaPrevia = `<img src="${m.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px;" alt="Miniatura">`;
+        } else {
+            vistaPrevia = `<video src="${m.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; background: #000;"></video>`;
+        }
+
+        return `
+            <div style="background: #2a2a2a; padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${vistaPrevia}
+                    <a href="${m.url}" target="_blank" style="color: #ffc107; text-decoration: none; font-size: 0.85rem;">Ver ${m.tipo}</a>
+                </div>
+                <button onclick="window.eliminarMedia(${m.id}, '${m.tipo}')" style="background: #dc3545; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Eliminar</button>
+            </div>
+        `;
+    }).join("");
 }
 
 window.eliminarMedia = async function(id, tipo) {
