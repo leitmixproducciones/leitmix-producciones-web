@@ -1,15 +1,8 @@
 import { supabase } from "./supabase.js";
 
-// ==========================================
-// CONFIGURACIÓN DE TU LOGO Y CLOUDINARY
-// ==========================================
-const urlLogo = "URL_DE_TU_LOGO_AQUI"; 
-const CLOUD_NAME = 'TU_CLOUD_NAME'; 
-const UPLOAD_PRESET = 'TU_UPLOAD_PRESET'; 
+const CLOUD_NAME = 'exzcoeyi'; 
+const UPLOAD_PRESET = 'leitmix_preset'; 
 
-// ==========================================
-// CONTROL DE ACCESO Y CARGA DEL PANEL
-// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const loginSection = document.getElementById('loginSection');
@@ -40,18 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
 function abrirPanel(loginSec, adminSec) {
     if (loginSec) loginSec.classList.add('hidden');
     if (adminSec) adminSec.classList.remove('hidden');
-    
     cargarDatosAdmin();
 }
 
-// ==========================================
-// CARGA DE DATOS DESDE SUPABASE AL PANEL
-// ==========================================
 async function cargarDatosAdmin() {
-    console.log("Cargando datos del panel con Supabase...");
-
     try {
-        // 1. Cargar Reservas
         const { data: reservas } = await supabase.from('reservas').select('*').order('id', { ascending: false });
         const contReservas = document.getElementById('listaReservasAdmin');
         const totalRes = document.getElementById('totalReservas');
@@ -73,7 +59,6 @@ async function cargarDatosAdmin() {
             }
         }
 
-        // 2. Cargar Recibos Emitidos
         const { data: recibos } = await supabase.from('recibos').select('*').order('id', { ascending: false });
         const contRecibos = document.getElementById('listaRecibosAdmin');
         const totalRec = document.getElementById('totalRecibos');
@@ -84,7 +69,6 @@ async function cargarDatosAdmin() {
             
             if (contRecibos) {
                 contRecibos.innerHTML = recibos.map(rec => {
-                    // Si el recibo guardó una fecha la usamos, sino usamos la fecha actual por seguridad
                     const fechaRecibo = rec.fecha || new Date().toLocaleDateString('es-AR');
                     return `
                         <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
@@ -103,10 +87,8 @@ async function cargarDatosAdmin() {
             if (contRecibos) contRecibos.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay recibos emitidos todavía.</p>';
         }
 
-        // 3. Cargar Fotos y Videos
         await cargarMultimediaAdmin();
 
-        // 4. Cargar Testimonios para moderar
         const { data: testimonios } = await supabase.from('testimonios').select('*').order('id', { ascending: false });
         const contTest = document.getElementById('listaTestimoniosAdmin');
         if (contTest) {
@@ -132,19 +114,12 @@ async function cargarDatosAdmin() {
     }
 }
 
-// Función auxiliar para aprobar/desaprobar testimonios
 window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
     const { error } = await supabase.from('testimonios').update({ activo: nuevoEstado }).eq('id', id);
-    if (!error) {
-        cargarDatosAdmin();
-    } else {
-        alert("Error al actualizar testimonio");
-    }
+    if (!error) cargarDatosAdmin();
+    else alert("Error al actualizar testimonio");
 };
 
-// ==========================================
-// GESTIÓN DE FOTOS Y VIDEOS (Cloudinary)
-// ==========================================
 async function cargarMultimediaAdmin() {
     const contMedia = document.getElementById('listaMediaAdmin');
     if (!contMedia) return;
@@ -181,7 +156,6 @@ async function cargarMultimediaAdmin() {
     }
 }
 
-// Subir a Cloudinary y guardar en Supabase
 document.getElementById('mediaForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fileInput = document.getElementById('mediaFile');
@@ -229,21 +203,14 @@ document.getElementById('mediaForm')?.addEventListener('submit', async (e) => {
     }
 });
 
-// Eliminar archivo multimedia
 window.eliminarMedia = async function(id, tabla) {
     if (confirm("¿Estás seguro de eliminar este archivo?")) {
         const { error } = await supabase.from(tabla).delete().eq('id', id);
-        if (!error) {
-            cargarMultimediaAdmin();
-        } else {
-            alert("Error al eliminar el archivo.");
-        }
+        if (!error) cargarMultimediaAdmin();
+        else alert("Error al eliminar el archivo.");
     }
 };
 
-// ==========================================
-// GUARDAR NUEVO RECIBO DESDE EL PANEL
-// ==========================================
 document.getElementById('reciboForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const cliente = document.getElementById('reciboCliente').value;
@@ -251,17 +218,9 @@ document.getElementById('reciboForm')?.addEventListener('submit', async (e) => {
     const detalle = document.getElementById('reciboDetalle').value;
     const fechaEmision = new Date().toLocaleDateString('es-AR');
 
-    // Intentamos guardar con la fecha de emisión. Si tu tabla de Supabase no tiene la columna 'fecha', 
-    // podés sacar la parte de 'fecha: fechaEmision' para que no falle.
-    const { error } = await supabase.from('recibos').insert([{ 
-        cliente, 
-        monto, 
-        detalle, 
-        fecha: fechaEmision 
-    }]);
+    const { error } = await supabase.from('recibos').insert([{ cliente, monto, detalle, fecha: fechaEmision }]);
 
     if (error) {
-        // Si tu Supabase tira error porque no existe la columna fecha, lo guardamos sin ella y usa la de hoy por defecto
         const { error: error2 } = await supabase.from('recibos').insert([{ cliente, monto, detalle }]);
         if (error2) {
             alert("Error al crear recibo: " + error2.message);
@@ -274,11 +233,7 @@ document.getElementById('reciboForm')?.addEventListener('submit', async (e) => {
     cargarDatosAdmin();
 });
 
-// ==========================================
-// GENERACIÓN DE RECIBOS OFICIALES
-// ==========================================
 window.verRecibo = function(cliente, monto, detalle, id, fechaRecibo) {
-    // Si viene la fecha guardada la usa, sino pone la de hoy
     const fechaFinal = (fechaRecibo && fechaRecibo !== 'undefined') ? fechaRecibo : new Date().toLocaleDateString('es-AR');
     const ventanaRecibo = window.open('', '_blank');
     
@@ -294,9 +249,8 @@ window.verRecibo = function(cliente, monto, detalle, id, fechaRecibo) {
                 body { background: #121212; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
                 .receipt-container { background: #ffffff; width: 100%; max-width: 480px; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-top: 8px solid #ffc107; color: #222; }
                 .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
-                .logo-img { max-width: 150px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
                 .logo-fallback { font-size: 1.4rem; font-weight: 900; color: #121212; letter-spacing: 1px; margin-bottom: 5px; }
-                .logo-fallback span { color: #ffc107; background: #121212; padding: 2px 6px; border-radius: 4px; }
+                .logo-fallback span { color: #ffc107; background: #121212; padding: 2px 8px; border-radius: 4px; }
                 .sub-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 600; margin-top: 6px; }
                 .receipt-meta { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; border: 1px solid #e2e8f0; }
                 .client-section { margin-bottom: 20px; font-size: 0.95rem; background: #fafafa; padding: 14px; border-radius: 8px; border-left: 4px solid #ffc107; }
@@ -315,8 +269,7 @@ window.verRecibo = function(cliente, monto, detalle, id, fechaRecibo) {
         <body>
             <div class="receipt-container">
                 <div class="header">
-                    <img src="${urlLogo}" alt="Leitmix Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
-                    <div id="fallback-logo" class="logo-fallback" style="display:none;">LEITMIX<span>PRODUCCIONES</span></div>
+                    <div class="logo-fallback">LEITMIX<span>PRODUCCIONES</span></div>
                     <div class="sub-title">Comprobante de Pago Oficial</div>
                 </div>
 
