@@ -228,7 +228,7 @@ window.cambiarEstado = async function(id, nuevoEstado) {
     if (!error) {
         cargarTestimoniosAdmin();
     } else {
-        alert("Error al actualizar: " + error.message);
+        alert("Error real: " + error.message);
     }
 };
 
