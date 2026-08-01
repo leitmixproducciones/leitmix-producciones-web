@@ -4,8 +4,8 @@ import { supabase } from "./supabase.js";
 // CONFIGURACIÓN DE TU LOGO Y CLOUDINARY
 // ==========================================
 const urlLogo = "URL_DE_TU_LOGO_AQUI"; 
-const CLOUD_NAME = 'TU_CLOUD_NAME'; // Tu cloud name real de Cloudinary
-const UPLOAD_PRESET = 'TU_UPLOAD_PRESET'; // Tu preset real de Cloudinary
+const CLOUD_NAME = 'TU_CLOUD_NAME'; 
+const UPLOAD_PRESET = 'TU_UPLOAD_PRESET'; 
 
 // ==========================================
 // CONTROL DE ACCESO Y CARGA DEL PANEL
@@ -89,7 +89,7 @@ async function cargarDatosAdmin() {
                             <p><b>Cliente:</b> ${rec.cliente}</p>
                             <p><b>Monto:</b> $${Number(rec.monto).toLocaleString('es-AR')} - <b>Concepto:</b> ${rec.detalle}</p>
                         </div>
-                        <button type="button" onclick="verRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}', '${rec.fecha}', '${rec.id}')" style="background:#ffc107; color:#121212; border:none; padding:8px 10px; border-radius:6px; font-weight:bold; cursor:pointer; width:auto; margin-bottom:0;">Ver</button>
+                        <button type="button" onclick="verRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}', '${rec.id}')" style="background:#ffc107; color:#121212; border:none; padding:8px 10px; border-radius:6px; font-weight:bold; cursor:pointer; width:auto; margin-bottom:0;">Ver</button>
                     </div>
                 `).join('');
             }
@@ -98,7 +98,7 @@ async function cargarDatosAdmin() {
             if (contRecibos) contRecibos.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay recibos emitidos todavía.</p>';
         }
 
-        // 3. Cargar Fotos y Videos (Cloudinary / Supabase)
+        // 3. Cargar Fotos y Videos
         await cargarMultimediaAdmin();
 
         // 4. Cargar Testimonios para moderar
@@ -127,7 +127,7 @@ async function cargarDatosAdmin() {
     }
 }
 
-// Función auxiliar para aprobar/desaprobar testimonios desde el panel
+// Función auxiliar para aprobar/desaprobar testimonios
 window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
     const { error } = await supabase.from('testimonios').update({ activo: nuevoEstado }).eq('id', id);
     if (!error) {
@@ -244,9 +244,8 @@ document.getElementById('reciboForm')?.addEventListener('submit', async (e) => {
     const cliente = document.getElementById('reciboCliente').value;
     const monto = parseFloat(document.getElementById('reciboMonto').value);
     const detalle = document.getElementById('reciboDetalle').value;
-    const fecha = new Date().toISOString().split('T')[0];
 
-    const { error } = await supabase.from('recibos').insert([{ cliente, monto, detalle, fecha }]);
+    const { error } = await supabase.from('recibos').insert([{ cliente, monto, detalle }]);
 
     if (error) {
         alert("Error al crear recibo: " + error.message);
@@ -257,11 +256,10 @@ document.getElementById('reciboForm')?.addEventListener('submit', async (e) => {
     }
 });
 
-
 // ==========================================
-// GENERACIÓN DE RECIBOS OFICIALES (Con Logo y Estilo)
+// GENERACIÓN DE RECIBOS OFICIALES
 // ==========================================
-window.verRecibo = function(cliente, monto, detalle, fecha, id) {
+window.verRecibo = function(cliente, monto, detalle, id) {
     const ventanaRecibo = window.open('', '_blank');
     ventanaRecibo.document.write(`
         <!DOCTYPE html>
@@ -303,7 +301,6 @@ window.verRecibo = function(cliente, monto, detalle, fecha, id) {
 
                 <div class="receipt-meta">
                     <div><span>N° Recibo:</span> <b>#000${id}</b></div>
-                    <div><span>Fecha:</span> <b>${fecha}</b></div>
                 </div>
 
                 <div class="client-section">
@@ -317,7 +314,7 @@ window.verRecibo = function(cliente, monto, detalle, fecha, id) {
                 </div>
 
                 <div class="actions">
-                    <a href="https://api.whatsapp.com/send?text=Hola%20*${encodeURIComponent(cliente)}*,%20te%20env%C3%ADo%20el%20comprobante%20oficial%20de%20Leitmix%20Producciones.%0A%0A*Recibo%20N%C2%B0:*%20%23000${id}%0A*Fecha:*%20${fecha}%0A*Concepto:*%20${encodeURIComponent(detalle)}%0A*Monto:*%20%24${Number(monto).toLocaleString('es-AR')}%0A%0A%C2%A1Muchas%20gracias%20por%20confiar%20en%20nosotros!" target="_blank" class="btn-whatsapp">
+                    <a href="https://api.whatsapp.com/send?text=Hola%20*${encodeURIComponent(cliente)}*,%20te%20env%C3%ADo%20el%20comprobante%20oficial%20de%20Leitmix%20Producciones.%0A%0A*Recibo%20N%C2%B0:*%20%23000${id}%0A*Concepto:*%20${encodeURIComponent(detalle)}%0A*Monto:*%20%24${Number(monto).toLocaleString('es-AR')}%0A%0A%C2%A1Muchas%20gracias%20por%20confiar%20en%20nosotros!" target="_blank" class="btn-whatsapp">
                         📲 Enviar por WhatsApp
                     </a>
                     <button onclick="window.print()" class="btn-print">🖨️ Imprimir / Guardar PDF</button>
