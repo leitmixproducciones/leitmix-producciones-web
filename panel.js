@@ -34,6 +34,25 @@ loginForm?.addEventListener("submit", async (e) => {
     }
 });
 
+// Función para recuperar contraseña desde la misma interfaz
+window.recuperarPassword = async function() {
+    const emailInput = document.getElementById("loginEmail")?.value.trim();
+    if (!emailInput) {
+        alert("Por favor, ingresa tu correo electrónico arriba para recuperar la contraseña.");
+        return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(emailInput, {
+        redirectTo: window.location.href,
+    });
+
+    if (error) {
+        alert("Error al enviar recuperación: " + error.message);
+    } else {
+        alert("¡Correo de recuperación enviado! Revisá tu Bandeja de entrada o Spam.");
+    }
+};
+
 btnLogout?.addEventListener("click", async () => {
     await supabase.auth.signOut();
     mostrarLogin();
