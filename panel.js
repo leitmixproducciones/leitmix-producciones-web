@@ -1,7 +1,12 @@
 // ==========================================
-// CONFIGURACIÓN E IMPORTACIONES
+// CONFIGURACIÓN DE TU LOGO (¡Reemplazá esto por tu link o nombre de archivo!)
 // ==========================================
-// Asegúrate de ajustar las rutas de importación de Firebase según tu estructura de archivos
+const urlLogo = "URL_DE_TU_LOGO_AQUI"; // Ejemplo: "https://i.ibb.co/tu-logo.png" o simplemente "logo.png"
+
+
+// ==========================================
+// CONFIGURACIÓN E IMPORTACIONES DE FIREBASE
+// ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
     getAuth, 
@@ -14,17 +19,14 @@ import {
     getFirestore, 
     collection, 
     getDocs, 
-    addFirestoreData, // (Ajustar según tus funciones de Firebase si usas addDoc)
     doc, 
     deleteDoc 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Configuración de Firebase (Mantén tus credenciales habituales o asegúrate de que esté conectado)
 const firebaseConfig = {
-    // Tus credenciales de Firebase aquí si es necesario
+    // Tus credenciales de Firebase
 };
 
-// Inicialización
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -70,8 +72,6 @@ onAuthStateChanged(auth, (user) => {
         if (loginSection) loginSection.classList.add('hidden');
         if (adminSection) adminSection.classList.remove('hidden');
         if (userLoggedEmail) userLoggedEmail.textContent = `Conectado como: ${user.email}`;
-        
-        // Cargar datos del panel
         cargarDatosAdmin();
     } else {
         if (loginSection) loginSection.classList.remove('hidden');
@@ -82,7 +82,7 @@ onAuthStateChanged(auth, (user) => {
 window.recuperarPassword = async function() {
     const email = document.getElementById('loginEmail').value;
     if (!email) {
-        alert('Por favor, ingresa tu correo electrónico primero en el campo de arriba para recuperar la contraseña.');
+        alert('Por favor, ingresa tu correo electrónico primero en el campo de arriba.');
         return;
     }
     try {
@@ -93,11 +93,7 @@ window.recuperarPassword = async function() {
     }
 };
 
-// ==========================================
-// CARGA DE DATOS DEL PANEL ADMIN
-// ==========================================
 async function cargarDatosAdmin() {
-    // Aquí puedes colocar las funciones para cargar reservas, recibos, etc., desde Firestore.
     console.log("Cargando datos del panel administrativo...");
 }
 
@@ -118,7 +114,9 @@ window.verRecibo = function(cliente, monto, detalle, fecha, id) {
                 body { background: #121212; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
                 .receipt-container { background: #ffffff; width: 100%; max-width: 480px; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-top: 8px solid #ffc107; color: #222; }
                 .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
-                .logo-img { max-width: 140px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+                .logo-img { max-width: 150px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+                .logo-fallback { font-size: 1.4rem; font-weight: 900; color: #121212; letter-spacing: 1px; margin-bottom: 5px; }
+                .logo-fallback span { color: #ffc107; background: #121212; padding: 2px 6px; border-radius: 4px; }
                 .sub-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 600; margin-top: 6px; }
                 .receipt-meta { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; border: 1px solid #e2e8f0; }
                 .client-section { margin-bottom: 20px; font-size: 0.95rem; background: #fafafa; padding: 14px; border-radius: 8px; border-left: 4px solid #ffc107; }
@@ -137,8 +135,10 @@ window.verRecibo = function(cliente, monto, detalle, fecha, id) {
         <body>
             <div class="receipt-container">
                 <div class="header">
-                    <!-- ACÁ VA EL LINK DE TU LOGO (Reemplaza URL_DE_TU_LOGO_AQUI por el enlace real de tu imagen) -->
-                    <img src="URL_DE_TU_LOGO_AQUI" alt="Leitmix Producciones" class="logo-img" onerror="this.style.display='none'">
+                    <!-- Si la imagen carga, se ve el logo. Si falla, muestra el texto corporativo de emergencia -->
+                    <img src="${urlLogo}" alt="Leitmix Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
+                    <div id="fallback-logo" class="logo-fallback" style="display:none;">LEITMIX<span>PRODUCCIONES</span></div>
+                    
                     <div class="sub-title">Comprobante de Pago Oficial</div>
                 </div>
 
