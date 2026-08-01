@@ -116,7 +116,7 @@ window.eliminarReserva = async function(id) {
     }
 };
 
-// Cargar, crear, sumar y listar Recibos con opción de Ver Recibo Formal
+// Cargar, crear, sumar y listar Recibos
 const reciboForm = document.getElementById("reciboForm");
 reciboForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -173,9 +173,9 @@ async function cargarRecibosAdmin() {
     }).join("");
 }
 
-// Ventana Emergente con el Recibo Profesional y Botón de WhatsApp
+// Ventana de Recibo Profesional con Logo, Diseño Ejecutivo y Redes Sociales
 window.verRecibo = function(cliente, monto, detalle, fecha, id) {
-    const ventanaRecibo = window.open('', '_blank', 'width=500,height=650');
+    const ventanaRecibo = window.open('', '_blank', 'width=650,height=800');
     ventanaRecibo.document.write(`
         <!DOCTYPE html>
         <html lang="es">
@@ -183,44 +183,65 @@ window.verRecibo = function(cliente, monto, detalle, fecha, id) {
             <meta charset="UTF-8">
             <title>Recibo Oficial #${id} - Leitmix Producciones</title>
             <style>
-                body { background: #f4f4f4; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-                .receipt { background: #ffffff; width: 100%; max-width: 420px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #ffc107; color: #333; }
-                .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
-                .header h2 { margin: 5px 0 0 0; color: #121212; font-size: 1.4rem; }
-                .header p { color: #666; font-size: 0.85rem; margin: 2px 0; }
-                .info-group { margin-bottom: 12px; font-size: 0.95rem; }
-                .info-group span { font-weight: bold; color: #444; }
-                .monto-box { background: #fff9e6; border: 1px dashed #ffc107; padding: 12px; text-align: center; border-radius: 8px; margin: 20px 0; }
-                .monto-box h3 { color: #d48806; margin: 0; font-size: 1.6rem; }
-                .footer { text-align: center; font-size: 0.75rem; color: #888; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; }
-                .btn-whatsapp { background: #25d366; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; text-align: center; display: block; text-decoration: none; }
+                body { background: #eef2f7; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; display: flex; justify-content: center; align-items: center; margin: 0; }
+                .receipt-container { background: #ffffff; width: 100%; max-width: 550px; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border-top: 8px solid #ffc107; color: #333; position: relative; }
+                .header { text-align: center; border-bottom: 2px solid #eaeaea; padding-bottom: 20px; margin-bottom: 25px; }
+                .logo-area { font-size: 1.8rem; font-weight: 900; color: #121212; letter-spacing: 1px; margin-bottom: 5px; }
+                .logo-area span { color: #d48806; }
+                .sub-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 600; }
+                .receipt-meta { display: flex; justify-content: space-between; background: #f8f9fa; padding: 12px 15px; border-radius: 8px; margin-bottom: 25px; font-size: 0.9rem; border: 1px solid #e2e8f0; }
+                .receipt-meta div span { color: #555; }
+                .client-section { margin-bottom: 25px; font-size: 1.05rem; background: #fff; padding: 15px; border-left: 4px solid #ffc107; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+                .client-section p { margin: 6px 0; }
+                .client-section span { font-weight: bold; color: #111; }
+                .monto-box { background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%); border: 2px dashed #ffc107; padding: 20px; text-align: center; border-radius: 10px; margin: 25px 0; }
+                .monto-box p { margin: 0 0 5px 0; font-size: 0.9rem; color: #7f6000; font-weight: 600; text-transform: uppercase; }
+                .monto-box h3 { color: #b7791f; margin: 0; font-size: 2.2rem; font-weight: 800; }
+                .actions { display: flex; gap: 10px; margin-top: 25px; }
+                .btn-whatsapp { background: #25d366; color: white; border: none; padding: 14px; flex: 2; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
                 .btn-whatsapp:hover { background: #1ebe5d; }
-                .btn-print { background: #333; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-top: 8px; }
+                .btn-print { background: #2d3748; color: white; border: none; padding: 14px; flex: 1; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem; text-align: center; }
+                .btn-print:hover { background: #1a202c; }
+                .footer { text-align: center; font-size: 0.8rem; color: #666; border-top: 1px solid #eaeaea; padding-top: 20px; margin-top: 30px; }
+                .social-links { display: flex; justify-content: center; gap: 15px; margin-top: 8px; font-weight: bold; color: #d48806; font-size: 0.85rem; }
             </style>
         </head>
         <body>
-            <div class="receipt">
+            <div class="receipt-container">
                 <div class="header">
-                    <h2>LEITMIX PRODUCCIONES</h2>
-                    <p>Comprobante de Pago / Recibo Oficial</p>
-                    <p>Fecha: <b>${fecha}</b> | Recibo N°: <b>#000${id}</b></p>
+                    <div class="logo-area">LEITMIX <span>PRODUCCIONES</span></div>
+                    <div class="sub-title">Comprobante de Pago Oficial</div>
                 </div>
-                <div class="info-group">
+
+                <div class="receipt-meta">
+                    <div><span>Recibo N°:</span> <b>#000${id}</b></div>
+                    <div><span>Fecha:</span> <b>${fecha}</b></div>
+                </div>
+
+                <div class="client-section">
                     <p><span>Cliente:</span> ${cliente}</p>
-                </div>
-                <div class="info-group">
                     <p><span>Concepto / Detalle:</span> ${detalle}</p>
                 </div>
+
                 <div class="monto-box">
-                    <p style="margin: 0 0 5px 0; font-size: 0.85rem; color: #666;">Monto Recibido</p>
+                    <p>Total Abonado</p>
                     <h3>$${Number(monto).toLocaleString('es-AR')}</h3>
                 </div>
-                <a href="https://api.whatsapp.com/send?text=Hola%20*${encodeURIComponent(cliente)}*,%20te%20env%C3%ADo%20el%20comprobante%20de%20pago%20de%20Leitmix%20Producciones.%0A%0A*Recibo%20N%C2%B0:*%20%23000${id}%0A*Fecha:*%20${fecha}%0A*Concepto:*%20${encodeURIComponent(detalle)}%0A*Monto:*%20%24${Number(monto).toLocaleString('es-AR')}%0A%0A%C2%A1Muchas%20gracias%20por%20confiar%20en%20nosotros!" target="_blank" class="btn-whatsapp">
-                    📲 Enviar Comprobante por WhatsApp
-                </a>
-                <button onclick="window.print()" class="btn-print">🖨️ Imprimir / Guardar PDF</button>
+
+                <div class="actions">
+                    <a href="https://api.whatsapp.com/send?text=Hola%20*${encodeURIComponent(cliente)}*,%20te%20env%C3%ADo%20el%20comprobante%20oficial%20de%20Leitmix%20Producciones.%0A%0A*Recibo%20N%C2%B0:*%20%23000${id}%0A*Fecha:*%20${fecha}%0A*Concepto:*%20${encodeURIComponent(detalle)}%0A*Monto:*%20%24${Number(monto).toLocaleString('es-AR')}%0A%0A%C2%A1Muchas%20gracias%20por%20confiar%20en%20nosotros!" target="_blank" class="btn-whatsapp">
+                        📲 Enviar por WhatsApp
+                    </a>
+                    <button onclick="window.print()" class="btn-print">🖨️ Imprimir / PDF</button>
+                </div>
+
                 <div class="footer">
-                    <p>Leitmix Producciones - Panel Multiusuario Profesional</p>
+                    <p><b>Leitmix Producciones</b> - Calidad y Profesionalismo en cada Evento</p>
+                    <div class="social-links">
+                        <span>📷 @leitmixproducciones</span> | 
+                        <span>🌐 leitmixproducciones.github.io</span> | 
+                        <span>📞 Contacto Directo</span>
+                    </div>
                 </div>
             </div>
         </body>
