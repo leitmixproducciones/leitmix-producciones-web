@@ -213,10 +213,10 @@ async function cargarTestimoniosAdmin() {
                 <strong style="color: #ffc107;">${t.nombre}</strong>
                 <span style="font-size: 0.85rem; color: #aaa;">${"⭐".repeat(t.estrellas)}</span>
             </div>
-            <p style="color: #ddd; font-size: 0.95rem; margin: 6px 0;">"${t.comentario}"</p>
+            <p style="color: #ddd; font-size: 0.95rem; margin: 6px 0;">"${t.mensaje || ''}"</p>
             <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button onclick="window.cambiarEstado(${t.id}, ${!t.aprobado})" style="background: ${t.aprobado ? '#ffc107' : '#28a745'}; color: #121212; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; font-size: 0.85rem;">
-                    ${t.aprobado ? 'Ocultar' : 'Aprobar'}
+                <button onclick="window.cambiarEstado(${t.id}, ${!t.activo})" style="background: ${t.activo ? '#ffc107' : '#28a745'}; color: #121212; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; font-size: 0.85rem;">
+                    ${t.activo ? 'Ocultar' : 'Aprobar'}
                 </button>
             </div>
         </div>
@@ -224,11 +224,11 @@ async function cargarTestimoniosAdmin() {
 }
 
 window.cambiarEstado = async function(id, nuevoEstado) {
-    const { error } = await supabase.from("testimonios").update({ aprobado: nuevoEstado }).eq("id", id);
+    const { error } = await supabase.from("testimonios").update({ activo: nuevoEstado }).eq("id", id);
     if (!error) {
         cargarTestimoniosAdmin();
     } else {
-        alert("Error al actualizar.");
+        alert("Error al actualizar: " + error.message);
     }
 };
 
