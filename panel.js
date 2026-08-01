@@ -1,3 +1,5 @@
+import { supabase } from "./supabase.js";
+
 // ==========================================
 // CONFIGURACIÓN DE TU LOGO
 // ==========================================
@@ -11,9 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginSection = document.getElementById('loginSection');
     const adminSection = document.getElementById('adminSection');
     const btnLogout = document.getElementById('btnLogout');
-    const loginError = document.getElementById('loginError');
 
-    // Verificar si ya hay sesión activa
     if (localStorage.getItem('sesion_activa') === 'true') {
         abrirPanel(loginSection, adminSection);
     }
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            // Acceso libre para evitar bloqueos
             localStorage.setItem('sesion_activa', 'true');
             abrirPanel(loginSection, adminSection);
         });
@@ -36,143 +35,123 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Función global por si hace clic en recuperar contraseña
-window.recuperarPassword = function() {
-    alert("Para ingresar, podés usar cualquier correo y contraseña configurados en el acceso directo.");
-};
-
 function abrirPanel(loginSec, adminSec) {
     if (loginSec) loginSec.classList.add('hidden');
     if (adminSec) adminSec.classList.remove('hidden');
     
-    // Iniciar carga de datos de Supabase
-    if (typeof cargarDatosAdmin === 'function') {
-        cargarDatosAdmin();
-    }
+    cargarDatosAdmin();
 }
 
 // ==========================================
-// CONEXIÓN CON SUPABASE PARA CARGAR LAS TABLAS
+// CARGA DE DATOS DESDE SUPABASE AL PANEL
 // ==========================================
 async function cargarDatosAdmin() {
-    console.log("Cargando datos del panel desde Supabase...");
-
-    if (typeof supabase === 'undefined') {
-        console.warn("El cliente de Supabase no está disponible.");
-        return;
-    }
+    console.log("Cargando datos del panel con Supabase...");
 
     try {
-        // 1. Cargar Reservas y calcular total
-        const { data: reservas, error: errRes } = await supabase.from('reservas').select('*');
-        if (!errRes && reservas) {
-            renderizarReservasAdmin(reservas);
+        // 1. Cargar Reservas
+        const { data: reservas } = await supabase.from('reservas').select('*').order('id', { ascending: false });
+        const contReservas = document.getElementById('listaReservasAdmin');
+        const totalRes = document.getElementById('totalReservas');
+        
+        if (totalRes) totalRes.textContent = reservas ? reservas.length : 0;
+        
+        if (contReservas) {
+            if (reservas && reservas.length > 0) {
+                contReservas.innerHTML = reservas.map(r => `
+                    <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107; font-size: 0.9rem;">
+                        <p><b>Cliente:</b> ${r.nombre}</p>
+                        <p><b>Evento:</b> ${r.evento || 'No especificado'} - <b>Fecha:</b> ${r.fecha || ''}</p>
+                        <p><b>Teléfono:</b> ${r.telefono || '-'}</p>
+                        ${r.comentarios ? `<p style="color: #aaa; font-style: italic;">Comentarios: ${r.comentarios}</p>` : ''}
+                    </div>
+                `).join('');
+            } else {
+                contReservas.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay reservas registradas.</p>';
+            }
         }
 
-        // 2. Cargar Recibos Emitidos y calcular recaudación
-        const { data: recibos, error: errRec } = await supabase.from('recibos').select('*');
-        if (!errRec && recibos) {
-            renderizarRecibosAdmin(recibos);
+        // 2. Cargar Recibos Emitidos
+        const { data: recibos } = await supabase.from('recibos').select('*').order('id', { ascending: false });
+        const contRecibos = document.getElementById('listaRecibosAdmin');
+        const totalRec = document.getElementById('totalRecibos');
+        
+        if (recibos && recibos.length > 0) {
+            let sumaTotal = recibos.reduce((acc, curr) => acc + Number(curr.monto || 0), 0);
+            if (totalRec) totalRec.textContent = `$${sumaTotal.toLocaleString('es-AR')}`;
+            
+            if (contRecibos) {
+                contRecibos.innerHTML = recibos.map(rec => `
+                    <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                        <div>
+                            <p><b>Cliente:</b> ${rec.cliente}</p>
+                            <p><b>Monto:</b> $${Number(rec.monto).toLocaleString('es-AR')} - <b>Concepto:</b> ${rec.detalle}</p>
+                        </div>
+                        <button type="button" onclick="verRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}', '${rec.fecha}', '${rec.id}')" style="background:#ffc107; color:#121212; border:none; padding:8px 10px; border-radius:6px; font-weight:bold; cursor:pointer; width:auto; margin-bottom:0;">Ver</button>
+                    </div>
+                `).join('');
+            }
+        } else {
+            if (totalRec) totalRec.textContent = "$0";
+            if (contRecibos) contRecibos.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay recibos emitidos todavía.</p>';
         }
 
-        // 3. Cargar Contenido Multimedia
-        const { data: multimedia, error: errMulti } = await supabase.from('multimedia').select('*');
-        if (!errMulti && multimedia) {
-            renderizarMultimediaAdmin(multimedia);
-        }
-
-        // 4. Cargar Testimonios
-        const { data: testimonios, error: errTest } = await supabase.from('testimonios').select('*');
-        if (!errTest && testimonios) {
-            renderizarTestimoniosAdmin(testimonios);
+        // 3. Cargar Testimonios para moderar
+        const { data: testimonios } = await supabase.from('testimonios').select('*').order('id', { ascending: false });
+        const contTest = document.getElementById('listaTestimoniosAdmin');
+        if (contTest) {
+            if (testimonios && testimonios.length > 0) {
+                contTest.innerHTML = testimonios.map(t => `
+                    <div style="background: #2a2a2a; padding: 10px; border-radius: 8px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p><b>${t.nombre}</b> (${t.estrellas} ⭐) - Estado: ${t.activo ? '🟢 Aprobado' : '🟡 Pendiente'}</p>
+                            <p style="color: #bbb; font-style: italic;">"${t.mensaje}"</p>
+                        </div>
+                        <button type="button" onclick="cambiarEstadoTestimonio('${t.id}', ${!t.activo})" style="background:${t.activo ? '#dc3545' : '#28a745'}; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; width:auto; margin-bottom:0; font-size:0.8rem;">
+                            ${t.activo ? 'Desactivar' : 'Aprobar'}
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                contTest.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay testimonios.</p>';
+            }
         }
 
     } catch (e) {
-        console.error("Error al sincronizar con Supabase:", e);
+        console.error("Error al cargar datos en el panel:", e);
     }
 }
 
-// Funciones de renderizado conectadas a los IDs exactos de tu panel.html
-function renderizarReservasAdmin(reservas) {
-    const contenedor = document.getElementById('listaReservasAdmin');
-    const contadorTotal = document.getElementById('totalReservas');
-    
-    if (contadorTotal) contadorTotal.textContent = reservas.length;
-    if (!contenedor) return;
-    
-    if (reservas.length === 0) {
-        contenedor.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay reservas registradas.</p>';
-        return;
+// Función auxiliar para aprobar/desaprobar testimonios desde el panel
+window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
+    const { error } = await supabase.from('testimonios').update({ activo: nuevoEstado }).eq('id', id);
+    if (!error) {
+        cargarDatosAdmin();
+    } else {
+        alert("Error al actualizar testimonio");
     }
-    
-    contenedor.innerHTML = reservas.map(r => `
-        <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107; font-size: 0.9rem;">
-            <p><b>Cliente:</b> ${r.nombre || r.cliente || 'Sin nombre'}</p>
-            <p><b>Evento:</b> ${r.evento || 'No especificado'} - <b>Fecha:</b> ${r.fecha || ''}</p>
-            <p><b>Teléfono:</b> ${r.telefono || '-'}</p>
-        </div>
-    `).join('');
-}
+};
 
-function renderizarRecibosAdmin(recibos) {
-    const contenedor = document.getElementById('listaRecibosAdmin');
-    const recaudadoTotal = document.getElementById('totalRecibos');
-    
-    if (!contenedor) return;
+// ==========================================
+// GUARDAR NUEVO RECIBO DESDE EL PANEL
+// ==========================================
+document.getElementById('reciboForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const cliente = document.getElementById('reciboCliente').value;
+    const monto = parseFloat(document.getElementById('reciboMonto').value);
+    const detalle = document.getElementById('reciboDetalle').value;
+    const fecha = new Date().toISOString().split('T')[0];
 
-    if (recibos.length === 0) {
-        contenedor.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay recibos emitidos todavía.</p>';
-        if (recaudadoTotal) recaudadoTotal.textContent = "$0";
-        return;
+    const { error } = await supabase.from('recibos').insert([{ cliente, monto, detalle, fecha }]);
+
+    if (error) {
+        alert("Error al crear recibo: " + error.message);
+    } else {
+        alert("¡Recibo creado con éxito!");
+        document.getElementById('reciboForm').reset();
+        cargarDatosAdmin();
     }
-
-    // Calcular suma total recaudada
-    let totalSuma = recibos.reduce((acc, curr) => acc + Number(curr.monto || 0), 0);
-    if (recaudadoTotal) recaudadoTotal.textContent = `$${totalSuma.toLocaleString('es-AR')}`;
-
-    contenedor.innerHTML = recibos.map(rec => `
-        <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
-            <div>
-                <p><b>Cliente:</b> ${rec.cliente}</p>
-                <p><b>Monto:</b> $${Number(rec.monto).toLocaleString('es-AR')} - <b>Concepto:</b> ${rec.detalle}</p>
-            </div>
-            <button type="button" onclick="verRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}', '${rec.fecha}', '${rec.id}')" style="background:#ffc107; color:#121212; border:none; padding:8px 10px; border-radius:6px; font-weight:bold; cursor:pointer; width:auto; margin-bottom:0;">Ver</button>
-        </div>
-    `).join('');
-}
-
-function renderizarMultimediaAdmin(multimedia) {
-    const contenedor = document.getElementById('listaMediaAdmin');
-    if (!contenedor) return;
-    
-    if (multimedia.length === 0) {
-        contenedor.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay archivos multimedia cargados.</p>';
-        return;
-    }
-    
-    contenedor.innerHTML = multimedia.map(m => `
-        <div style="background: #2a2a2a; padding: 8px; border-radius: 8px; text-align: center;">
-            <img src="${m.url}" style="max-width:100%; height:80px; object-fit:cover; border-radius:6px;" />
-        </div>
-    `).join('');
-}
-
-function renderizarTestimoniosAdmin(testimonios) {
-    const contenedor = document.getElementById('listaTestimoniosAdmin');
-    if (!contenedor) return;
-
-    if (testimonios.length === 0) {
-        contenedor.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay testimonios para moderar.</p>';
-        return;
-    }
-
-    contenedor.innerHTML = testimonios.map(t => `
-        <div style="background: #2a2a2a; padding: 10px; border-radius: 8px; font-size: 0.9rem;">
-            <p><b>${t.nombre}</b> (${t.estrellas} ⭐)</p>
-            <p style="color: #bbb; font-style: italic;">"${t.comentario}"</p>
-        </div>
-    `).join('');
-}
+});
 
 
 // ==========================================
