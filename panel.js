@@ -1,11 +1,10 @@
 // ==========================================
-// CONFIGURACIÓN DE TU LOGO (¡Reemplazá esto por tu link o nombre de archivo!)
+// CONFIGURACIÓN DE TU LOGO (Reemplazá por tu link o nombre de archivo)
 // ==========================================
-const urlLogo = "URL_DE_TU_LOGO_AQUI"; // Ejemplo: "logo.png" o el link directo de tu imagen
-
+const urlLogo = "URL_DE_TU_LOGO_AQUI"; 
 
 // ==========================================
-// GESTIÓN DE SESIÓN Y LOGIN (Sin Firebase)
+// GESTIÓN DE SESIÓN Y LOGIN
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -14,27 +13,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginError = document.getElementById('loginError');
     const btnLogout = document.getElementById('btnLogout');
 
-    // Verificar si ya hay una sesión local activa
+    // Verificar si ya hay una sesión activa guardada
     if (localStorage.getItem('sesionActiva') === 'true') {
-        if (loginSection) loginSection.classList.add('hidden');
-        if (adminSection) adminSection.classList.remove('hidden');
-        cargarDatosAdmin();
+        mostrarAdmin(loginSection, adminSection);
     }
 
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+            const emailInput = document.getElementById('loginEmail');
+            const passwordInput = document.getElementById('loginPassword');
             
-            // Aquí puedes definir tu usuario y contraseña de acceso rápido
+            const email = emailInput ? emailInput.value : '';
+            const password = passwordInput ? passwordInput.value : '';
+            
+            // Credenciales de acceso del panel
             if (email === "admin@leitmix.com" && password === "123456") {
                 localStorage.setItem('sesionActiva', 'true');
-                if (loginSection) loginSection.classList.add('hidden');
-                if (adminSection) adminSection.classList.remove('hidden');
-                cargarDatosAdmin();
+                if (loginError) loginError.textContent = '';
+                mostrarAdmin(loginSection, adminSection);
             } else {
-                if (loginError) loginError.textContent = 'Correo o contraseña incorrectos.';
+                if (loginError) {
+                    loginError.textContent = 'Correo o contraseña incorrectos.';
+                } else {
+                    alert('Correo o contraseña incorrectos.');
+                }
             }
         });
     }
@@ -42,16 +45,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
             localStorage.removeItem('sesionActiva');
-            if (loginSection) loginSection.classList.remove('hidden');
             if (adminSection) adminSection.classList.add('hidden');
+            if (loginSection) loginSection.classList.remove('hidden');
         });
     }
 });
 
-function cargarDatosAdmin() {
-    console.log("Cargando panel de administración...");
+function mostrarAdmin(loginSec, adminSec) {
+    if (loginSec) loginSec.classList.add('hidden');
+    if (adminSec) adminSec.classList.remove('hidden');
+    
+    // Llamada segura a la carga de datos si existe
+    if (typeof cargarDatosAdmin === 'function') {
+        cargarDatosAdmin();
+    }
 }
 
+function cargarDatosAdmin() {
+    console.log("Panel de administración cargado correctamente.");
+}
 
 // ==========================================
 // GENERACIÓN DE RECIBOS OFICIALES
@@ -91,10 +103,8 @@ window.verRecibo = function(cliente, monto, detalle, fecha, id) {
         <body>
             <div class="receipt-container">
                 <div class="header">
-                    <!-- Si la imagen carga, se ve el logo. Si falla, muestra el texto corporativo -->
                     <img src="${urlLogo}" alt="Leitmix Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
                     <div id="fallback-logo" class="logo-fallback" style="display:none;">LEITMIX<span>PRODUCCIONES</span></div>
-                    
                     <div class="sub-title">Comprobante de Pago Oficial</div>
                 </div>
 
