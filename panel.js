@@ -260,6 +260,7 @@ document.getElementById('reciboForm')?.addEventListener('submit', async (e) => {
 // GENERACIÓN DE RECIBOS OFICIALES
 // ==========================================
 window.verRecibo = function(cliente, monto, detalle, id) {
+    const fechaActual = new Date().toLocaleDateString('es-AR');
     const ventanaRecibo = window.open('', '_blank');
     ventanaRecibo.document.write(`
         <!DOCTYPE html>
@@ -301,6 +302,7 @@ window.verRecibo = function(cliente, monto, detalle, id) {
 
                 <div class="receipt-meta">
                     <div><span>N° Recibo:</span> <b>#000${id}</b></div>
+                    <div><span>Fecha:</span> <b>${fechaActual}</b></div>
                 </div>
 
                 <div class="client-section">
@@ -314,7 +316,7 @@ window.verRecibo = function(cliente, monto, detalle, id) {
                 </div>
 
                 <div class="actions">
-                    <a href="https://api.whatsapp.com/send?text=Hola%20*${encodeURIComponent(cliente)}*,%20te%20env%C3%ADo%20el%20comprobante%20oficial%20de%20Leitmix%20Producciones.%0A%0A*Recibo%20N%C2%B0:*%20%23000${id}%0A*Concepto:*%20${encodeURIComponent(detalle)}%0A*Monto:*%20%24${Number(monto).toLocaleString('es-AR')}%0A%0A%C2%A1Muchas%20gracias%20por%20confiar%20en%20nosotros!" target="_blank" class="btn-whatsapp">
+                    <a href="https://api.whatsapp.com/send?text=Hola%20*${encodeURIComponent(cliente)}*,%20te%20env%C3%ADo%20el%20comprobante%20oficial%20de%20Leitmix%20Producciones.%0A%0A*Recibo%20N%C2%B0:*%20%23000${id}%0A*Fecha:*%20${fechaActual}%0A*Concepto:*%20${encodeURIComponent(detalle)}%0A*Monto:*%20%24${Number(monto).toLocaleString('es-AR')}%0A%0A%C2%A1Muchas%20gracias%20por%20confiar%20en%20nosotros!" target="_blank" class="btn-whatsapp">
                         📲 Enviar por WhatsApp
                     </a>
                     <button onclick="window.print()" class="btn-print">🖨️ Imprimir / Guardar PDF</button>
