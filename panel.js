@@ -1,17 +1,7 @@
 // ==========================================
 // CONFIGURACIÓN DE TU LOGO
 // ==========================================
-const urlLogo = "URL_DE_TU_LOGO_AQUI"; // Reemplaza con tu enlace o nombre de archivo si lo deseas
-
-// ==========================================
-// AQUÍ VA TU CÓDIGO ORIGINAL DE LOGIN Y FUNCIONES DEL PANEL
-// ==========================================
-// (Restauramos la estructura exacta que tenías para que no te rebote el acceso)
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Si manejas eventos de login personalizados, los mantienes aquí
-    console.log("Panel inicializado correctamente.");
-});
+const urlLogo = "URL_DE_TU_LOGO_AQUI"; // Reemplaza con tu enlace o nombre de archivo
 
 
 // ==========================================
