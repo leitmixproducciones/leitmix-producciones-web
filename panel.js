@@ -1,101 +1,57 @@
 // ==========================================
 // CONFIGURACIÓN DE TU LOGO (¡Reemplazá esto por tu link o nombre de archivo!)
 // ==========================================
-const urlLogo = "URL_DE_TU_LOGO_AQUI"; // Ejemplo: "https://i.ibb.co/tu-logo.png" o simplemente "logo.png"
+const urlLogo = "URL_DE_TU_LOGO_AQUI"; // Ejemplo: "logo.png" o el link directo de tu imagen
 
 
 // ==========================================
-// CONFIGURACIÓN E IMPORTACIONES DE FIREBASE
+// GESTIÓN DE SESIÓN Y LOGIN (Sin Firebase)
 // ==========================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-    getAuth, 
-    signInWithEmailAndPassword, 
-    signOut, 
-    onAuthStateChanged, 
-    sendPasswordResetEmail 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { 
-    getFirestore, 
-    collection, 
-    getDocs, 
-    doc, 
-    deleteDoc 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    const loginSection = document.getElementById('loginSection');
+    const adminSection = document.getElementById('adminSection');
+    const loginError = document.getElementById('loginError');
+    const btnLogout = document.getElementById('btnLogout');
 
-const firebaseConfig = {
-    // Tus credenciales de Firebase
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// ==========================================
-// GESTIÓN DE SESIÓN Y LOGIN
-// ==========================================
-const loginForm = document.getElementById('loginForm');
-const loginSection = document.getElementById('loginSection');
-const adminSection = document.getElementById('adminSection');
-const loginError = document.getElementById('loginError');
-const userLoggedEmail = document.getElementById('userLoggedEmail');
-const btnLogout = document.getElementById('btnLogout');
-
-if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        loginError.textContent = '';
-
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-        } catch (error) {
-            console.error(error);
-            loginError.textContent = 'Error: Verificá tu correo y contraseña.';
-        }
-    });
-}
-
-if (btnLogout) {
-    btnLogout.addEventListener('click', async () => {
-        try {
-            await signOut(auth);
-        } catch (error) {
-            console.error('Error al cerrar sesión', error);
-        }
-    });
-}
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
+    // Verificar si ya hay una sesión local activa
+    if (localStorage.getItem('sesionActiva') === 'true') {
         if (loginSection) loginSection.classList.add('hidden');
         if (adminSection) adminSection.classList.remove('hidden');
-        if (userLoggedEmail) userLoggedEmail.textContent = `Conectado como: ${user.email}`;
         cargarDatosAdmin();
-    } else {
-        if (loginSection) loginSection.classList.remove('hidden');
-        if (adminSection) adminSection.classList.add('hidden');
+    }
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Aquí puedes definir tu usuario y contraseña de acceso rápido
+            if (email === "admin@leitmix.com" && password === "123456") {
+                localStorage.setItem('sesionActiva', 'true');
+                if (loginSection) loginSection.classList.add('hidden');
+                if (adminSection) adminSection.classList.remove('hidden');
+                cargarDatosAdmin();
+            } else {
+                if (loginError) loginError.textContent = 'Correo o contraseña incorrectos.';
+            }
+        });
+    }
+
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            localStorage.removeItem('sesionActiva');
+            if (loginSection) loginSection.classList.remove('hidden');
+            if (adminSection) adminSection.classList.add('hidden');
+        });
     }
 });
 
-window.recuperarPassword = async function() {
-    const email = document.getElementById('loginEmail').value;
-    if (!email) {
-        alert('Por favor, ingresa tu correo electrónico primero en el campo de arriba.');
-        return;
-    }
-    try {
-        await sendPasswordResetEmail(auth, email);
-        alert('Se ha enviado un correo para restablecer tu contraseña.');
-    } catch (error) {
-        alert('Error al enviar el correo: ' + error.message);
-    }
-};
-
-async function cargarDatosAdmin() {
-    console.log("Cargando datos del panel administrativo...");
+function cargarDatosAdmin() {
+    console.log("Cargando panel de administración...");
 }
+
 
 // ==========================================
 // GENERACIÓN DE RECIBOS OFICIALES
@@ -135,7 +91,7 @@ window.verRecibo = function(cliente, monto, detalle, fecha, id) {
         <body>
             <div class="receipt-container">
                 <div class="header">
-                    <!-- Si la imagen carga, se ve el logo. Si falla, muestra el texto corporativo de emergencia -->
+                    <!-- Si la imagen carga, se ve el logo. Si falla, muestra el texto corporativo -->
                     <img src="${urlLogo}" alt="Leitmix Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
                     <div id="fallback-logo" class="logo-fallback" style="display:none;">LEITMIX<span>PRODUCCIONES</span></div>
                     
