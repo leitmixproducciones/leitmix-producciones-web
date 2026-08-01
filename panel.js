@@ -93,6 +93,7 @@ window.eliminarReserva = async function(id) {
         const { error } = await supabase.from("reservas").delete().eq("id", id);
         if (!error) cargarReservasAdmin();
         else alert("Error al eliminar la reserva.");
+    }
 };
 
 // Subida directa a Cloudinary
