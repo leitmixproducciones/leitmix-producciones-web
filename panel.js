@@ -4,27 +4,51 @@ const CLOUD_NAME = 'exzcoeyi';
 const UPLOAD_PRESET = 'leitmix_preset'; 
 const URL_LOGO_OFICIAL = 'https://res.cloudinary.com/exzcoeyi/image/upload/l4y4rqa7bokko0mfafwm'; 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const loginForm = document.getElementById('loginForm');
     const loginSection = document.getElementById('loginSection');
     const adminSection = document.getElementById('adminSection');
     const btnLogout = document.getElementById('btnLogout');
 
-    if (localStorage.getItem('sesion_activa') === 'true') {
+    // Verificar si ya hay una sesión activa real en Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
         abrirPanel(loginSection, adminSection);
     }
 
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            localStorage.setItem('sesion_activa', 'true');
+            
+            // Buscamos los campos de email y contraseña en el formulario de login
+            const emailInput = document.getElementById('loginEmail') || document.getElementById('email');
+            const passwordInput = document.getElementById('loginPassword') || document.getElementById('password');
+
+            if (!emailInput || !passwordInput) {
+                alert("Faltan los campos de correo o contraseña en el HTML.");
+                return;
+            }
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                alert("Error al iniciar sesión: " + error.message);
+                return;
+            }
+
             abrirPanel(loginSection, adminSection);
         });
     }
 
     if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
-            localStorage.removeItem('sesion_activa');
+        btnLogout.addEventListener('click', async () => {
+            await supabase.auth.signOut();
             if (adminSection) adminSection.classList.add('hidden');
             if (loginSection) loginSection.classList.remove('hidden');
         });
@@ -39,7 +63,17 @@ function abrirPanel(loginSec, adminSec) {
 
 async function cargarDatosAdmin() {
     try {
-        const { data: reservas } = await supabase.from('reservas').select('*').order('id', { ascending: false });
+        // Obtenemos el usuario autenticado actual para filtrar sus datos
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Cargar reservas del DJ actual
+        const { data: reservas } = await supabase
+            .from('reservas')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('id', { ascending: false });
+
         const contReservas = document.getElementById('listaReservasAdmin');
         const totalRes = document.getElementById('totalReservas');
         
@@ -60,7 +94,13 @@ async function cargarDatosAdmin() {
             }
         }
 
-        const { data: recibos } = await supabase.from('recibos').select('*').order('id', { ascending: false });
+        // Cargar recibos del DJ actual
+        const { data: recibos } = await supabase
+            .from('recibos')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('id', { ascending: false });
+
         const contRecibos = document.getElementById('listaRecibosAdmin');
         const totalRec = document.getElementById('totalRecibos');
         
@@ -88,9 +128,15 @@ async function cargarDatosAdmin() {
             if (contRecibos) contRecibos.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay recibos emitidos todavía.</p>';
         }
 
-        await cargarMultimediaAdmin();
+        await cargarMultimediaAdmin(user.id);
 
-        const { data: testimonios } = await supabase.from('testimonios').select('*').order('id', { ascending: false });
+        // Cargar testimonios del DJ actual
+        const { data: testimonios } = await supabase
+            .from('testimonios')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('id', { ascending: false });
+
         const contTest = document.getElementById('listaTestimoniosAdmin');
         if (contTest) {
             if (testimonios && testimonios.length > 0) {
@@ -121,12 +167,12 @@ window.cambiarEstadoTestimonio = async function(id, nuevoEstado) {
     else alert("Error al actualizar testimonio");
 };
 
-async function cargarMultimediaAdmin() {
+async function cargarMultimediaAdmin(userId) {
     const contMedia = document.getElementById('listaMediaAdmin');
     if (!contMedia) return;
 
-    const { data: fotos } = await supabase.from('fotos').select('*').order('id', { ascending: false });
-    const { data: videos } = await supabase.from('videos').select('*').order('id', { ascending: false });
+    const { data: fotos } = await supabase.from('fotos').select('*').eq('user_id', userId).order('id', { ascending: false });
+    const { data: videos } = await supabase.from('videos').select('*').eq('user_id', userId).order('id', { ascending: false });
     
     let htmlContenido = '';
 
@@ -163,6 +209,9 @@ document.getElementById('mediaForm')?.addEventListener('submit', async (e) => {
     const file = fileInput.files[0];
     if (!file) return;
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const btnSubir = e.target.querySelector('button');
     btnSubir.textContent = "Subiendo...";
     btnSubir.disabled = true;
@@ -183,14 +232,14 @@ document.getElementById('mediaForm')?.addEventListener('submit', async (e) => {
         const data = await response.json();
         if (data.secure_url) {
             const tabla = tipoEsVideo ? 'videos' : 'fotos';
-            const { error } = await supabase.from(tabla).insert([{ url: data.secure_url }]);
+            const { error } = await supabase.from(tabla).insert([{ url: data.secure_url, user_id: user.id }]);
 
             if (error) {
                 alert("Error al guardar en la base de datos: " + error.message);
             } else {
                 alert("¡Archivo subido con éxito!");
                 fileInput.value = '';
-                cargarMultimediaAdmin();
+                cargarMultimediaAdmin(user.id);
             }
         } else {
             alert("Error al subir a Cloudinary.");
@@ -207,7 +256,8 @@ document.getElementById('mediaForm')?.addEventListener('submit', async (e) => {
 window.eliminarMedia = async function(id, tabla) {
     if (confirm("¿Estás seguro de eliminar este archivo?")) {
         const { error } = await supabase.from(tabla).delete().eq('id', id);
-        if (!error) cargarMultimediaAdmin();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!error) cargarMultimediaAdmin(user.id);
         else alert("Error al eliminar el archivo.");
     }
 };
@@ -219,14 +269,20 @@ document.getElementById('reciboForm')?.addEventListener('submit', async (e) => {
     const detalle = document.getElementById('reciboDetalle').value;
     const fechaEmision = new Date().toLocaleDateString('es-AR');
 
-    const { error } = await supabase.from('recibos').insert([{ cliente, monto, detalle, fecha: fechaEmision }]);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase.from('recibos').insert([{ 
+        cliente, 
+        monto, 
+        detalle, 
+        fecha: fechaEmision, 
+        user_id: user.id 
+    }]);
 
     if (error) {
-        const { error: error2 } = await supabase.from('recibos').insert([{ cliente, monto, detalle }]);
-        if (error2) {
-            alert("Error al crear recibo: " + error2.message);
-            return;
-        }
+        alert("Error al crear recibo: " + error.message);
+        return;
     }
 
     alert("¡Recibo creado con éxito!");
