@@ -7,6 +7,7 @@ const loginError = document.getElementById("loginError");
 const btnLogout = document.getElementById("btnLogout");
 const userLoggedEmail = document.getElementById("userLoggedEmail");
 const totalReservasEl = document.getElementById("totalReservas");
+const totalRecibosEl = document.getElementById("totalRecibos");
 
 async function verificarSesion() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -34,7 +35,6 @@ loginForm?.addEventListener("submit", async (e) => {
     }
 });
 
-// Función para recuperar contraseña desde la misma interfaz
 window.recuperarPassword = async function() {
     const emailInput = document.getElementById("loginEmail")?.value.trim();
     if (!emailInput) {
@@ -64,6 +64,7 @@ function mostrarPanel(user) {
     if (userLoggedEmail) userLoggedEmail.textContent = `Conectado como: ${user.email}`;
     
     cargarReservasAdmin();
+    cargarRecibosAdmin();
     cargarMediaAdmin();
     cargarTestimoniosAdmin();
 }
@@ -74,7 +75,7 @@ function mostrarLogin() {
     if (loginError) loginError.textContent = "";
 }
 
-// Cargar y listar Reservas en el Panel
+// Cargar y listar Reservas
 async function cargarReservasAdmin() {
     const { data: reservas, count } = await supabase
         .from('reservas')
@@ -115,7 +116,66 @@ window.eliminarReserva = async function(id) {
     }
 };
 
-// Subida directa a Cloudinary
+// Cargar, crear, sumar y listar Recibos
+const reciboForm = document.getElementById("reciboForm");
+reciboForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const cliente = document.getElementById("reciboCliente").value.trim();
+    const monto = parseFloat(document.getElementById("reciboMonto").value);
+    const detalle = document.getElementById("reciboDetalle").value.trim();
+
+    const { error } = await supabase
+        .from("recibos")
+        .insert([{ cliente, monto, detalle }]);
+
+    if (error) {
+        alert("Error al crear recibo: " + error.message);
+    } else {
+        alert("¡Recibo creado con éxito!");
+        reciboForm.reset();
+        cargarRecibosAdmin();
+    }
+});
+
+async function cargarRecibosAdmin() {
+    const { data: recibos } = await supabase
+        .from("recibos")
+        .select("*")
+        .order("id", { ascending: false });
+
+    const contenedorRecibos = document.getElementById("listaRecibosAdmin");
+    if (!contenedorRecibos) return;
+
+    if (!recibos || recibos.length === 0) {
+        contenedorRecibos.innerHTML = '<p style="color: #888; text-align: center; font-size: 0.9rem;">No hay recibos emitidos.</p>';
+        if (totalRecibosEl) totalRecibosEl.textContent = "$0";
+        return;
+    }
+
+    // Hace la cuenta sola sumando todos los montos de la tabla
+    const sumaTotal = recibos.reduce((acc, curr) => acc + (Number(curr.monto) || 0), 0);
+    if (totalRecibosEl) totalRecibosEl.textContent = `$${sumaTotal.toLocaleString('es-AR')}`;
+
+    contenedorRecibos.innerHTML = recibos.map(rec => `
+        <div style="background: #2a2a2a; padding: 10px; border-radius: 6px; border: 1px solid #444; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong style="color: #ffc107; font-size: 0.95rem;">${rec.cliente}</strong> - <span style="color: #28a745; font-weight: bold;">$${Number(rec.monto).toLocaleString('es-AR')}</span>
+                <p style="color: #bbb; font-size: 0.85rem; margin: 2px 0;">📝 ${rec.detalle || 'Sin detalle'}</p>
+            </div>
+            <button onclick="window.eliminarRecibo(${rec.id})" style="background: #dc3545; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; height: fit-content;">Borrar</button>
+        </div>
+    `).join("");
+}
+
+window.eliminarRecibo = async function(id) {
+    if (confirm("¿Estás seguro de eliminar este recibo?")) {
+        const { error } = await supabase.from("recibos").delete().eq("id", id);
+        if (!error) cargarRecibosAdmin();
+        else alert("Error al eliminar el recibo.");
+    }
+};
+
+// Subida de Multimedia
 const mediaForm = document.getElementById("mediaForm");
 mediaForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -143,21 +203,14 @@ mediaForm?.addEventListener("submit", async (e) => {
         });
 
         const data = await response.json();
+        if (!response.ok) throw new Error(data.error?.message || "Error al subir a Cloudinary");
 
-        if (!response.ok) {
-            throw new Error(data.error?.message || "Error al subir a Cloudinary");
-        }
-
-        const publicUrl = data.secure_url;
-
-        const { error: dbError } = await supabase
-            .from(tablaDestino)
-            .insert([{ url: publicUrl }]);
+        const { error: dbError } = await supabase.from(tablaDestino).insert([{ url: data.secure_url }]);
 
         if (dbError) {
             alert(`Error al guardar en la tabla ${tablaDestino}: ` + dbError.message);
         } else {
-            alert(`¡${esVideo ? 'Video' : 'Foto'} subido con éxito a Cloudinary!`);
+            alert(`¡${esVideo ? 'Video' : 'Foto'} subido con éxito!`);
             fileInput.value = "";
             cargarMediaAdmin();
         }
@@ -186,24 +239,15 @@ async function cargarMediaAdmin() {
         return;
     }
 
-    contenedor.innerHTML = totalItems.map(m => {
-        let vistaPrevia = '';
-        if (m.tipo === 'foto') {
-            vistaPrevia = `<img src="${m.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px;" alt="Miniatura">`;
-        } else {
-            vistaPrevia = `<video src="${m.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; background: #000;"></video>`;
-        }
-
-        return `
-            <div style="background: #2a2a2a; padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; gap: 10px; margin-bottom: 6px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    ${vistaPrevia}
-                    <a href="${m.url}" target="_blank" style="color: #ffc107; text-decoration: none; font-size: 0.85rem;">Ver ${m.tipo}</a>
-                </div>
-                <button onclick="window.eliminarMedia(${m.id}, '${m.tipo}')" style="background: #dc3545; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Eliminar</button>
+    contenedor.innerHTML = totalItems.map(m => `
+        <div style="background: #2a2a2a; padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; gap: 10px; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                ${m.tipo === 'foto' ? `<img src="${m.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px;" alt="Miniatura">` : `<video src="${m.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; background: #000;"></video>`}
+                <a href="${m.url}" target="_blank" style="color: #ffc107; text-decoration: none; font-size: 0.85rem;">Ver ${m.tipo}</a>
             </div>
-        `;
-    }).join("");
+            <button onclick="window.eliminarMedia(${m.id}, '${m.tipo}')" style="background: #dc3545; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Eliminar</button>
+        </div>
+    `).join("");
 }
 
 window.eliminarMedia = async function(id, tipo) {
@@ -215,6 +259,7 @@ window.eliminarMedia = async function(id, tipo) {
     }
 };
 
+// Moderación de Testimonios
 async function cargarTestimoniosAdmin() {
     const contenedor = document.getElementById("listaTestimoniosAdmin");
     if (!contenedor) return;
