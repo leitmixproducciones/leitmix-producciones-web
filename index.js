@@ -46,18 +46,36 @@ document.getElementById("formTestimonioPublico")?.addEventListener("submit", asy
     }
 });
 
-// 3. Cargar Galería, Videos y Testimonios Aprobados
+// 3. Cargar Galería de Fotos, Videos y Testimonios Aprobados por separado
 async function cargarPublico() {
-    // Galería
-    const { data: fotos } = await supabase.from("galeria").select("*");
+    // Cargar Fotos en su sección
+    const { data: fotos } = await supabase.from("fotos").select("*").order("id", { ascending: false });
     const contGaleria = document.getElementById("galeriaPublica");
-    if (fotos && fotos.length > 0 && contGaleria) {
-        contGaleria.innerHTML = fotos.map(f => `
-            <div style="background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center;">
-                <img src="${f.Imagen || f.url}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px;" alt="Foto">
-                <p style="margin-top: 8px; font-size: 0.9rem; color: #fff;">${f.Titulo || ''}</p>
-            </div>
-        `).join("");
+    if (contGaleria) {
+        if (fotos && fotos.length > 0) {
+            contGaleria.innerHTML = fotos.map(f => `
+                <div style="background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center;">
+                    <img src="${f.url}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px;" alt="Foto">
+                </div>
+            `).join("");
+        } else {
+            contGaleria.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1 / -1;">No hay fotos cargadas.</p>';
+        }
+    }
+
+    // Cargar Videos en su propia sección
+    const { data: videos } = await supabase.from("videos").select("*").order("id", { ascending: false });
+    const contVideos = document.getElementById("videosPublicos");
+    if (contVideos) {
+        if (videos && videos.length > 0) {
+            contVideos.innerHTML = videos.map(v => `
+                <div style="background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center;">
+                    <video src="${v.url}" controls style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px;"></video>
+                </div>
+            `).join("");
+        } else {
+            contVideos.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1 / -1;">No hay videos cargados.</p>';
+        }
     }
 
     // Testimonios aprobados
