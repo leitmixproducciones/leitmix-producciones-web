@@ -25,11 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const emailInput = document.getElementById('loginEmail');
             const passwordInput = document.getElementById('loginPassword');
             
-            const email = emailInput ? emailInput.value.trim() : '';
+            const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
             const password = passwordInput ? passwordInput.value.trim() : '';
             
-            // Credenciales de acceso al panel
-            if (email === "admin@leitmix.com" && password === "123456") {
+            // TUS CREDENCIALES OFICIALES CONFIGURADAS
+            if (email === "leitmix@hotmail.com" && password === "123456") {
                 localStorage.setItem('sesion_activa', 'true');
                 if (loginError) loginError.textContent = '';
                 mostrarAdmin(loginSection, adminSection);
@@ -58,13 +58,11 @@ function mostrarAdmin(loginSec, adminSec) {
     if (loginSec) loginSec.classList.add('hidden');
     if (adminSec) adminSec.classList.remove('hidden');
     
-    // Llamada automática para inicializar los datos del panel si existen
     if (typeof cargarDatosAdmin === 'function') {
         cargarDatosAdmin();
     }
 }
 
-// Función base de respaldo para que no falle ninguna llamada del sistema
 function cargarDatosAdmin() {
     console.log("Panel de Leitmix Producciones cargado correctamente.");
 }
@@ -99,7 +97,7 @@ window.verRecibo = function(cliente, monto, detalle, fecha, id) {
                 .monto-box p { margin: 0 0 5px 0; font-size: 0.8rem; color: #b7791f; font-weight: bold; text-transform: uppercase; }
                 .monto-box h3 { color: #121212; margin: 0; font-size: 2rem; font-weight: 800; }
                 .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-                .btn-whatsapp { background: #25d366; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: center; text-decoration: none; display: block; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+                .btn-whatsapp { background: ` + "`#25d366`" + `; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: center; text-decoration: none; display: block; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
                 .btn-print { background: #2d3748; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; text-align: center; }
                 .footer { text-align: center; font-size: 0.75rem; color: #666; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; }
                 .social-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 8px; font-weight: bold; color: #b7791f; font-size: 0.75rem; }
