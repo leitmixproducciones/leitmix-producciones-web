@@ -3,6 +3,72 @@
 // ==========================================
 const urlLogo = "URL_DE_TU_LOGO_AQUI"; // Reemplaza con tu enlace o nombre de archivo
 
+// ==========================================
+// SISTEMA DE SESIÓN Y CARGA DEL PANEL
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    const loginSection = document.getElementById('loginSection');
+    const adminSection = document.getElementById('adminSection');
+    const loginError = document.getElementById('loginError');
+    const btnLogout = document.getElementById('btnLogout');
+
+    // Verificar si ya hay una sesión activa guardada
+    if (localStorage.getItem('sesion_activa') === 'true') {
+        mostrarAdmin(loginSection, adminSection);
+    }
+
+    // Manejo del formulario de inicio de sesión
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('loginEmail');
+            const passwordInput = document.getElementById('loginPassword');
+            
+            const email = emailInput ? emailInput.value.trim() : '';
+            const password = passwordInput ? passwordInput.value.trim() : '';
+            
+            // Credenciales de acceso al panel
+            if (email === "admin@leitmix.com" && password === "123456") {
+                localStorage.setItem('sesion_activa', 'true');
+                if (loginError) loginError.textContent = '';
+                mostrarAdmin(loginSection, adminSection);
+            } else {
+                if (loginError) {
+                    loginError.textContent = 'Correo o contraseña incorrectos.';
+                } else {
+                    alert('Correo o contraseña incorrectos.');
+                }
+            }
+        });
+    }
+
+    // Botón para cerrar sesión
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            localStorage.removeItem('sesion_activa');
+            if (adminSection) adminSection.classList.add('hidden');
+            if (loginSection) loginSection.classList.remove('hidden');
+        });
+    }
+});
+
+// Función para alternar las vistas del panel de administración
+function mostrarAdmin(loginSec, adminSec) {
+    if (loginSec) loginSec.classList.add('hidden');
+    if (adminSec) adminSec.classList.remove('hidden');
+    
+    // Llamada automática para inicializar los datos del panel si existen
+    if (typeof cargarDatosAdmin === 'function') {
+        cargarDatosAdmin();
+    }
+}
+
+// Función base de respaldo para que no falle ninguna llamada del sistema
+function cargarDatosAdmin() {
+    console.log("Panel de Leitmix Producciones cargado correctamente.");
+}
+
 
 // ==========================================
 // GENERACIÓN DE RECIBOS OFICIALES (Con Logo)
