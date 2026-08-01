@@ -1,13 +1,10 @@
 // ==========================================
-// CONFIGURACIÓN DE TU LOGO Y SERVICIOS
+// CONFIGURACIÓN DE TU LOGO
 // ==========================================
 const urlLogo = "URL_DE_TU_LOGO_AQUI"; 
 
-// Nota: Asegurate de que las credenciales de Supabase o las librerías 
-// (como el cliente de Supabase) estén cargadas en tu HTML principal.
-
 // ==========================================
-// CONTROL DE ACCESO Y CARGA DE SUPABASE/CLOUDINARY
+// CONTROL DE ACCESO Y CARGA DEL PANEL
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -22,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            // Acceso directo verificado
             localStorage.setItem('sesion_activa', 'true');
             abrirPanel(loginSection, adminSection);
         });
@@ -40,66 +38,128 @@ function abrirPanel(loginSec, adminSec) {
     if (loginSec) loginSec.classList.add('hidden');
     if (adminSec) adminSec.classList.remove('hidden');
     
-    // Disparamos las funciones que consultan Supabase y Cloudinary
+    // Iniciar carga de datos desde Supabase
     if (typeof cargarDatosAdmin === 'function') {
         cargarDatosAdmin();
     }
 }
 
-// Función central para conectar con Supabase y traer tus reservas, recibos y testimonios
+// ==========================================
+// CONEXIÓN CON SUPABASE PARA CARGAR LAS TABLAS
+// ==========================================
 async function cargarDatosAdmin() {
-    console.log("Conectando con Supabase y Cloudinary...");
-    
+    console.log("Cargando datos del panel desde Supabase...");
+
+    if (typeof supabase === 'undefined') {
+        console.warn("El cliente de Supabase no está cargado.");
+        return;
+    }
+
     try {
-        // Si usas el cliente global de Supabase ('supabase'), llamamos a tus tablas.
-        // Reemplazá 'reservas', 'recibos' y 'testimonios' por los nombres exactos de tus tablas en Supabase si cambian.
-        if (typeof supabase !== 'undefined') {
-            
-            // 1. Cargar Reservas
-            const { data: reservas, error: errRes } = await supabase.from('reservas').select('*');
-            if (!errRes && reservas) {
-                renderizarReservas(reservas);
-            }
-
-            // 2. Cargar Recibos Emitidos
-            const { data: recibos, error: errRec } = await supabase.from('recibos').select('*');
-            if (!errRec && recibos) {
-                renderizarRecibos(recibos);
-            }
-
-            // 3. Cargar Testimonios
-            const { data: testimonios, error: errTest } = await supabase.from('testimonios').select('*');
-            if (!errTest && testimonios) {
-                renderizarTestimonios(testimonios);
-            }
+        // 1. Cargar Reservas
+        const { data: reservas, error: errRes } = await supabase.from('reservas').select('*');
+        if (!errRes && reservas) {
+            renderizarReservasAdmin(reservas);
         }
+
+        // 2. Cargar Recibos Emitidos
+        const { data: recibos, error: errRec } = await supabase.from('recibos').select('*');
+        if (!errRec && recibos) {
+            renderizarRecibosAdmin(recibos);
+        }
+
+        // 3. Cargar Contenido Multimedia (Cloudinary / Supabase)
+        const { data: multimedia, error: errMulti } = await supabase.from('multimedia').select('*');
+        if (!errMulti && multimedia) {
+            renderizarMultimediaAdmin(multimedia);
+        }
+
+        // 4. Cargar Testimonios
+        const { data: testimonios, error: errTest } = await supabase.from('testimonios').select('*');
+        if (!errTest && testimonios) {
+            renderizarTestimoniosAdmin(testimonios);
+        }
+
     } catch (e) {
-        console.error("Error al sincronizar con Supabase:", e);
+        console.error("Error al sincronizar las tablas con Supabase:", e);
     }
 }
 
-// Funciones de apoyo para pintar los datos en tu HTML (pueden adaptarse a tus IDs existentes)
-function renderizarReservas(reservas) {
+// Funciones de renderizado para que no se queden en "Cargando..."
+function renderizarReservasAdmin(reservas) {
     const contenedor = document.getElementById('listadoReservas') || document.getElementById('reservasContainer');
     if (!contenedor) return;
-    // Aquí se dibuja tu listado de reservas
+    
+    if (reservas.length === 0) {
+        contenedor.innerHTML = '<p style="color: #888; text-align: center;">No hay reservas registradas.</p>';
+        return;
+    }
+    
+    contenedor.innerHTML = reservas.map(r => `
+        <div style="background: #222; padding: 15px; margin-bottom: 10px; border-radius: 6px; border-left: 4px solid #ffc107;">
+            <p><b>Cliente:</b> ${r.nombre || r.cliente || 'Sin nombre'}</p>
+            <p><b>Evento:</b> ${r.evento || 'No especificado'} - <b>Fecha:</b> ${r.fecha || ''}</p>
+            <p><b>Teléfono:</b> ${r.telefono || '-'}</p>
+        </div>
+    `).join('');
 }
 
-function renderizarRecibos(recibos) {
+function renderizarRecibosAdmin(recibos) {
     const contenedor = document.getElementById('listadoRecibos') || document.getElementById('recibosContainer');
     if (!contenedor) return;
-    // Aquí se dibujan tus recibos guardados
+
+    if (recibos.length === 0) {
+        contenedor.innerHTML = '<p style="color: #888; text-align: center;">No hay recibos emitidos todavía.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = recibos.map(rec => `
+        <div style="background: #222; padding: 15px; margin-bottom: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <p><b>Cliente:</b> ${rec.cliente}</p>
+                <p><b>Monto:</b> $${Number(rec.monto).toLocaleString('es-AR')} - <b>Concepto:</b> ${rec.detalle}</p>
+            </div>
+            <button onclick="verRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}', '${rec.fecha}', '${rec.id}')" style="background:#ffc107; color:#121212; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">Ver Recibo</button>
+        </div>
+    `).join('');
 }
 
-function renderizarTestimonios(testimonios) {
+function renderizarMultimediaAdmin(multimedia) {
+    const contenedor = document.getElementById('listadoMultimedia') || document.getElementById('multimediaContainer');
+    if (!contenedor) return;
+    
+    if (multimedia.length === 0) {
+        contenedor.innerHTML = '<p style="color: #888; text-align: center;">No hay archivos multimedia cargados.</p>';
+        return;
+    }
+    
+    contenedor.innerHTML = multimedia.map(m => `
+        <div style="background: #222; padding: 10px; border-radius: 6px; text-align: center;">
+            <img src="${m.url}" style="max-width:100%; height:100px; object-fit:cover; border-radius:4px;" />
+        </div>
+    `).join('');
+}
+
+function renderizarTestimoniosAdmin(testimonios) {
     const contenedor = document.getElementById('listadoTestimonios') || document.getElementById('testimoniosContainer');
     if (!contenedor) return;
-    // Aquí se muestran los testimonios a moderar
+
+    if (testimonios.length === 0) {
+        contenedor.innerHTML = '<p style="color: #888; text-align: center;">No hay testimonios para moderar.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = testimonios.map(t => `
+        <div style="background: #222; padding: 12px; margin-bottom: 10px; border-radius: 6px;">
+            <p><b>${t.nombre}</b> (${t.estrellas} ⭐)</p>
+            <p style="color: #bbb; font-style: italic;">"${t.comentario}"</p>
+        </div>
+    `).join('');
 }
 
 
 // ==========================================
-// GENERACIÓN DE RECIBOS OFICIALES (Con Logo y Estilo Completo)
+// GENERACIÓN DE RECIBOS OFICIALES (Con Logo y Estilo)
 // ==========================================
 window.verRecibo = function(cliente, monto, detalle, fecha, id) {
     const ventanaRecibo = window.open('', '_blank');
