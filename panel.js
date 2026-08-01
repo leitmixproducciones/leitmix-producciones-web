@@ -2,6 +2,7 @@ import { supabase } from "./supabase.js";
 
 const CLOUD_NAME = 'exzcoeyi'; 
 const UPLOAD_PRESET = 'leitmix_preset'; 
+const URL_LOGO_OFICIAL = 'https://res.cloudinary.com/exzcoeyi/image/upload/l4y4rqa7bokko0mfafwm'; 
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -249,7 +250,8 @@ window.verRecibo = function(cliente, monto, detalle, id, fechaRecibo) {
                 body { background: #121212; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
                 .receipt-container { background: #ffffff; width: 100%; max-width: 480px; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-top: 8px solid #ffc107; color: #222; }
                 .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
-                .logo-fallback { font-size: 1.4rem; font-weight: 900; color: #121212; letter-spacing: 1px; margin-bottom: 5px; }
+                .logo-img { max-width: 150px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+                .logo-fallback { font-size: 1.4rem; font-weight: 900; color: #121212; letter-spacing: 1px; margin-bottom: 5px; display: none; }
                 .logo-fallback span { color: #ffc107; background: #121212; padding: 2px 8px; border-radius: 4px; }
                 .sub-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 600; margin-top: 6px; }
                 .receipt-meta { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; border: 1px solid #e2e8f0; }
@@ -269,7 +271,8 @@ window.verRecibo = function(cliente, monto, detalle, id, fechaRecibo) {
         <body>
             <div class="receipt-container">
                 <div class="header">
-                    <div class="logo-fallback">LEITMIX<span>PRODUCCIONES</span></div>
+                    <img src="${URL_LOGO_OFICIAL}" alt="Leitmix Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
+                    <div id="fallback-logo" class="logo-fallback">LEITMIX<span>PRODUCCIONES</span></div>
                     <div class="sub-title">Comprobante de Pago Oficial</div>
                 </div>
 
