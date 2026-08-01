@@ -83,15 +83,20 @@ async function cargarDatosAdmin() {
             if (totalRec) totalRec.textContent = `$${sumaTotal.toLocaleString('es-AR')}`;
             
             if (contRecibos) {
-                contRecibos.innerHTML = recibos.map(rec => `
-                    <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
-                        <div>
-                            <p><b>Cliente:</b> ${rec.cliente}</p>
-                            <p><b>Monto:</b> $${Number(rec.monto).toLocaleString('es-AR')} - <b>Concepto:</b> ${rec.detalle}</p>
+                contRecibos.innerHTML = recibos.map(rec => {
+                    // Si el recibo guardó una fecha la usamos, sino usamos la fecha actual por seguridad
+                    const fechaRecibo = rec.fecha || new Date().toLocaleDateString('es-AR');
+                    return `
+                        <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                            <div>
+                                <p><b>Cliente:</b> ${rec.cliente}</p>
+                                <p><b>Monto:</b> $${Number(rec.monto).toLocaleString('es-AR')} - <b>Concepto:</b> ${rec.detalle}</p>
+                                <p style="font-size: 0.8rem; color: #aaa;"><b>Fecha:</b> ${fechaRecibo}</p>
+                            </div>
+                            <button type="button" onclick="verRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}', '${rec.id}', '${fechaRecibo}')" style="background:#ffc107; color:#121212; border:none; padding:8px 10px; border-radius:6px; font-weight:bold; cursor:pointer; width:auto; margin-bottom:0;">Ver</button>
                         </div>
-                        <button type="button" onclick="verRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}', '${rec.id}')" style="background:#ffc107; color:#121212; border:none; padding:8px 10px; border-radius:6px; font-weight:bold; cursor:pointer; width:auto; margin-bottom:0;">Ver</button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
         } else {
             if (totalRec) totalRec.textContent = "$0";
@@ -244,24 +249,39 @@ document.getElementById('reciboForm')?.addEventListener('submit', async (e) => {
     const cliente = document.getElementById('reciboCliente').value;
     const monto = parseFloat(document.getElementById('reciboMonto').value);
     const detalle = document.getElementById('reciboDetalle').value;
+    const fechaEmision = new Date().toLocaleDateString('es-AR');
 
-    const { error } = await supabase.from('recibos').insert([{ cliente, monto, detalle }]);
+    // Intentamos guardar con la fecha de emisión. Si tu tabla de Supabase no tiene la columna 'fecha', 
+    // podés sacar la parte de 'fecha: fechaEmision' para que no falle.
+    const { error } = await supabase.from('recibos').insert([{ 
+        cliente, 
+        monto, 
+        detalle, 
+        fecha: fechaEmision 
+    }]);
 
     if (error) {
-        alert("Error al crear recibo: " + error.message);
-    } else {
-        alert("¡Recibo creado con éxito!");
-        document.getElementById('reciboForm').reset();
-        cargarDatosAdmin();
+        // Si tu Supabase tira error porque no existe la columna fecha, lo guardamos sin ella y usa la de hoy por defecto
+        const { error: error2 } = await supabase.from('recibos').insert([{ cliente, monto, detalle }]);
+        if (error2) {
+            alert("Error al crear recibo: " + error2.message);
+            return;
+        }
     }
+
+    alert("¡Recibo creado con éxito!");
+    document.getElementById('reciboForm').reset();
+    cargarDatosAdmin();
 });
 
 // ==========================================
 // GENERACIÓN DE RECIBOS OFICIALES
 // ==========================================
-window.verRecibo = function(cliente, monto, detalle, id) {
-    const fechaActual = new Date().toLocaleDateString('es-AR');
+window.verRecibo = function(cliente, monto, detalle, id, fechaRecibo) {
+    // Si viene la fecha guardada la usa, sino pone la de hoy
+    const fechaFinal = (fechaRecibo && fechaRecibo !== 'undefined') ? fechaRecibo : new Date().toLocaleDateString('es-AR');
     const ventanaRecibo = window.open('', '_blank');
+    
     ventanaRecibo.document.write(`
         <!DOCTYPE html>
         <html lang="es">
@@ -302,7 +322,7 @@ window.verRecibo = function(cliente, monto, detalle, id) {
 
                 <div class="receipt-meta">
                     <div><span>N° Recibo:</span> <b>#000${id}</b></div>
-                    <div><span>Fecha:</span> <b>${fechaActual}</b></div>
+                    <div><span>Fecha:</span> <b>${fechaFinal}</b></div>
                 </div>
 
                 <div class="client-section">
@@ -316,7 +336,7 @@ window.verRecibo = function(cliente, monto, detalle, id) {
                 </div>
 
                 <div class="actions">
-                    <a href="https://api.whatsapp.com/send?text=Hola%20*${encodeURIComponent(cliente)}*,%20te%20env%C3%ADo%20el%20comprobante%20oficial%20de%20Leitmix%20Producciones.%0A%0A*Recibo%20N%C2%B0:*%20%23000${id}%0A*Fecha:*%20${fechaActual}%0A*Concepto:*%20${encodeURIComponent(detalle)}%0A*Monto:*%20%24${Number(monto).toLocaleString('es-AR')}%0A%0A%C2%A1Muchas%20gracias%20por%20confiar%20en%20nosotros!" target="_blank" class="btn-whatsapp">
+                    <a href="https://api.whatsapp.com/send?text=Hola%20*${encodeURIComponent(cliente)}*,%20te%20env%C3%ADo%20el%20comprobante%20oficial%20de%20Leitmix%20Producciones.%0A%0A*Recibo%20N%C2%B0:*%20%23000${id}%0A*Fecha:*%20${fechaFinal}%0A*Concepto:*%20${encodeURIComponent(detalle)}%0A*Monto:*%20%24${Number(monto).toLocaleString('es-AR')}%0A%0A%C2%A1Muchas%20gracias%20por%20confiar%20en%20nosotros!" target="_blank" class="btn-whatsapp">
                         📲 Enviar por WhatsApp
                     </a>
                     <button onclick="window.print()" class="btn-print">🖨️ Imprimir / Guardar PDF</button>
@@ -333,4 +353,5 @@ window.verRecibo = function(cliente, monto, detalle, id) {
         </body>
         </html>
     `);
+    ventanaRecibo.document.close();
 };
