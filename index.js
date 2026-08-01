@@ -19,9 +19,16 @@ document.getElementById("formReserva")?.addEventListener("submit", async (e) => 
         alert("¡Reserva guardada con éxito!");
         document.getElementById("formReserva").reset();
         
-        // Redirigir a WhatsApp
-        const mensaje = `Hola! Quiero confirmar una reserva.%0A*Nombre:* ${nombre}%0A*Evento:* ${evento}%0A*Fecha:* ${fecha}%0A*Teléfono:* ${telefono}%0A*Comentarios:* ${comentarios}`;
-        window.open(`https://wa.me/?text=${mensaje}`, '_blank');
+        // Redirigir a tu WhatsApp con los datos listos
+        const numeroWhatsApp = "5491150480339"; // Tu número con código de país y área
+        const textoMensaje = `Hola! Nueva reserva de:
+*Nombre:* ${nombre}
+*Evento:* ${evento}
+*Fecha:* ${fecha}
+*Teléfono:* ${telefono}
+*Comentarios:* ${comentarios}`;
+
+        window.open(`https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(textoMensaje)}`, '_blank');
     }
 });
 
@@ -73,4 +80,3 @@ async function cargarPublico() {
 }
 
 cargarPublico();
-
