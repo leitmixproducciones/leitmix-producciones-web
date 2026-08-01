@@ -48,14 +48,14 @@ document.getElementById("formTestimonioPublico")?.addEventListener("submit", asy
 
 // 3. Cargar Galería de Fotos, Videos y Testimonios Aprobados por separado
 async function cargarPublico() {
-    // Cargar Fotos en su sección
+    // Cargar Fotos completas en su sección
     const { data: fotos } = await supabase.from("fotos").select("*").order("id", { ascending: false });
     const contGaleria = document.getElementById("galeriaPublica");
     if (contGaleria) {
         if (fotos && fotos.length > 0) {
             contGaleria.innerHTML = fotos.map(f => `
                 <div style="background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center;">
-                    <img src="${f.url}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px;" alt="Foto">
+                    <img src="${f.url}" style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 6px;" alt="Foto">
                 </div>
             `).join("");
         } else {
@@ -63,7 +63,7 @@ async function cargarPublico() {
         }
     }
 
-    // Cargar Videos en su propia sección con diseño mejorado
+    // Cargar Videos en su propia sección
     const { data: videos } = await supabase.from("videos").select("*").order("id", { ascending: false });
     const contVideos = document.getElementById("videosPublicos");
     if (contVideos) {
