@@ -158,7 +158,7 @@ async function cargarPanelAdmin() {
     }
 }
 
-// 5. Funciones de Recibos (WhatsApp y Comprobante Visual Estilizado)
+// 5. Funciones de Recibos (WhatsApp y Comprobante Exacto a la Captura)
 window.enviarWhatsApp = function(cliente, monto, detalle) {
     const mensaje = `🎧 *LEITMIX PRODUCCIONES* \n\nEstimado/a *${cliente}*, le confirmamos la recepción de su pago.\n\n💰 *Monto:* $${Number(monto).toLocaleString()}\n📝 *Concepto:* ${detalle}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
@@ -175,7 +175,7 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                 <style>
                     body {
                         font-family: Arial, sans-serif;
-                        background-color: #f4f4f4;
+                        background-color: #121824;
                         margin: 0;
                         padding: 20px;
                         display: flex;
@@ -183,14 +183,14 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                         align-items: center;
                     }
                     .recibo-card {
-                        background: #fff;
+                        background: #ffffff;
                         width: 100%;
-                        max-width: 450px;
+                        max-width: 420px;
                         padding: 25px;
-                        border-radius: 16px;
-                        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                        border-radius: 20px;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
                         box-sizing: border-box;
-                        border: 3px solid #ffcc00;
+                        border-top: 6px solid #ffcc00;
                     }
                     .header-img {
                         text-align: center;
@@ -198,57 +198,62 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                     }
                     .header-img img {
                         width: 100%;
-                        max-height: 180px;
+                        max-height: 200px;
                         object-fit: cover;
-                        border-radius: 10px;
+                        border-radius: 12px;
                     }
                     .titulo {
                         text-align: center;
-                        font-weight: bold;
-                        font-size: 1.1rem;
-                        color: #222;
-                        margin-bottom: 20px;
-                        letter-spacing: 0.5px;
-                        border-bottom: 2px solid #eee;
-                        padding-bottom: 10px;
+                        font-weight: 800;
+                        font-size: 0.95rem;
+                        color: #444;
+                        margin-bottom: 18px;
+                        letter-spacing: 1px;
+                        text-transform: uppercase;
+                        border-bottom: 1px solid #eaeaea;
+                        padding-bottom: 12px;
                     }
-                    .info-grid {
+                    .info-box {
+                        background: #f8f9fa;
+                        border: 1px solid #e9ecef;
+                        padding: 12px 16px;
+                        border-radius: 12px;
+                        margin-bottom: 15px;
                         display: flex;
                         justify-content: space-between;
-                        background: #f9f9f9;
-                        padding: 12px 15px;
-                        border-radius: 10px;
-                        margin-bottom: 15px;
-                        font-size: 0.95rem;
-                        font-weight: bold;
-                        color: #444;
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        color: #333;
                     }
-                    .detalle-box {
-                        background: #fdfdfd;
-                        border: 1px solid #e0e0e0;
+                    .cliente-box {
+                        background: #f8f9fa;
+                        border-left: 4px solid #ffcc00;
+                        border-top: 1px solid #e9ecef;
+                        border-right: 1px solid #e9ecef;
+                        border-bottom: 1px solid #e9ecef;
                         padding: 15px;
-                        border-radius: 10px;
+                        border-radius: 12px;
                         margin-bottom: 15px;
                     }
-                    .detalle-box p {
-                        margin: 5px 0;
-                        font-size: 1rem;
+                    .cliente-box p {
+                        margin: 6px 0;
+                        font-size: 0.95rem;
                         color: #333;
                     }
                     .monto-box {
                         background: #fffbe6;
                         border: 2px dashed #ffcc00;
                         text-align: center;
-                        padding: 15px;
-                        border-radius: 10px;
-                        margin-bottom: 25px;
+                        padding: 16px;
+                        border-radius: 12px;
+                        margin-bottom: 22px;
                     }
                     .monto-titulo {
-                        font-size: 0.85rem;
-                        font-weight: bold;
+                        font-size: 0.75rem;
+                        font-weight: 800;
                         color: #b38600;
                         margin-bottom: 5px;
-                        letter-spacing: 1px;
+                        letter-spacing: 1.5px;
                     }
                     .monto-valor {
                         font-size: 1.8rem;
@@ -258,29 +263,31 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                     .acciones {
                         display: flex;
                         flex-direction: column;
-                        gap: 10px;
+                        gap: 12px;
                     }
                     .btn-wsp {
                         background: #25d366;
                         color: white;
                         border: none;
-                        padding: 12px;
-                        border-radius: 10px;
-                        font-size: 1rem;
+                        padding: 14px;
+                        border-radius: 12px;
+                        font-size: 0.95rem;
                         font-weight: bold;
                         cursor: pointer;
                         text-align: center;
+                        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
                     }
                     .btn-print {
                         background: #1f293d;
                         color: white;
                         border: none;
-                        padding: 12px;
-                        border-radius: 10px;
-                        font-size: 1rem;
+                        padding: 14px;
+                        border-radius: 12px;
+                        font-size: 0.95rem;
                         font-weight: bold;
                         cursor: pointer;
                         text-align: center;
+                        box-shadow: 0 4px 10px rgba(31, 41, 61, 0.3);
                     }
                     @media print {
                         body { background: none; padding: 0; }
@@ -294,14 +301,14 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                     <div class="header-img">
                         <img src="https://res.cloudinary.com/dskg3j23x/image/upload/v1/tu-imagen-de-banner.jpg" onerror="this.style.display='none'" alt="Leitmix Producciones">
                     </div>
-                    <div class="titulo">COMPROBANTE DE PAGO OFICIAL</div>
+                    <div class="titulo">Comprobante de Pago Oficial</div>
                     
-                    <div class="info-grid">
+                    <div class="info-box">
                         <span>N° Recibo: #${idRecibo}</span>
                         <span>Fecha: ${fecha}</span>
                     </div>
 
-                    <div class="detalle-box">
+                    <div class="cliente-box">
                         <p><b>Cliente:</b> ${cliente}</p>
                         <p><b>Concepto:</b> ${detalle}</p>
                     </div>
