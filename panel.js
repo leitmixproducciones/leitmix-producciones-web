@@ -6,6 +6,12 @@ const USER_ID = "a6f7ed6c-a23d-4239-9a2b-3fdd421317ca";
 // 1. Manejar el Inicio de Sesión
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    
+    // Evita que el formulario intente loguear si se presionó otro botón interno
+    if (e.submitter && (e.submitter.id === "btnRegistrar" || e.submitter.id === "btnOlvido")) {
+        return;
+    }
+
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
 
@@ -449,7 +455,7 @@ document.getElementById("cerrarModal")?.addEventListener("click", () => {
     if (modalConfig) modalConfig.style.display = "none";
 });
 
-// 10. NUEVAS FUNCIONES PARA CREAR CUENTA Y RECUPERAR CONTRASEÑA
+// 10. FUNCIONES DE REGISTRO Y RECUPERACIÓN DE CONTRASEÑA
 const btnRegistrar = document.getElementById('btnRegistrar');
 if (btnRegistrar) {
     btnRegistrar.addEventListener('click', async (e) => {
