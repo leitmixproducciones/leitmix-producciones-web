@@ -233,7 +233,7 @@ async function cargarPanelAdmin(userId) {
     }
 }
 
-// 6. Funciones de Recibos (WhatsApp y Comprobante Exacto con Logo Compacto)
+// 6. Funciones de Recibos (WhatsApp y Comprobante Exacto con Logo Tamaño Equilibrado)
 window.enviarWhatsApp = function(cliente, monto, detalle) {
     const mensaje = `🎧 *LEITMIX PRODUCCIONES* \n\nEstimado/a *${cliente}*, le confirmamos la recepción de su pago.\n\n💰 *Monto:* $${Number(monto).toLocaleString()}\n📝 *Concepto:* ${detalle}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
@@ -252,52 +252,53 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                         font-family: Arial, sans-serif;
                         background-color: #121824;
                         margin: 0;
-                        padding: 5px;
+                        padding: 10px;
                         display: flex;
                         justify-content: center;
                         align-items: center;
+                        min-height: 100vh;
                     }
                     .recibo-card {
                         background: #ffffff;
                         width: 100%;
-                        max-width: 340px;
-                        padding: 14px;
-                        border-radius: 12px;
+                        max-width: 360px;
+                        padding: 16px;
+                        border-radius: 14px;
                         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
                         box-sizing: border-box;
-                        border-top: 5px solid #ffcc00;
+                        border-top: 6px solid #ffcc00;
                     }
                     .header-img {
                         text-align: center;
-                        margin-bottom: 8px;
+                        margin-bottom: 10px;
                         width: 100%;
                     }
                     .header-img img {
-                        width: 90px; /* Tamaño súper compacto para que entre holgado en una sola hoja */
+                        width: 200px; /* Tamaño equilibrado: ni gigante ni diminuto, perfecto para una hoja */
                         height: auto;
                         display: inline-block;
-                        border-radius: 6px;
+                        border-radius: 8px;
                     }
                     .titulo {
                         text-align: center;
                         font-weight: 800;
-                        font-size: 0.8rem;
+                        font-size: 0.85rem;
                         color: #444;
-                        margin-bottom: 10px;
+                        margin-bottom: 12px;
                         letter-spacing: 1px;
                         text-transform: uppercase;
                         border-bottom: 1px solid #eaeaea;
-                        padding-bottom: 6px;
+                        padding-bottom: 8px;
                     }
                     .info-box {
                         background: #f8f9fa;
                         border: 1px solid #e9ecef;
-                        padding: 8px 10px;
+                        padding: 10px 12px;
                         border-radius: 8px;
-                        margin-bottom: 8px;
+                        margin-bottom: 10px;
                         display: flex;
                         justify-content: space-between;
-                        font-size: 0.78rem;
+                        font-size: 0.82rem;
                         font-weight: 600;
                         color: #333;
                     }
@@ -307,47 +308,47 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                         border-top: 1px solid #e9ecef;
                         border-right: 1px solid #e9ecef;
                         border-bottom: 1px solid #e9ecef;
-                        padding: 8px 10px;
+                        padding: 10px 12px;
                         border-radius: 8px;
-                        margin-bottom: 8px;
+                        margin-bottom: 10px;
                     }
                     .cliente-box p {
-                        margin: 3px 0;
-                        font-size: 0.82rem;
+                        margin: 4px 0;
+                        font-size: 0.85rem;
                         color: #333;
                     }
                     .monto-box {
                         background: #fffbe6;
                         border: 2px dashed #ffcc00;
                         text-align: center;
-                        padding: 10px;
+                        padding: 12px;
                         border-radius: 8px;
-                        margin-bottom: 12px;
+                        margin-bottom: 15px;
                     }
                     .monto-titulo {
-                        font-size: 0.65rem;
+                        font-size: 0.7rem;
                         font-weight: 800;
                         color: #b38600;
-                        margin-bottom: 2px;
-                        letter-spacing: 1px;
+                        margin-bottom: 3px;
+                        letter-spacing: 1.2px;
                     }
                     .monto-valor {
-                        font-size: 1.3rem;
+                        font-size: 1.45rem;
                         font-weight: bold;
                         color: #111;
                     }
                     .acciones {
                         display: flex;
                         flex-direction: column;
-                        gap: 8px;
+                        gap: 10px;
                     }
                     .btn-wsp {
                         background: #25d366;
                         color: white;
                         border: none;
-                        padding: 10px;
+                        padding: 11px;
                         border-radius: 8px;
-                        font-size: 0.85rem;
+                        font-size: 0.88rem;
                         font-weight: bold;
                         cursor: pointer;
                         text-align: center;
@@ -356,15 +357,15 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                         background: #1f293d;
                         color: white;
                         border: none;
-                        padding: 10px;
+                        padding: 11px;
                         border-radius: 8px;
-                        font-size: 0.85rem;
+                        font-size: 0.88rem;
                         font-weight: bold;
                         cursor: pointer;
                         text-align: center;
                     }
                     @media print {
-                        body { background: none; padding: 0; display: block; }
+                        body { background: none; padding: 0; display: block; height: auto; }
                         .recibo-card { border: none; box-shadow: none; max-width: 100%; padding: 0; margin: 0 auto; }
                         .acciones { display: none; }
                     }
