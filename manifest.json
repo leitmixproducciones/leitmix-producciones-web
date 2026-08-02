@@ -1,7 +1,7 @@
 {
   "name": "Producciones Manager",
-  "short_name": "PM",
-  "start_url": "/panel.html",
+  "short_name": "Prod Manager",
+  "start_url": "./panel.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#ffc107",
@@ -9,8 +9,8 @@
     {
       "src": "https://res.cloudinary.com/exzcoeyi/image/upload/nvzsktuzupud41gsfgbe",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
-
