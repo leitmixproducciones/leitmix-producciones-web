@@ -67,7 +67,7 @@ async function cargarPanelAdmin() {
         }
     }
 
-    // --- B. Cargar Recibos ---
+    // --- B. Cargar Recibos con botones de WhatsApp e Imprimir ---
     const { data: recibos } = await supabase.from("recibos").select("*").order("id", { ascending: false });
     const contRecibos = document.getElementById("listaRecibosAdmin");
     const totalRecibosBadge = document.getElementById("totalRecibos");
@@ -81,12 +81,16 @@ async function cargarPanelAdmin() {
     if (contRecibos) {
         if (recibos && recibos.length > 0) {
             contRecibos.innerHTML = recibos.map(rec => `
-                <div style="background: var(--bg-input); padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                    <div>
+                <div style="background: var(--bg-input); padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--border-color);">
+                    <div style="margin-bottom: 8px;">
                         <p style="margin: 0 0 4px 0; font-weight: 600;">${rec.cliente} - <span style="color: var(--success);">$${Number(rec.monto).toLocaleString()}</span></p>
                         <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Concepto: ${rec.detalle}</p>
                     </div>
-                    <button onclick="window.eliminarRecibo(${rec.id})" class="btn-danger-subtle" style="padding: 4px 10px; font-size: 0.75rem;">Eliminar</button>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button onclick="window.enviarWhatsApp('${rec.cliente}', '${rec.monto}', '${rec.detalle}')" style="background: #25d366; color: #fff; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">💬 WhatsApp</button>
+                        <button onclick="window.imprimirRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}')" style="background: var(--accent); color: #0b0f19; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">🖨️ Imprimir</button>
+                        <button onclick="window.eliminarRecibo(${rec.id})" class="btn-danger-subtle" style="padding: 4px 8px; font-size: 0.75rem;">Eliminar</button>
+                    </div>
                 </div>
             `).join("");
         } else {
@@ -150,7 +154,48 @@ async function cargarPanelAdmin() {
     }
 }
 
-// 5. Manejar Creación de Recibos
+// 5. Funciones de Recibos (WhatsApp e Imprimir)
+window.enviarWhatsApp = function(cliente, monto, detalle) {
+    const mensaje = `🎧 *LEITMIX PRODUCCIONES* \n\nEstimado/a *${cliente}*, le confirmamos la recepción de su pago.\n\n💰 *Monto:* $${Number(monto).toLocaleString()}\n📝 *Concepto:* ${detalle}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+};
+
+window.imprimirRecibo = function(cliente, monto, detalle) {
+    const ventanaImpresion = window.open('', '_blank');
+    ventanaImpresion.document.write(`
+        <html>
+            <head>
+                <title>Comprobante - Leitmix Producciones</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; color: #000; max-width: 400px; margin: 0 auto; }
+                    .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+                    .info { margin-bottom: 10px; font-size: 1rem; }
+                    .monto { font-size: 1.4rem; font-weight: bold; margin: 20px 0; text-align: center; background: #eee; padding: 10px; border-radius: 6px; }
+                    .footer { text-align: center; margin-top: 40px; font-size: 0.85rem; color: #555; border-top: 1px dashed #ccc; padding-top: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>LEITMIX PRODUCCIONES</h2>
+                    <p>Comprobante de Pago / Seña</p>
+                </div>
+                <div class="info"><b>Cliente:</b> ${cliente}</div>
+                <div class="info"><b>Concepto:</b> ${detalle}</div>
+                <div class="monto">Total: $${Number(monto).toLocaleString()}</div>
+                <div class="footer">
+                    <p>¡Gracias por elegirnos!</p>
+                </div>
+                <script>
+                    window.onload = function() { window.print(); }
+                </script>
+            </body>
+        </html>
+    `);
+    ventanaImpresion.document.close();
+};
+
+// 6. Manejar Creación de Recibos
 document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const cliente = document.getElementById("reciboCliente").value;
@@ -173,7 +218,7 @@ document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     }
 });
 
-// 6. Manejar Subida de Multimedia (Cloudinary)
+// 7. Manejar Subida de Multimedia (Cloudinary)
 document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fileInput = document.getElementById("mediaFile");
@@ -218,7 +263,7 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     }
 });
 
-// 7. Funciones globales de Acciones (Eliminar / Modificar)
+// 8. Funciones globales de Acciones (Eliminar / Modificar)
 window.eliminarReserva = async function(id) {
     if (confirm("¿Estás seguro de eliminar esta reserva?")) {
         const { error } = await supabase.from("reservas").delete().eq("id", id);
@@ -257,7 +302,7 @@ window.eliminarMedia = async function(tabla, id) {
     }
 };
 
-// 8. Control del Modal de Configuración
+// 9. Control del Modal de Configuración
 const modalConfig = document.getElementById("modalConfig");
 document.getElementById("btnConfig")?.addEventListener("click", () => {
     if (modalConfig) modalConfig.style.display = "flex";
