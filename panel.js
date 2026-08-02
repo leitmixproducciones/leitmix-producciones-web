@@ -1,5 +1,8 @@
 import { supabase } from "./supabase.js";
 
+// ID de usuario predeterminado para tus registros
+const USER_ID = "a6f7ed6c-a23d-4239-9a2b-3fdd421317ca";
+
 // 1. Manejar el Inicio de Sesión
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -41,9 +44,9 @@ async function verificarSesion() {
     }
 }
 
-// 4. Cargar y Administrar Datos dentro del Panel
+// 4. Cargar y Administrar Todos los Datos del Panel
 async function cargarPanelAdmin() {
-    // Cargar Reservas
+    // --- A. Cargar Reservas ---
     const { data: reservas } = await supabase.from("reservas").select("*").order("id", { ascending: false });
     const contReservas = document.getElementById("listaReservasAdmin");
     const totalReservasBadge = document.getElementById("totalReservas");
@@ -64,7 +67,7 @@ async function cargarPanelAdmin() {
         }
     }
 
-    // Cargar Testimonios para moderar
+    // --- B. Cargar Testimonios para moderar ---
     const { data: testimonios } = await supabase.from("testimonios").select("*").order("id", { ascending: false });
     const contTestimonios = document.getElementById("listaTestimoniosAdmin");
     if (contTestimonios) {
@@ -83,9 +86,89 @@ async function cargarPanelAdmin() {
             contTestimonios.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No hay testimonios para moderar.</p>';
         }
     }
+
+    // --- C. Cargar Multimedia (Fotos y Videos) ---
+    const contMedia = document.getElementById("listaMediaAdmin");
+    if (contMedia) {
+        const { data: fotos } = await supabase.from("fotos").select("*").order("id", { ascending: false });
+        const { data: videos } = await supabase.from("videos").select("*").order("id", { ascending: false });
+
+        let mediaHTML = "";
+
+        if (fotos && fotos.length > 0) {
+            mediaHTML += `<h4 style="color: var(--text-muted); margin: 10px 0 5px 0; font-size: 0.9rem;">Fotos</h4>`;
+            mediaHTML += fotos.map(f => `
+                <div style="background: var(--bg-input); padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border-color);">
+                    <img src="${f.url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" alt="Foto">
+                    <button onclick="window.eliminarMedia('fotos', ${f.id})" class="btn-danger-subtle" style="padding: 4px 8px; font-size: 0.7rem;">Borrar</button>
+                </div>
+            `).join("");
+        }
+
+        if (videos && videos.length > 0) {
+            mediaHTML += `<h4 style="color: var(--text-muted); margin: 15px 0 5px 0; font-size: 0.9rem;">Videos</h4>`;
+            mediaHTML += videos.map(v => `
+                <div style="background: var(--bg-input); padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border-color);">
+                    <span style="font-size: 0.85rem; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">Video ID: ${v.id}</span>
+                    <button onclick="window.eliminarMedia('videos', ${v.id})" class="btn-danger-subtle" style="padding: 4px 8px; font-size: 0.7rem;">Borrar</button>
+                </div>
+            `).join("");
+        }
+
+        if ((!fotos || fotos.length === 0) && (!videos || videos.length === 0)) {
+            mediaHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No hay archivos multimedia cargados.</p>';
+        }
+
+        contMedia.innerHTML = mediaHTML;
+    }
 }
 
-// 5. Funciones globales de Acciones (Eliminar / Modificar)
+// 5. Manejar Subida de Multimedia (Cloudinary)
+document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById("mediaFile");
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "preset_leitmix"); // Reemplazá con tu preset de Cloudinary si usás otro
+
+    alert("Subiendo archivo... por favor esperá.");
+
+    try {
+        const response = await fetch("https://api.cloudinary.com/v1_1/dskg3j23x/upload", { // Tu nube de Cloudinary
+            method: "POST",
+            body: formData
+        });
+        const data = await response.json();
+
+        if (data.secure_url) {
+            const url = data.secure_url;
+            const esVideo = file.type.startsWith("video");
+            const tabla = esVideo ? "videos" : "fotos";
+
+            const { error } = await supabase.from(tabla).insert([{
+                url: url,
+                user_id: USER_ID
+            }]);
+
+            if (error) {
+                alert("Error al guardar en Supabase: " + error.message);
+            } else {
+                alert("¡Archivo subido con éxito!");
+                fileInput.value = "";
+                cargarPanelAdmin();
+            }
+        } else {
+            alert("Error al subir a Cloudinary.");
+        }
+    } catch (err) {
+        alert("Error de red al subir el archivo.");
+    }
+});
+
+// 6. Funciones globales de Acciones (Eliminar / Modificar)
 window.eliminarReserva = async function(id) {
     if (confirm("¿Estás seguro de eliminar esta reserva?")) {
         const { error } = await supabase.from("reservas").delete().eq("id", id);
@@ -108,7 +191,15 @@ window.eliminarTestimonio = async function(id) {
     }
 };
 
-// 6. Control del Modal de Configuración
+window.eliminarMedia = async function(tabla, id) {
+    if (confirm("¿Estás seguro de eliminar este archivo?")) {
+        const { error } = await supabase.from(tabla).delete().eq("id", id);
+        if (error) alert("Error: " + error.message);
+        else cargarPanelAdmin();
+    }
+};
+
+// 7. Control del Modal de Configuración
 const modalConfig = document.getElementById("modalConfig");
 document.getElementById("btnConfig")?.addEventListener("click", () => {
     if (modalConfig) modalConfig.style.display = "flex";
