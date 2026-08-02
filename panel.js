@@ -67,7 +67,34 @@ async function cargarPanelAdmin() {
         }
     }
 
-    // --- B. Cargar Testimonios para moderar ---
+    // --- B. Cargar Recibos ---
+    const { data: recibos } = await supabase.from("recibos").select("*").order("id", { ascending: false });
+    const contRecibos = document.getElementById("listaRecibosAdmin");
+    const totalRecibosBadge = document.getElementById("totalRecibos");
+
+    let sumaTotal = 0;
+    if (recibos && recibos.length > 0) {
+        sumaTotal = recibos.reduce((acc, curr) => acc + Number(curr.monto || 0), 0);
+    }
+    if (totalRecibosBadge) totalRecibosBadge.textContent = `$${sumaTotal.toLocaleString()}`;
+
+    if (contRecibos) {
+        if (recibos && recibos.length > 0) {
+            contRecibos.innerHTML = recibos.map(rec => `
+                <div style="background: var(--bg-input); padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p style="margin: 0 0 4px 0; font-weight: 600;">${rec.cliente} - <span style="color: var(--success);">$${Number(rec.monto).toLocaleString()}</span></p>
+                        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Concepto: ${rec.detalle}</p>
+                    </div>
+                    <button onclick="window.eliminarRecibo(${rec.id})" class="btn-danger-subtle" style="padding: 4px 10px; font-size: 0.75rem;">Eliminar</button>
+                </div>
+            `).join("");
+        } else {
+            contRecibos.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No hay recibos creados.</p>';
+        }
+    }
+
+    // --- C. Cargar Testimonios para moderar ---
     const { data: testimonios } = await supabase.from("testimonios").select("*").order("id", { ascending: false });
     const contTestimonios = document.getElementById("listaTestimoniosAdmin");
     if (contTestimonios) {
@@ -87,7 +114,7 @@ async function cargarPanelAdmin() {
         }
     }
 
-    // --- C. Cargar Multimedia (Fotos y Videos) ---
+    // --- D. Cargar Multimedia (Fotos y Videos) ---
     const contMedia = document.getElementById("listaMediaAdmin");
     if (contMedia) {
         const { data: fotos } = await supabase.from("fotos").select("*").order("id", { ascending: false });
@@ -123,7 +150,30 @@ async function cargarPanelAdmin() {
     }
 }
 
-// 5. Manejar Subida de Multimedia (Cloudinary)
+// 5. Manejar Creación de Recibos
+document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const cliente = document.getElementById("reciboCliente").value;
+    const monto = parseFloat(document.getElementById("reciboMonto").value);
+    const detalle = document.getElementById("reciboDetalle").value;
+
+    const { error } = await supabase.from("recibos").insert([{
+        cliente,
+        monto,
+        detalle,
+        user_id: USER_ID
+    }]);
+
+    if (error) {
+        alert("Error al crear recibo: " + error.message);
+    } else {
+        alert("¡Recibo creado con éxito!");
+        document.getElementById("reciboForm").reset();
+        cargarPanelAdmin();
+    }
+});
+
+// 6. Manejar Subida de Multimedia (Cloudinary)
 document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fileInput = document.getElementById("mediaFile");
@@ -132,12 +182,12 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "preset_leitmix"); // Reemplazá con tu preset de Cloudinary si usás otro
+    formData.append("upload_preset", "preset_leitmix");
 
     alert("Subiendo archivo... por favor esperá.");
 
     try {
-        const response = await fetch("https://api.cloudinary.com/v1_1/dskg3j23x/upload", { // Tu nube de Cloudinary
+        const response = await fetch("https://api.cloudinary.com/v1_1/dskg3j23x/upload", {
             method: "POST",
             body: formData
         });
@@ -168,10 +218,18 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     }
 });
 
-// 6. Funciones globales de Acciones (Eliminar / Modificar)
+// 7. Funciones globales de Acciones (Eliminar / Modificar)
 window.eliminarReserva = async function(id) {
     if (confirm("¿Estás seguro de eliminar esta reserva?")) {
         const { error } = await supabase.from("reservas").delete().eq("id", id);
+        if (error) alert("Error: " + error.message);
+        else cargarPanelAdmin();
+    }
+};
+
+window.eliminarRecibo = async function(id) {
+    if (confirm("¿Estás seguro de eliminar este recibo?")) {
+        const { error } = await supabase.from("recibos").delete().eq("id", id);
         if (error) alert("Error: " + error.message);
         else cargarPanelAdmin();
     }
@@ -199,7 +257,7 @@ window.eliminarMedia = async function(tabla, id) {
     }
 };
 
-// 7. Control del Modal de Configuración
+// 8. Control del Modal de Configuración
 const modalConfig = document.getElementById("modalConfig");
 document.getElementById("btnConfig")?.addEventListener("click", () => {
     if (modalConfig) modalConfig.style.display = "flex";
