@@ -10,7 +10,11 @@ document.getElementById("formReserva")?.addEventListener("submit", async (e) => 
     const comentarios = document.getElementById("reservaComentarios").value;
 
     const { error } = await supabase.from("reservas").insert([{
-        nombre, telefono, evento, fecha, comentarios
+        nombre, 
+        telefono, 
+        evento, 
+        fecha, 
+        comentarios
     }]);
 
     if (error) {
@@ -19,7 +23,6 @@ document.getElementById("formReserva")?.addEventListener("submit", async (e) => 
         alert("¡Reserva guardada con éxito!");
         document.getElementById("formReserva").reset();
         
-        // Redirigir a tu WhatsApp con los datos listos de forma directa
         const numeroWhatsApp = "5491150480339"; 
         const textoMensaje = `Hola! Nueva reserva de:\n*Nombre:* ${nombre}\n*Evento:* ${evento}\n*Fecha:* ${fecha}\n*Teléfono:* ${telefono}\n*Comentarios:* ${comentarios}`;
 
@@ -35,7 +38,10 @@ document.getElementById("formTestimonioPublico")?.addEventListener("submit", asy
     const mensaje = document.getElementById("testimonioComentario").value;
 
     const { error } = await supabase.from("testimonios").insert([{
-        nombre, estrellas, mensaje, activo: false
+        nombre, 
+        estrellas, 
+        mensaje, 
+        activo: false
     }]);
 
     if (error) {
