@@ -144,7 +144,7 @@ async function cargarPanelAdmin() {
             mediaHTML += `<h4 style="color: var(--text-muted); margin: 15px 0 5px 0; font-size: 0.9rem;">Videos</h4>`;
             mediaHTML += videos.map(v => `
                 <div style="background: var(--bg-input); padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border-color);">
-                    <span style="font-size: 0.85rem; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">Video ID: ${v.id}</span>
+                    <video src="${v.url}" style="width: 60px; height: 50px; object-fit: cover; border-radius: 4px;" preload="metadata"></video>
                     <button onclick="window.eliminarMedia('videos', ${v.id})" class="btn-danger-subtle" style="padding: 6px 10px; font-size: 0.75rem;">Borrar</button>
                 </div>
             `).join("");
