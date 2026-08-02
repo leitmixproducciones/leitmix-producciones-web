@@ -8,11 +8,10 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #e0e0e0; line-height: 1.6; }
         
-        /* HEADER CON LOGO GRANDE Y DESTACADO */
+        /* HEADER CON LOGO MÁXIMO Y ADAPTABLE */
         header { 
             background: #1a1a1a; 
-            min-height: 220px; 
-            padding: 20px; 
+            padding: 20px 10px; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
@@ -32,14 +31,15 @@
         }
 
         .logo-img {
-            height: 180px; /* Logo extra grande y perfectamente legible */
-            width: auto;  
+            width: 95%;           /* Ocupa casi todo el ancho de la pantalla del celular */
+            max-width: 480px;     /* Tope máximo para pantallas grandes o PC */
+            height: auto;         /* Mantiene la proporción justa para que no se deforme */
             object-fit: contain; 
         }
 
         nav {
             display: flex;
-            gap: 25px;
+            gap: 20px;
             flex-wrap: wrap;
             justify-content: center;
         }
