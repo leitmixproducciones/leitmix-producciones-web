@@ -1,3 +1,8 @@
+window.onerror = function(msg, url, line) {
+    alert("Error JS: " + msg + " (Línea: " + line + ")");
+};
+
+
 import { supabase } from "./supabase.js";
 
 // 1. Enviar Reserva y abrir WhatsApp
