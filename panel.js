@@ -252,52 +252,53 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                         font-family: Arial, sans-serif;
                         background-color: #121824;
                         margin: 0;
-                        padding: 20px;
+                        padding: 10px;
                         display: flex;
                         justify-content: center;
                         align-items: center;
+                        min-height: 100vh;
                     }
                     .recibo-card {
                         background: #ffffff;
                         width: 100%;
-                        max-width: 420px;
-                        padding: 25px;
-                        border-radius: 20px;
+                        max-width: 380px;
+                        padding: 20px;
+                        border-radius: 16px;
                         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
                         box-sizing: border-box;
                         border-top: 6px solid #ffcc00;
                     }
                     .header-img {
                         text-align: center;
-                        margin-bottom: 15px;
+                        margin-bottom: 12px;
                         width: 100%;
                     }
                     .header-img img {
-                        width: 100%;
+                        width: 140px; /* Tamaño controlado para que no sea gigante y entre en una hoja */
                         height: auto;
-                        display: block;
-                        border-radius: 10px;
+                        display: inline-block;
+                        border-radius: 8px;
                     }
                     .titulo {
                         text-align: center;
                         font-weight: 800;
-                        font-size: 0.95rem;
+                        font-size: 0.9rem;
                         color: #444;
-                        margin-bottom: 18px;
+                        margin-bottom: 15px;
                         letter-spacing: 1px;
                         text-transform: uppercase;
                         border-bottom: 1px solid #eaeaea;
-                        padding-bottom: 12px;
+                        padding-bottom: 10px;
                     }
                     .info-box {
                         background: #f8f9fa;
                         border: 1px solid #e9ecef;
-                        padding: 12px 16px;
-                        border-radius: 12px;
-                        margin-bottom: 15px;
+                        padding: 10px 14px;
+                        border-radius: 10px;
+                        margin-bottom: 12px;
                         display: flex;
                         justify-content: space-between;
-                        font-size: 0.9rem;
+                        font-size: 0.85rem;
                         font-weight: 600;
                         color: #333;
                     }
@@ -307,67 +308,65 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                         border-top: 1px solid #e9ecef;
                         border-right: 1px solid #e9ecef;
                         border-bottom: 1px solid #e9ecef;
-                        padding: 15px;
-                        border-radius: 12px;
-                        margin-bottom: 15px;
+                        padding: 12px;
+                        border-radius: 10px;
+                        margin-bottom: 12px;
                     }
                     .cliente-box p {
-                        margin: 6px 0;
-                        font-size: 0.95rem;
+                        margin: 4px 0;
+                        font-size: 0.9rem;
                         color: #333;
                     }
                     .monto-box {
                         background: #fffbe6;
                         border: 2px dashed #ffcc00;
                         text-align: center;
-                        padding: 16px;
-                        border-radius: 12px;
-                        margin-bottom: 22px;
+                        padding: 14px;
+                        border-radius: 10px;
+                        margin-bottom: 18px;
                     }
                     .monto-titulo {
-                        font-size: 0.75rem;
+                        font-size: 0.7rem;
                         font-weight: 800;
                         color: #b38600;
-                        margin-bottom: 5px;
+                        margin-bottom: 4px;
                         letter-spacing: 1.5px;
                     }
                     .monto-valor {
-                        font-size: 1.8rem;
+                        font-size: 1.6rem;
                         font-weight: bold;
                         color: #111;
                     }
                     .acciones {
                         display: flex;
                         flex-direction: column;
-                        gap: 12px;
+                        gap: 10px;
                     }
                     .btn-wsp {
                         background: #25d366;
                         color: white;
                         border: none;
-                        padding: 14px;
-                        border-radius: 12px;
-                        font-size: 0.95rem;
+                        padding: 12px;
+                        border-radius: 10px;
+                        font-size: 0.9rem;
                         font-weight: bold;
                         cursor: pointer;
                         text-align: center;
-                        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
                     }
                     .btn-print {
                         background: #1f293d;
                         color: white;
                         border: none;
-                        padding: 14px;
-                        border-radius: 12px;
-                        font-size: 0.95rem;
+                        padding: 12px;
+                        border-radius: 10px;
+                        font-size: 0.9rem;
                         font-weight: bold;
                         cursor: pointer;
                         text-align: center;
-                        box-shadow: 0 4px 10px rgba(31, 41, 61, 0.3);
                     }
                     @media print {
-                        body { background: none; padding: 0; display: block; }
-                        .recibo-card { border: none; box-shadow: none; max-width: 100%; padding: 10px; margin: 0 auto; }
+                        body { background: none; padding: 0; display: block; height: auto; }
+                        .recibo-card { border: none; box-shadow: none; max-width: 100%; padding: 5px; margin: 0 auto; }
                         .acciones { display: none; }
                     }
                 </style>
