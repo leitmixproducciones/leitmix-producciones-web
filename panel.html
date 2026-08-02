@@ -4,22 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel - Leitmix Producciones</title>
-    <!-- Tus estilos actuales -->
 </head>
-<body>
+<body style="background: #121212; color: #fff; font-family: sans-serif; margin: 0; padding: 0;">
 
     <!-- SECCIÓN DE LOGIN -->
-    <section id="loginSection">
-        <form id="loginForm">
-            <h2>Iniciar Sesión</h2>
-            <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
-            <input type="password" id="loginPassword" placeholder="Contraseña" required>
-            <button type="submit">Ingresar</button>
+    <section id="loginSection" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <form id="loginForm" style="background: #1e1e1e; padding: 30px; border-radius: 12px; width: 100%; max-width: 350px; border: 1px solid #333;">
+            <h2 style="margin-top: 0; color: #ffc107; text-align: center;">Iniciar Sesión</h2>
+            <div style="margin-bottom: 15px;">
+                <input type="email" id="loginEmail" placeholder="Correo electrónico" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;" required>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <input type="password" id="loginPassword" placeholder="Contraseña" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;" required>
+            </div>
+            <button type="submit" style="width: 100%; background: #ffc107; color: #121212; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Ingresar</button>
         </form>
     </section>
 
     <!-- SECCIÓN DE ADMINISTRACIÓN (Panel Principal) -->
-    <section id="adminSection" class="hidden" style="position: relative; padding: 20px;">
+    <section id="adminSection" class="hidden" style="display: none; position: relative; padding: 20px; max-width: 800px; margin: 0 auto;">
         
         <!-- Botón de Engranaje (Configuración de Perfil) -->
         <button id="btnConfig" title="Configurar Perfil" style="background: transparent; border: none; font-size: 1.6rem; cursor: pointer; color: #ffc107; position: absolute; top: 20px; right: 20px; z-index: 10;">⚙️</button>
@@ -33,19 +36,19 @@
         <div id="listaReservasAdmin"></div>
 
         <h2>💰 Gestión de Recibos</h2>
-        <form id="reciboForm">
-            <input type="text" id="reciboCliente" placeholder="Nombre del cliente" required>
-            <input type="number" id="reciboMonto" placeholder="Monto ($)" required>
-            <input type="text" id="reciboDetalle" placeholder="Concepto o seña" required>
-            <button type="submit">Crear Recibo</button>
+        <form id="reciboForm" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+            <input type="text" id="reciboCliente" placeholder="Nombre del cliente" style="flex: 1; min-width: 150px; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px;" required>
+            <input type="number" id="reciboMonto" placeholder="Monto ($)" style="flex: 1; min-width: 100px; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px;" required>
+            <input type="text" id="reciboDetalle" placeholder="Concepto o seña" style="flex: 1; min-width: 150px; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px;" required>
+            <button type="submit" style="background: #ffc107; color: #121212; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer;">Crear Recibo</button>
         </form>
         <div id="listaRecibosAdmin"></div>
         <p>Recaudado Total: <span id="totalRecibos">$0</span></p>
 
         <h2>📁 Contenido Multimedia</h2>
-        <form id="mediaForm">
-            <input type="file" id="mediaFile" accept="image/*,video/*" required>
-            <button type="submit">Subir Archivo</button>
+        <form id="mediaForm" style="margin-bottom: 15px;">
+            <input type="file" id="mediaFile" accept="image/*,video/*" required style="color: #aaa;">
+            <button type="submit" style="background: #ffc107; color: #121212; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px;">Subir Archivo</button>
         </form>
         <div id="listaMediaAdmin"></div>
 
@@ -53,36 +56,32 @@
         <div id="listaTestimoniosAdmin"></div>
     </section>
 
-    <!-- MODAL DE CONFIGURACIÓN DE PERFIL (Desplegado por el engranaje) -->
+    <!-- MODAL DE CONFIGURACIÓN DE PERFIL -->
     <div id="modalConfig" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 2000;">
         <div style="background: #1e1e1e; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; border: 2px solid #ffc107; color: #fff; position: relative;">
             <h3 style="color: #ffc107; margin-top: 0; margin-bottom: 15px;">⚙️ Configuración de Perfil</h3>
-            
             <form id="perfilForm">
                 <div style="margin-bottom: 12px;">
                     <label style="font-size: 0.85rem; color: #aaa; display: block; margin-bottom: 4px;">Nombre Artístico / DJ</label>
-                    <input type="text" id="perfilNombre" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px;" required>
+                    <input type="text" id="perfilNombre" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;" required>
                 </div>
-                
                 <div style="margin-bottom: 12px;">
                     <label style="font-size: 0.85rem; color: #aaa; display: block; margin-bottom: 4px;">Teléfono de Contacto</label>
-                    <input type="text" id="perfilTelefono" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                    <input type="text" id="perfilTelefono" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;">
                 </div>
-
                 <div style="margin-bottom: 20px;">
                     <label style="font-size: 0.85rem; color: #aaa; display: block; margin-bottom: 4px;">Instagram / Redes</label>
-                    <input type="text" id="perfilInstagram" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                    <input type="text" id="perfilInstagram" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;">
                 </div>
-
                 <div style="display: flex; gap: 10px;">
-                    <button type="submit" style="background: #ffc107; color: #121212; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1;">Guardar Cambios</button>
+                    <button type="submit" style="background: #ffc107; color: #121212; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1;">Guardar</button>
                     <button type="button" id="cerrarModal" style="background: #dc3545; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1;">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Script principal del panel -->
+    <!-- Script principal -->
     <script type="module" src="panel.js"></script>
 </body>
 </html>
