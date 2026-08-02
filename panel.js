@@ -80,7 +80,10 @@ async function cargarPanelAdmin() {
 
     if (contRecibos) {
         if (recibos && recibos.length > 0) {
-            contRecibos.innerHTML = recibos.map(rec => `
+            contRecibos.innerHTML = recibos.map(rec => {
+                const fechaActual = new Date().toLocaleDateString();
+                const idReciboStr = String(rec.id).padStart(4, '0');
+                return `
                 <div style="background: var(--bg-input); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
                     <div>
                         <p style="margin: 0 0 4px 0; font-weight: 600; font-size: 1rem;">${rec.cliente} - <span style="color: var(--success);">$${Number(rec.monto).toLocaleString()}</span></p>
@@ -88,11 +91,12 @@ async function cargarPanelAdmin() {
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--border-color); padding-top: 10px;">
                         <button onclick="window.enviarWhatsApp('${rec.cliente}', '${rec.monto}', '${rec.detalle}')" style="background: #25d366; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; flex: 1; text-align: center;">💬 WhatsApp</button>
-                        <button onclick="window.imprimirRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}')" style="background: var(--accent); color: #0b0f19; border: none; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; flex: 1; text-align: center;">🖨️ Imprimir</button>
+                        <button onclick="window.imprimirRecibo('${idReciboStr}', '${fechaActual}', '${rec.cliente}', '${rec.monto}', '${rec.detalle}')" style="background: var(--accent); color: #0b0f19; border: none; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; flex: 1; text-align: center;">🖨️ Imprimir</button>
                         <button onclick="window.eliminarRecibo(${rec.id})" class="btn-danger-subtle" style="padding: 8px 12px; font-size: 0.8rem; text-align: center;">Borrar</button>
                     </div>
                 </div>
-            `).join("");
+            `;
+            }).join("");
         } else {
             contRecibos.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No hay recibos creados.</p>';
         }
@@ -154,41 +158,164 @@ async function cargarPanelAdmin() {
     }
 }
 
-// 5. Funciones de Recibos (WhatsApp e Imprimir)
+// 5. Funciones de Recibos (WhatsApp y Comprobante Visual Estilizado)
 window.enviarWhatsApp = function(cliente, monto, detalle) {
     const mensaje = `🎧 *LEITMIX PRODUCCIONES* \n\nEstimado/a *${cliente}*, le confirmamos la recepción de su pago.\n\n💰 *Monto:* $${Number(monto).toLocaleString()}\n📝 *Concepto:* ${detalle}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 };
 
-window.imprimirRecibo = function(cliente, monto, detalle) {
+window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
     const ventanaImpresion = window.open('', '_blank');
     ventanaImpresion.document.write(`
         <html>
             <head>
                 <title>Comprobante - Leitmix Producciones</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
-                    body { font-family: Arial, sans-serif; padding: 20px; color: #000; max-width: 400px; margin: 0 auto; }
-                    .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-                    .info { margin-bottom: 10px; font-size: 1rem; }
-                    .monto { font-size: 1.4rem; font-weight: bold; margin: 20px 0; text-align: center; background: #eee; padding: 10px; border-radius: 6px; }
-                    .footer { text-align: center; margin-top: 40px; font-size: 0.85rem; color: #555; border-top: 1px dashed #ccc; padding-top: 10px; }
+                    body {
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f4;
+                        margin: 0;
+                        padding: 20px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .recibo-card {
+                        background: #fff;
+                        width: 100%;
+                        max-width: 450px;
+                        padding: 25px;
+                        border-radius: 16px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                        box-sizing: border-box;
+                        border: 3px solid #ffcc00;
+                    }
+                    .header-img {
+                        text-align: center;
+                        margin-bottom: 15px;
+                    }
+                    .header-img img {
+                        width: 100%;
+                        max-height: 180px;
+                        object-fit: cover;
+                        border-radius: 10px;
+                    }
+                    .titulo {
+                        text-align: center;
+                        font-weight: bold;
+                        font-size: 1.1rem;
+                        color: #222;
+                        margin-bottom: 20px;
+                        letter-spacing: 0.5px;
+                        border-bottom: 2px solid #eee;
+                        padding-bottom: 10px;
+                    }
+                    .info-grid {
+                        display: flex;
+                        justify-content: space-between;
+                        background: #f9f9f9;
+                        padding: 12px 15px;
+                        border-radius: 10px;
+                        margin-bottom: 15px;
+                        font-size: 0.95rem;
+                        font-weight: bold;
+                        color: #444;
+                    }
+                    .detalle-box {
+                        background: #fdfdfd;
+                        border: 1px solid #e0e0e0;
+                        padding: 15px;
+                        border-radius: 10px;
+                        margin-bottom: 15px;
+                    }
+                    .detalle-box p {
+                        margin: 5px 0;
+                        font-size: 1rem;
+                        color: #333;
+                    }
+                    .monto-box {
+                        background: #fffbe6;
+                        border: 2px dashed #ffcc00;
+                        text-align: center;
+                        padding: 15px;
+                        border-radius: 10px;
+                        margin-bottom: 25px;
+                    }
+                    .monto-titulo {
+                        font-size: 0.85rem;
+                        font-weight: bold;
+                        color: #b38600;
+                        margin-bottom: 5px;
+                        letter-spacing: 1px;
+                    }
+                    .monto-valor {
+                        font-size: 1.8rem;
+                        font-weight: bold;
+                        color: #111;
+                    }
+                    .acciones {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    .btn-wsp {
+                        background: #25d366;
+                        color: white;
+                        border: none;
+                        padding: 12px;
+                        border-radius: 10px;
+                        font-size: 1rem;
+                        font-weight: bold;
+                        cursor: pointer;
+                        text-align: center;
+                    }
+                    .btn-print {
+                        background: #1f293d;
+                        color: white;
+                        border: none;
+                        padding: 12px;
+                        border-radius: 10px;
+                        font-size: 1rem;
+                        font-weight: bold;
+                        cursor: pointer;
+                        text-align: center;
+                    }
+                    @media print {
+                        body { background: none; padding: 0; }
+                        .recibo-card { border: none; box-shadow: none; max-width: 100%; padding: 0; }
+                        .acciones { display: none; }
+                    }
                 </style>
             </head>
             <body>
-                <div class="header">
-                    <h2>LEITMIX PRODUCCIONES</h2>
-                    <p>Comprobante de Pago / Seña</p>
+                <div class="recibo-card">
+                    <div class="header-img">
+                        <img src="https://res.cloudinary.com/dskg3j23x/image/upload/v1/tu-imagen-de-banner.jpg" onerror="this.style.display='none'" alt="Leitmix Producciones">
+                    </div>
+                    <div class="titulo">COMPROBANTE DE PAGO OFICIAL</div>
+                    
+                    <div class="info-grid">
+                        <span>N° Recibo: #${idRecibo}</span>
+                        <span>Fecha: ${fecha}</span>
+                    </div>
+
+                    <div class="detalle-box">
+                        <p><b>Cliente:</b> ${cliente}</p>
+                        <p><b>Concepto:</b> ${detalle}</p>
+                    </div>
+
+                    <div class="monto-box">
+                        <div class="monto-titulo">MONTO RECIBIDO</div>
+                        <div class="monto-valor">$${Number(monto).toLocaleString()}</div>
+                    </div>
+
+                    <div class="acciones">
+                        <button class="btn-wsp" onclick="window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('🎧 *LEITMIX PRODUCCIONES* \\n\\nEstimado/a *${cliente}*, le confirmamos la recepción de su pago.\\n\\n💰 *Monto:* $' + Number(${monto}).toLocaleString() + '\\n📝 *Concepto:* ${detalle}\\n\\n¡Muchas gracias por confiar en nosotros! 🚀'), '_blank')">📱 Enviar por WhatsApp</button>
+                        <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+                    </div>
                 </div>
-                <div class="info"><b>Cliente:</b> ${cliente}</div>
-                <div class="info"><b>Concepto:</b> ${detalle}</div>
-                <div class="monto">Total: $${Number(monto).toLocaleString()}</div>
-                <div class="footer">
-                    <p>¡Gracias por elegirnos!</p>
-                </div>
-                <script>
-                    window.onload = function() { window.print(); }
-                </script>
             </body>
         </html>
     `);
