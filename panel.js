@@ -506,25 +506,17 @@ if (btnRegistrar) {
 
 const btnOlvido = document.getElementById('btnOlvido');
 if (btnOlvido) {
-    btnOlvido.addEventListener('click', async (e) => {
+    btnOlvido.addEventListener('click', (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
 
-        if (!email) {
-            alert("Por favor, escribe tu correo arriba para recuperar la contraseña.");
-            return;
-        }
-
-        // URL exacta forzada para evitar el error 404 al hacer clic en el mail
-        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: "https://leitmixproducciones.github.io/leitmix-producciones-web/",
-        });
-
-        if (error) {
-            alert("Error: " + error.message);
-        } else {
-            alert("¡Listo! Se ha enviado un enlace de recuperación a tu correo electrónico.");
-        }
+        // Redirige por WhatsApp para soporte directo sin errores 404 en GitHub Pages
+        const mensaje = email 
+            ? `Hola! Necesito recuperar la contraseña de acceso al panel para el correo: ${email}` 
+            : `Hola! Necesito recuperar la contraseña de acceso al panel de administración.`;
+            
+        const urlWhatsApp = `https://api.whatsapp.com/send?phone=5491100000000&text=${encodeURIComponent(mensaje)}`;
+        window.open(urlWhatsApp, '_blank');
     });
 }
 
