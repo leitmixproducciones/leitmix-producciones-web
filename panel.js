@@ -1,104 +1,105 @@
 import { supabase } from "./supabase.js";
 
-// 1. Enviar Reserva y abrir WhatsApp
-document.getElementById("formReserva")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const nombre = document.getElementById("reservaNombre").value;
-    const telefono = document.getElementById("reservaTelefono").value;
-    const evento = document.getElementById("reservaEvento").value;
-    const fecha = document.getElementById("reservaFecha").value;
-    const comentarios = document.getElementById("reservaComentarios").value;
+// ID de usuario predeterminado para tus registros
+const USER_ID = "a6f7ed6c-a23d-4239-9a2b-3fdd421317ca";
 
-    const { error } = await supabase.from("reservas").insert([{
-        nombre, 
-        telefono, 
-        evento, 
-        fecha, 
-        comentarios,
-        user_id: "a6f7ed6c-a23d-4239-9a2b-3fdd421317ca"
-    }]);
+// 1. Manejar el Inicio de Sesión
+document.getElementById("formLogin")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    const { error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
 
     if (error) {
-        alert("Error al guardar reserva: " + error.message);
+        alert("Error al iniciar sesión: " + error.message);
     } else {
-        alert("¡Reserva guardada con éxito!");
-        document.getElementById("formReserva").reset();
-        
-        // Redirigir a tu WhatsApp con los datos listos de forma directa
-        const numeroWhatsApp = "5491150480339"; 
-        const textoMensaje = `Hola! Nueva reserva de:\n*Nombre:* ${nombre}\n*Evento:* ${evento}\n*Fecha:* ${fecha}\n*Teléfono:* ${telefono}\n*Comentarios:* ${comentarios}`;
-
-        window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(textoMensaje)}`, '_blank');
+        alert("¡Bienvenido al panel!");
+        verificarSesion();
     }
 });
 
-// 2. Enviar Testimonio Pùblico
-document.getElementById("formTestimonioPublico")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const nombre = document.getElementById("testimonioNombre").value;
-    const estrellas = parseInt(document.getElementById("testimonioEstrellas").value);
-    const mensaje = document.getElementById("testimonioComentario").value;
+// 2. Verificar Estado de la Sesión
+async function verificarSesion() {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const seccionLogin = document.getElementById("seccionLogin");
+    const seccionAdmin = document.getElementById("seccionAdmin");
 
-    const { error } = await supabase.from("testimonios").insert([{
-        nombre, 
-        estrellas, 
-        mensaje, 
-        activo: false,
-        user_id: "a6f7ed6c-a23d-4239-9a2b-3fdd421317ca"
-    }]);
-
-    if (error) {
-        alert("Error al enviar comentario: " + error.message);
+    if (session) {
+        if (seccionLogin) seccionLogin.style.display = "none";
+        if (seccionAdmin) seccionAdmin.style.display = "block";
+        cargarPanelAdmin();
     } else {
-        alert("¡Gracias! Tu comentario fue enviado y será publicado pronto.");
-        document.getElementById("formTestimonioPublico").reset();
-    }
-});
-
-// 3. Cargar Galería de Fotos, Videos y Testimonios Aprobados por separado
-async function cargarPublico() {
-    // Cargar Fotos completas en su sección
-    const { data: fotos } = await supabase.from("fotos").select("*").order("id", { ascending: false });
-    const contGaleria = document.getElementById("galeriaPublica");
-    if (contGaleria) {
-        if (fotos && fotos.length > 0) {
-            contGaleria.innerHTML = fotos.map(f => `
-                <div style="background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center;">
-                    <img src="${f.url}" style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 6px;" alt="Foto">
-                </div>
-            `).join("");
-        } else {
-            contGaleria.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1 / -1;">No hay fotos cargadas.</p>';
-        }
-    }
-
-    // Cargar Videos en su propia sección
-    const { data: videos } = await supabase.from("videos").select("*").order("id", { ascending: false });
-    const contVideos = document.getElementById("videosPublicos");
-    if (contVideos) {
-        if (videos && videos.length > 0) {
-            contVideos.innerHTML = videos.map(v => `
-                <div style="background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center; overflow: hidden;">
-                    <video src="${v.url}" controls preload="metadata" style="width: 100%; max-height: 250px; object-fit: contain; border-radius: 6px; background: #000;"></video>
-                </div>
-            `).join("");
-        } else {
-            contVideos.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1 / -1;">No hay videos cargados.</p>';
-        }
-    }
-
-    // Testimonios aprobados (usando la columna 'activo' y mapeando 'mensaje')
-    const { data: tests } = await supabase.from("testimonios").select("*").eq("activo", true);
-    const contTest = document.getElementById("testimoniosPublicos");
-    if (tests && tests.length > 0 && contTest) {
-        contTest.innerHTML = tests.map(t => `
-            <div style="background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #333;">
-                <strong style="color: #ffc107;">${t.nombre}</strong>
-                <p style="color: #aaa; font-size: 0.85rem; margin: 4px 0;">${"⭐".repeat(t.estrellas)}</p>
-                <p style="color: #ddd; font-size: 0.95rem;">"${t.mensaje}"</p>
-            </div>
-        `).join("");
+        if (seccionLogin) seccionLogin.style.display = "block";
+        if (seccionAdmin) seccionAdmin.style.display = "none";
     }
 }
 
-cargarPublico();
+// 3. Cargar y Administrar Datos dentro del Panel
+async function cargarPanelAdmin() {
+    // Cargar Reservas
+    const { data: reservas } = await supabase.from("reservas").select("*").order("id", { ascending: false });
+    const contReservas = document.getElementById("reservasAdmin");
+    if (contReservas) {
+        if (reservas && reservas.length > 0) {
+            contReservas.innerHTML = reservas.map(r => `
+                <div style="background: #222; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #444;">
+                    <p style="color: #fff; margin: 0 0 5px 0;"><b>${r.nombre}</b> - ${r.evento} (${r.fecha})</p>
+                    <p style="color: #aaa; font-size: 0.85rem; margin: 0 0 5px 0;">Tel: ${r.telefono} | Comentario: ${r.comentarios || 'Ninguno'}</p>
+                    <button onclick="eliminarReserva(${r.id})" style="background: #d9534f; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Eliminar</button>
+                </div>
+            `).join("");
+        } else {
+            contReservas.innerHTML = '<p style="color: #888;">No hay reservas registradas.</p>';
+        }
+    }
+
+    // Cargar Testimonios para aprobar o rechazar
+    const { data: testimonios } = await supabase.from("testimonios").select("*").order("id", { ascending: false });
+    const contTestimonios = document.getElementById("testimoniosAdmin");
+    if (contTestimonios) {
+        if (testimonios && testimonios.length > 0) {
+            contTestimonios.innerHTML = testimonios.map(t => `
+                <div style="background: #222; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #444;">
+                    <p style="color: #fff; margin: 0 0 5px 0;"><b>${t.nombre}</b> (${"⭐".repeat(t.estrellas)})</p>
+                    <p style="color: #ddd; font-size: 0.9rem; margin: 0 0 5px 0;">"${t.mensaje}"</p>
+                    <p style="color: ${t.activo ? '#5cb85c' : '#f0ad4e'}; font-size: 0.8rem; margin: 0 0 8px 0;">Estado: ${t.activo ? 'Aprobado (Visible)' : 'Pendiente'}</p>
+                    <button onclick="toggleTestimonio(${t.id}, ${!t.activo})" style="background: ${t.activo ? '#f0ad4e' : '#5cb85c'}; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">${t.activo ? 'Ocultar' : 'Aprobar'}</button>
+                    <button onclick="eliminarTestimonio(${t.id})" style="background: #d9534f; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Eliminar</button>
+                </div>
+            `).join("");
+        } else {
+            contTestimonios.innerHTML = '<p style="color: #888;">No hay testimonios.</p>';
+        }
+    }
+}
+
+// 4. Funciones de Acciones (Eliminar / Modificar)
+window.eliminarReserva = async function(id) {
+    if (confirm("¿Estás seguro de eliminar esta reserva?")) {
+        const { error } = await supabase.from("reservas").delete().eq("id", id);
+        if (error) alert("Error: " + error.message);
+        else cargarPanelAdmin();
+    }
+};
+
+window.toggleTestimonio = async function(id, nuevoEstado) {
+    const { error } = await supabase.from("testimonios").update({ activo: nuevoEstado }).eq("id", id);
+    if (error) alert("Error: " + error.message);
+    else cargarPanelAdmin();
+};
+
+window.eliminarTestimonio = async function(id) {
+    if (confirm("¿Estás seguro de eliminar este testimonio?")) {
+        const { error } = await supabase.from("testimonios").delete().eq("id", id);
+        if (error) alert("Error: " + error.message);
+        else cargarPanelAdmin();
+    }
+};
+
+// Ejecutar verificación al cargar la página del panel
+verificarSesion();
