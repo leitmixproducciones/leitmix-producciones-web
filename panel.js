@@ -158,7 +158,7 @@ async function cargarPanelAdmin() {
     }
 }
 
-// 5. Funciones de Recibos (WhatsApp y Comprobante Exacto a la Captura)
+// 5. Funciones de Recibos (WhatsApp y Comprobante Exacto con Logo de Index)
 window.enviarWhatsApp = function(cliente, monto, detalle) {
     const mensaje = `🎧 *LEITMIX PRODUCCIONES* \n\nEstimado/a *${cliente}*, le confirmamos la recepción de su pago.\n\n💰 *Monto:* $${Number(monto).toLocaleString()}\n📝 *Concepto:* ${detalle}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
@@ -299,7 +299,7 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
             <body>
                 <div class="recibo-card">
                     <div class="header-img">
-                        <img src="https://res.cloudinary.com/dskg3j23x/image/upload/v1/tu-imagen-de-banner.jpg" onerror="this.style.display='none'" alt="Leitmix Producciones">
+                        <img src="https://res.cloudinary.com/exzcoeyi/image/upload/l4y4rqa7bokko0mfafwm" alt="Leitmix Producciones">
                     </div>
                     <div class="titulo">Comprobante de Pago Oficial</div>
                     
