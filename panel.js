@@ -195,12 +195,17 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                     .header-img {
                         text-align: center;
                         margin-bottom: 15px;
+                        background: #0b0f19;
+                        border-radius: 12px;
+                        padding: 12px;
                     }
                     .header-img img {
                         width: 100%;
-                        max-height: 200px;
-                        object-fit: cover;
-                        border-radius: 12px;
+                        max-height: 150px;
+                        object-fit: contain;
+                        display: block;
+                        margin: 0 auto;
+                        border-radius: 8px;
                     }
                     .titulo {
                         text-align: center;
@@ -290,8 +295,9 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
                         box-shadow: 0 4px 10px rgba(31, 41, 61, 0.3);
                     }
                     @media print {
-                        body { background: none; padding: 0; }
-                        .recibo-card { border: none; box-shadow: none; max-width: 100%; padding: 0; }
+                        body { background: none; padding: 0; display: block; }
+                        .recibo-card { border: none; box-shadow: none; max-width: 100%; padding: 10px; margin: 0 auto; }
+                        .header-img { background: #0b0f19 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                         .acciones { display: none; }
                     }
                 </style>
