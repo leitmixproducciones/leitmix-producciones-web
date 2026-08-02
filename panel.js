@@ -510,12 +510,11 @@ if (btnOlvido) {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
 
-        // Redirige por WhatsApp para soporte directo sin errores 404 en GitHub Pages
         const mensaje = email 
             ? `Hola! Necesito recuperar la contraseña de acceso al panel para el correo: ${email}` 
             : `Hola! Necesito recuperar la contraseña de acceso al panel de administración.`;
             
-        const urlWhatsApp = `https://api.whatsapp.com/send?phone=5491100000000&text=${encodeURIComponent(mensaje)}`;
+        const urlWhatsApp = `https://api.whatsapp.com/send?phone=5491150480339&text=${encodeURIComponent(mensaje)}`;
         window.open(urlWhatsApp, '_blank');
     });
 }
