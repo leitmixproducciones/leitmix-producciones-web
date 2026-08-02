@@ -7,8 +7,33 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #e0e0e0; line-height: 1.6; }
-        header { background: #1a1a1a; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; position: sticky; top: 0; z-index: 100; }
-        .logo-text { font-size: 1.5rem; font-weight: bold; color: #ffc107; }
+        
+        /* HEADER ACTUALIZADO CON LOGO */
+        header { 
+            background: #1a1a1a; 
+            height: 75px; 
+            padding: 0 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 2px solid #ffc107; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+
+        .logo-container {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 65%; /* Ajusta el tamaño vertical dentro del header */
+            width: auto;  /* Mantiene la proporción intacta */
+            object-fit: contain; /* Evita cualquier deformación */
+        }
+
         nav a { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 500; transition: color 0.3s; }
         nav a:hover { color: #ffc107; }
         .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
@@ -33,7 +58,10 @@
 <body>
 
     <header>
-        <div class="logo-text">Leitmix Producciones</div>
+        <div class="logo-container">
+            <!-- Reemplazá el enlace de abajo por la URL de la imagen de tu logo (puede ser el link directo de Cloudinary) -->
+            <img src="URL_DE_TU_LOGO_AQUI" alt="Leitmix Producciones" class="logo-img">
+        </div>
         <nav>
             <a href="#reservas">Reservas</a>
             <a href="#galeria">Galería</a>
@@ -75,7 +103,6 @@
         <!-- TESTIMONIOS -->
         <section id="testimonios">
             <h2 class="section-title">⭐ Testimonios</h2>
-            <!-- Cambiado de grid-media a list-testimonios para que salgan en columna -->
             <div id="testimoniosPublicos" class="list-testimonios">
                 <p style="color: #888; text-align: center;">Aún no hay testimonios publicados.</p>
             </div>
