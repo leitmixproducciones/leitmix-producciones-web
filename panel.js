@@ -1,5 +1,23 @@
 import { supabase } from "./supabase.js";
 
+// 0. Crear e inyectar el modal de recuperación de contraseña automáticamente en la página
+if (!document.getElementById("modalRecovery")) {
+    const modalHTML = `
+    <div id="modalRecovery" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+        <div style="background: #121824; width: 100%; max-width: 400px; padding: 30px; border-radius: 20px; border: 1px solid #1f293d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;">
+            <h3 style="color: #ffcc00; margin-top: 0; margin-bottom: 10px; font-size: 1.3rem;">Nueva Contraseña</h3>
+            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">Ingresa tu nueva clave dos veces para confirmar el cambio.</p>
+            
+            <form id="recoveryForm" style="display: flex; flex-direction: column; gap: 12px;">
+                <input type="password" id="newPassword1" placeholder="Nueva contraseña" required style="background: #1a2332; border: 1px solid #2a374a; color: #fff; padding: 12px 15px; border-radius: 10px; font-size: 0.95rem; outline: none;">
+                <input type="password" id="newPassword2" placeholder="Repetir nueva contraseña" required style="background: #1a2332; border: 1px solid #2a374a; color: #fff; padding: 12px 15px; border-radius: 10px; font-size: 0.95rem; outline: none;">
+                <button type="submit" style="background: #ffcc00; color: #0b0f19; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px;">Actualizar Contraseña</button>
+            </form>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+}
+
 // 1. Manejar el Inicio de Sesión
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -29,21 +47,15 @@ document.getElementById("btnLogout")?.addEventListener("click", async () => {
     verificarSesion();
 });
 
-// 3. Verificar Estado de la Sesión y detectar si viene a recuperar contraseña
+// 3. Verificar Estado de la Sesión y detectar recuperación por correo
 async function verificarSesion() {
-    // Detectar si Supabase mandó un token de recuperación en la URL del navegador
     const hash = window.location.hash;
+    
+    // Si viene el token de recuperación en la URL, mostramos el modal flotante
     if (hash && hash.includes("type=recovery")) {
-        const nuevaClave = prompt("Ingresa tu nueva contraseña:");
-        if (nuevaClave) {
-            const { error } = await supabase.auth.updateUser({ password: nuevaClave });
-            if (error) {
-                alert("Error al actualizar la contraseña: " + error.message);
-            } else {
-                alert("¡Contraseña actualizada con éxito! Ya puedes iniciar sesión con tu nueva clave.");
-                window.location.hash = ""; // Limpiar la URL
-                window.location.reload();
-            }
+        const modalRecovery = document.getElementById("modalRecovery");
+        if (modalRecovery) {
+            modalRecovery.style.display = "flex";
         }
         return;
     }
@@ -63,7 +75,36 @@ async function verificarSesion() {
     }
 }
 
-// 4. Cargar y Administrar Todos los Datos del Panel (Filtrados por Usuario)
+// 4. Lógica para enviar el formulario de cambio de contraseña con doble validación
+document.addEventListener("submit", async (e) => {
+    if (e.target && e.target.id === "recoveryForm") {
+        e.preventDefault();
+        const pass1 = document.getElementById("newPassword1").value;
+        const pass2 = document.getElementById("newPassword2").value;
+
+        if (pass1 !== pass2) {
+            alert("Las contraseñas no coinciden. Por favor, revísalas.");
+            return;
+        }
+
+        if (pass1.length < 6) {
+            alert("La contraseña debe tener al menos 6 caracteres.");
+            return;
+        }
+
+        const { error } = await supabase.auth.updateUser({ password: pass1 });
+
+        if (error) {
+            alert("Error al actualizar la contraseña: " + error.message);
+        } else {
+            alert("¡Contraseña actualizada con éxito! Ya puedes iniciar sesión con tu nueva clave.");
+            window.location.hash = ""; // Limpiar la URL
+            window.location.reload();
+        }
+    }
+});
+
+// 5. Cargar y Administrar Todos los Datos del Panel (Filtrados por Usuario)
 async function cargarPanelAdmin(userId) {
     // --- A. Cargar Reservas del usuario ---
     const { data: reservas } = await supabase
@@ -192,7 +233,7 @@ async function cargarPanelAdmin(userId) {
     }
 }
 
-// 5. Funciones de Recibos (WhatsApp y Comprobante Exacto con Logo)
+// 6. Funciones de Recibos (WhatsApp y Comprobante Exacto con Logo)
 window.enviarWhatsApp = function(cliente, monto, detalle) {
     const mensaje = `🎧 *LEITMIX PRODUCCIONES* \n\nEstimado/a *${cliente}*, le confirmamos la recepción de su pago.\n\n💰 *Monto:* $${Number(monto).toLocaleString()}\n📝 *Concepto:* ${detalle}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
@@ -364,7 +405,7 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
     ventanaImpresion.document.close();
 };
 
-// 6. Manejar Creación de Recibos
+// 7. Manejar Creación de Recibos
 document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
@@ -390,7 +431,7 @@ document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     }
 });
 
-// 7. Manejar Subida de Multimedia (Cloudinary)
+// 8. Manejar Subida de Multimedia (Cloudinary)
 document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
@@ -441,7 +482,7 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     }
 });
 
-// 8. Funciones globales de Acciones (Eliminar / Modificar)
+// 9. Funciones globales de Acciones (Eliminar / Modificar)
 window.eliminarReserva = async function(id) {
     if (confirm("¿Estás seguro de eliminar esta reserva?")) {
         const { data: { session } } = await supabase.auth.getSession();
@@ -485,7 +526,7 @@ window.eliminarMedia = async function(tabla, id) {
     }
 };
 
-// 9. Control del Modal de Configuración
+// 10. Control del Modal de Configuración
 const modalConfig = document.getElementById("modalConfig");
 document.getElementById("btnConfig")?.addEventListener("click", () => {
     if (modalConfig) modalConfig.style.display = "flex";
@@ -494,7 +535,7 @@ document.getElementById("cerrarModal")?.addEventListener("click", () => {
     if (modalConfig) modalConfig.style.display = "none";
 });
 
-// 10. FUNCIONES DE REGISTRO Y RECUPERACIÓN DE CONTRASEÑA
+// 11. FUNCIONES DE REGISTRO Y RECUPERACIÓN DE CONTRASEÑA
 const btnRegistrar = document.getElementById('btnRegistrar');
 if (btnRegistrar) {
     btnRegistrar.addEventListener('click', async (e) => {
