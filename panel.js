@@ -59,7 +59,7 @@ async function cargarPanelAdmin() {
                 <div style="background: var(--bg-input); padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--border-color);">
                     <p style="margin: 0 0 5px 0; font-weight: 600;">${r.nombre} - <span style="color: var(--accent);">${r.evento}</span></p>
                     <p style="margin: 0 0 8px 0; font-size: 0.85rem; color: var(--text-muted);">Fecha: ${r.fecha} | Tel: ${r.telefono}</p>
-                    <button onclick="window.eliminarReserva(${r.id})" class="btn-danger-subtle" style="padding: 4px 10px; font-size: 0.75rem;">Eliminar</button>
+                    <button onclick="window.eliminarReserva(${r.id})" class="btn-danger-subtle" style="padding: 6px 12px; font-size: 0.8rem;">Eliminar</button>
                 </div>
             `).join("");
         } else {
@@ -67,7 +67,7 @@ async function cargarPanelAdmin() {
         }
     }
 
-    // --- B. Cargar Recibos con botones de WhatsApp e Imprimir ---
+    // --- B. Cargar Recibos (Con botones de WhatsApp e Imprimir) ---
     const { data: recibos } = await supabase.from("recibos").select("*").order("id", { ascending: false });
     const contRecibos = document.getElementById("listaRecibosAdmin");
     const totalRecibosBadge = document.getElementById("totalRecibos");
@@ -81,15 +81,15 @@ async function cargarPanelAdmin() {
     if (contRecibos) {
         if (recibos && recibos.length > 0) {
             contRecibos.innerHTML = recibos.map(rec => `
-                <div style="background: var(--bg-input); padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--border-color);">
-                    <div style="margin-bottom: 8px;">
-                        <p style="margin: 0 0 4px 0; font-weight: 600;">${rec.cliente} - <span style="color: var(--success);">$${Number(rec.monto).toLocaleString()}</span></p>
-                        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Concepto: ${rec.detalle}</p>
+                <div style="background: var(--bg-input); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                        <p style="margin: 0 0 4px 0; font-weight: 600; font-size: 1rem;">${rec.cliente} - <span style="color: var(--success);">$${Number(rec.monto).toLocaleString()}</span></p>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Concepto: ${rec.detalle}</p>
                     </div>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <button onclick="window.enviarWhatsApp('${rec.cliente}', '${rec.monto}', '${rec.detalle}')" style="background: #25d366; color: #fff; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">💬 WhatsApp</button>
-                        <button onclick="window.imprimirRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}')" style="background: var(--accent); color: #0b0f19; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">🖨️ Imprimir</button>
-                        <button onclick="window.eliminarRecibo(${rec.id})" class="btn-danger-subtle" style="padding: 4px 8px; font-size: 0.75rem;">Eliminar</button>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                        <button onclick="window.enviarWhatsApp('${rec.cliente}', '${rec.monto}', '${rec.detalle}')" style="background: #25d366; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; flex: 1; text-align: center;">💬 WhatsApp</button>
+                        <button onclick="window.imprimirRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}')" style="background: var(--accent); color: #0b0f19; border: none; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; flex: 1; text-align: center;">🖨️ Imprimir</button>
+                        <button onclick="window.eliminarRecibo(${rec.id})" class="btn-danger-subtle" style="padding: 8px 12px; font-size: 0.8rem; text-align: center;">Borrar</button>
                     </div>
                 </div>
             `).join("");
@@ -108,8 +108,8 @@ async function cargarPanelAdmin() {
                     <p style="margin: 0 0 4px 0; font-weight: 600;">${t.nombre} <span style="font-weight: normal;">(${"⭐".repeat(t.estrellas)})</span></p>
                     <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: var(--text-muted);">"${t.mensaje}"</p>
                     <div style="display: flex; gap: 8px;">
-                        <button onclick="window.toggleTestimonio(${t.id}, ${!t.activo})" class="btn-primary" style="padding: 4px 10px; font-size: 0.75rem; width: auto; background: ${t.activo ? 'var(--text-muted)' : 'var(--success)'};">${t.activo ? 'Ocultar' : 'Aprobar'}</button>
-                        <button onclick="window.eliminarTestimonio(${t.id})" class="btn-danger-subtle" style="padding: 4px 10px; font-size: 0.75rem;">Eliminar</button>
+                        <button onclick="window.toggleTestimonio(${t.id}, ${!t.activo})" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; width: auto; background: ${t.activo ? 'var(--text-muted)' : 'var(--success)'};">${t.activo ? 'Ocultar' : 'Aprobar'}</button>
+                        <button onclick="window.eliminarTestimonio(${t.id})" class="btn-danger-subtle" style="padding: 6px 12px; font-size: 0.8rem;">Eliminar</button>
                     </div>
                 </div>
             `).join("");
@@ -131,7 +131,7 @@ async function cargarPanelAdmin() {
             mediaHTML += fotos.map(f => `
                 <div style="background: var(--bg-input); padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border-color);">
                     <img src="${f.url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" alt="Foto">
-                    <button onclick="window.eliminarMedia('fotos', ${f.id})" class="btn-danger-subtle" style="padding: 4px 8px; font-size: 0.7rem;">Borrar</button>
+                    <button onclick="window.eliminarMedia('fotos', ${f.id})" class="btn-danger-subtle" style="padding: 6px 10px; font-size: 0.75rem;">Borrar</button>
                 </div>
             `).join("");
         }
@@ -141,7 +141,7 @@ async function cargarPanelAdmin() {
             mediaHTML += videos.map(v => `
                 <div style="background: var(--bg-input); padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border-color);">
                     <span style="font-size: 0.85rem; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">Video ID: ${v.id}</span>
-                    <button onclick="window.eliminarMedia('videos', ${v.id})" class="btn-danger-subtle" style="padding: 4px 8px; font-size: 0.7rem;">Borrar</button>
+                    <button onclick="window.eliminarMedia('videos', ${v.id})" class="btn-danger-subtle" style="padding: 6px 10px; font-size: 0.75rem;">Borrar</button>
                 </div>
             `).join("");
         }
