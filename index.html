@@ -8,16 +8,16 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #e0e0e0; line-height: 1.6; }
         
-        /* HEADER GRANDE Y CENTRADO CON LOGO OFICIAL */
+        /* HEADER AMPLIADO PARA LOGO GRANDE */
         header { 
             background: #1a1a1a; 
-            height: 110px; 
-            padding: 10px 30px; 
+            min-height: 150px; 
+            padding: 15px 20px; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center; 
-            gap: 10px; 
+            gap: 12px; 
             border-bottom: 2px solid #ffc107; 
             position: sticky; 
             top: 0; 
@@ -28,24 +28,27 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            width: 100%;
         }
 
         .logo-img {
-            height: 55px; /* Logo grande y perfectamente visible */
+            height: 110px; /* Logo grande, visible y con excelente definición */
             width: auto;  
             object-fit: contain; 
         }
 
         nav {
             display: flex;
-            gap: 15px;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         nav a { 
             color: #fff; 
             text-decoration: none; 
             font-weight: 500; 
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             transition: color 0.3s; 
         }
         nav a:hover { color: #ffc107; }
