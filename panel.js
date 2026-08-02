@@ -478,7 +478,7 @@ document.getElementById("cerrarModal")?.addEventListener("click", () => {
     if (modalConfig) modalConfig.style.display = "none";
 });
 
-// 10. FUNCIONES DE REGISTRO Y RECUPERACIÓN DE CONTRASEÑA (Con solución de error 404)
+// 10. FUNCIONES DE REGISTRO Y RECUPERACIÓN DE CONTRASEÑA
 const btnRegistrar = document.getElementById('btnRegistrar');
 if (btnRegistrar) {
     btnRegistrar.addEventListener('click', async (e) => {
@@ -515,8 +515,9 @@ if (btnOlvido) {
             return;
         }
 
+        // URL exacta forzada para evitar el error 404 al hacer clic en el mail
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + window.location.pathname,
+            redirectTo: "https://leitmixproducciones.github.io/leitmix-producciones-web/",
         });
 
         if (error) {
