@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Panel - Leitmix Producciones</title>
 </head>
 <body style="background: #121212; color: #fff; font-family: sans-serif; margin: 0; padding: 0;">
@@ -12,10 +12,10 @@
         <form id="loginForm" style="background: #1e1e1e; padding: 30px; border-radius: 12px; width: 100%; max-width: 350px; border: 1px solid #333;">
             <h2 style="margin-top: 0; color: #ffc107; text-align: center;">Iniciar Sesión</h2>
             <div style="margin-bottom: 15px;">
-                <input type="email" id="loginEmail" placeholder="Correo electrónico" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;" required>
+                <input type="email" id="loginEmail" placeholder="Correo electrónico" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px;" required>
             </div>
             <div style="margin-bottom: 20px;">
-                <input type="password" id="loginPassword" placeholder="Contraseña" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;" required>
+                <input type="password" id="loginPassword" placeholder="Contraseña" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px;" required>
             </div>
             <button type="submit" style="width: 100%; background: #ffc107; color: #121212; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Ingresar</button>
         </form>
@@ -37,10 +37,10 @@
 
         <h2>💰 Gestión de Recibos</h2>
         <form id="reciboForm" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
-            <input type="text" id="reciboCliente" placeholder="Nombre del cliente" style="flex: 1; min-width: 150px; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px;" required>
-            <input type="number" id="reciboMonto" placeholder="Monto ($)" style="flex: 1; min-width: 100px; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px;" required>
-            <input type="text" id="reciboDetalle" placeholder="Concepto o seña" style="flex: 1; min-width: 150px; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px;" required>
-            <button type="submit" style="background: #ffc107; color: #121212; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer;">Crear Recibo</button>
+            <input type="text" id="reciboCliente" placeholder="Nombre del cliente" style="flex: 1; min-width: 150px; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; font-size: 16px;" required>
+            <input type="number" id="reciboMonto" placeholder="Monto ($)" style="flex: 1; min-width: 100px; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; font-size: 16px;" required>
+            <input type="text" id="reciboDetalle" placeholder="Concepto o seña" style="flex: 1; min-width: 150px; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; font-size: 16px;" required>
+            <button type="submit" style="background: #ffc107; color: #121212; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%;">Crear Recibo</button>
         </form>
         <div id="listaRecibosAdmin"></div>
         <p>Recaudado Total: <span id="totalRecibos">$0</span></p>
@@ -63,15 +63,15 @@
             <form id="perfilForm">
                 <div style="margin-bottom: 12px;">
                     <label style="font-size: 0.85rem; color: #aaa; display: block; margin-bottom: 4px;">Nombre Artístico / DJ</label>
-                    <input type="text" id="perfilNombre" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;" required>
+                    <input type="text" id="perfilNombre" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px;" required>
                 </div>
                 <div style="margin-bottom: 12px;">
                     <label style="font-size: 0.85rem; color: #aaa; display: block; margin-bottom: 4px;">Teléfono de Contacto</label>
-                    <input type="text" id="perfilTelefono" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;">
+                    <input type="text" id="perfilTelefono" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
                 </div>
                 <div style="margin-bottom: 20px;">
                     <label style="font-size: 0.85rem; color: #aaa; display: block; margin-bottom: 4px;">Instagram / Redes</label>
-                    <input type="text" id="perfilInstagram" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box;">
+                    <input type="text" id="perfilInstagram" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button type="submit" style="background: #ffc107; color: #121212; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1;">Guardar</button>
