@@ -4,7 +4,6 @@ import { supabase } from "./supabase.js";
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     
-    // Evita que el formulario intente loguear si se presionó otro botón interno
     if (e.submitter && (e.submitter.id === "btnRegistrar" || e.submitter.id === "btnOlvido")) {
         return;
     }
@@ -30,8 +29,25 @@ document.getElementById("btnLogout")?.addEventListener("click", async () => {
     verificarSesion();
 });
 
-// 3. Verificar Estado de la Sesión al cargar o cambiar
+// 3. Verificar Estado de la Sesión y detectar si viene a recuperar contraseña
 async function verificarSesion() {
+    // Detectar si Supabase mandó un token de recuperación en la URL del navegador
+    const hash = window.location.hash;
+    if (hash && hash.includes("type=recovery")) {
+        const nuevaClave = prompt("Ingresa tu nueva contraseña:");
+        if (nuevaClave) {
+            const { error } = await supabase.auth.updateUser({ password: nuevaClave });
+            if (error) {
+                alert("Error al actualizar la contraseña: " + error.message);
+            } else {
+                alert("¡Contraseña actualizada con éxito! Ya puedes iniciar sesión con tu nueva clave.");
+                window.location.hash = ""; // Limpiar la URL
+                window.location.reload();
+            }
+        }
+        return;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     
     const loginSection = document.getElementById("loginSection");
@@ -75,7 +91,7 @@ async function cargarPanelAdmin(userId) {
         }
     }
 
-    // --- B. Cargar Recibos del usuario (Con botones de WhatsApp e Imprimir) ---
+    // --- B. Cargar Recibos del usuario ---
     const { data: recibos } = await supabase
         .from("recibos")
         .select("*")
