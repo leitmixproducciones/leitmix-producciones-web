@@ -352,7 +352,7 @@ document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     }
 });
 
-// 7. Manejar Subida de Multimedia (Cloudinary)
+// 7. Manejar Subida de Multimedia (Cloudinary) con manejo de errores robusto para la App
 document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fileInput = document.getElementById("mediaFile");
@@ -370,6 +370,7 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
             method: "POST",
             body: formData
         });
+
         const data = await response.json();
 
         if (data.secure_url) {
@@ -390,10 +391,12 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
                 cargarPanelAdmin();
             }
         } else {
-            alert("Error al subir a Cloudinary.");
+            console.error("Respuesta de Cloudinary:", data);
+            alert("Error al subir a Cloudinary: " + (data.error?.message || "Revisar consola"));
         }
     } catch (err) {
-        alert("Error de red al subir el archivo.");
+        console.error("Error de red:", err);
+        alert("Error de red o permisos al subir el archivo desde la App. Intentá de nuevo.");
     }
 });
 
