@@ -449,5 +449,52 @@ document.getElementById("cerrarModal")?.addEventListener("click", () => {
     if (modalConfig) modalConfig.style.display = "none";
 });
 
+// 10. NUEVAS FUNCIONES PARA CREAR CUENTA Y RECUPERAR CONTRASEÑA
+const btnRegistrar = document.getElementById('btnRegistrar');
+if (btnRegistrar) {
+    btnRegistrar.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        if (!email || !password) {
+            alert("Por favor, ingresa un correo y una contraseña para registrarte.");
+            return;
+        }
+
+        const { data, error } = await supabase.auth.signUp({ 
+            email: email, 
+            password: password 
+        });
+
+        if (error) {
+            alert("Error al registrarse: " + error.message);
+        } else {
+            alert("¡Cuenta creada con éxito! Ya puedes iniciar sesión.");
+        }
+    });
+}
+
+const btnOlvido = document.getElementById('btnOlvido');
+if (btnOlvido) {
+    btnOlvido.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+
+        if (!email) {
+            alert("Por favor, escribe tu correo arriba para recuperar la contraseña.");
+            return;
+        }
+
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+
+        if (error) {
+            alert("Error: " + error.message);
+        } else {
+            alert("Se ha enviado un enlace de recuperación a tu correo.");
+        }
+    });
+}
+
 // Ejecutar verificación de sesión al iniciar
 verificarSesion();
