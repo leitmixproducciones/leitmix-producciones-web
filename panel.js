@@ -352,7 +352,7 @@ document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     }
 });
 
-// 7. Manejar Subida de Multimedia (Cloudinary) con manejo de errores robusto para la App
+// 7. Manejar Subida de Multimedia (Cloudinary) con el preset correcto
 document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fileInput = document.getElementById("mediaFile");
@@ -361,12 +361,12 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "preset_leitmix");
+    formData.append("upload_preset", "leitmix_preset");
 
     alert("Subiendo archivo... por favor esperá.");
 
     try {
-        const response = await fetch("https://api.cloudinary.com/v1_1/dskg3j23x/upload", {
+        const response = await fetch("https://api.cloudinary.com/v1_1/exzcoeyi/upload", {
             method: "POST",
             body: formData
         });
