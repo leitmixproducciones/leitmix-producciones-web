@@ -1,8 +1,5 @@
 import { supabase } from "./supabase.js";
 
-// ID de usuario predeterminado para tus registros
-const USER_ID = "a6f7ed6c-a23d-4239-9a2b-3fdd421317ca";
-
 // 1. Manejar el Inicio de Sesión
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -43,17 +40,22 @@ async function verificarSesion() {
     if (session) {
         if (loginSection) loginSection.style.display = "none";
         if (adminSection) adminSection.style.display = "block";
-        cargarPanelAdmin();
+        cargarPanelAdmin(session.user.id); // Pasamos el ID del usuario actual
     } else {
         if (loginSection) loginSection.style.display = "flex";
         if (adminSection) adminSection.style.display = "none";
     }
 }
 
-// 4. Cargar y Administrar Todos los Datos del Panel
-async function cargarPanelAdmin() {
-    // --- A. Cargar Reservas ---
-    const { data: reservas } = await supabase.from("reservas").select("*").order("id", { ascending: false });
+// 4. Cargar y Administrar Todos los Datos del Panel (Filtrados por Usuario)
+async function cargarPanelAdmin(userId) {
+    // --- A. Cargar Reservas del usuario ---
+    const { data: reservas } = await supabase
+        .from("reservas")
+        .select("*")
+        .eq("user_id", userId)
+        .order("id", { ascending: false });
+
     const contReservas = document.getElementById("listaReservasAdmin");
     const totalReservasBadge = document.getElementById("totalReservas");
     
@@ -73,8 +75,13 @@ async function cargarPanelAdmin() {
         }
     }
 
-    // --- B. Cargar Recibos (Con botones de WhatsApp e Imprimir) ---
-    const { data: recibos } = await supabase.from("recibos").select("*").order("id", { ascending: false });
+    // --- B. Cargar Recibos del usuario (Con botones de WhatsApp e Imprimir) ---
+    const { data: recibos } = await supabase
+        .from("recibos")
+        .select("*")
+        .eq("user_id", userId)
+        .order("id", { ascending: false });
+
     const contRecibos = document.getElementById("listaRecibosAdmin");
     const totalRecibosBadge = document.getElementById("totalRecibos");
 
@@ -108,8 +115,13 @@ async function cargarPanelAdmin() {
         }
     }
 
-    // --- C. Cargar Testimonios para moderar ---
-    const { data: testimonios } = await supabase.from("testimonios").select("*").order("id", { ascending: false });
+    // --- C. Cargar Testimonios del usuario para moderar ---
+    const { data: testimonios } = await supabase
+        .from("testimonios")
+        .select("*")
+        .eq("user_id", userId)
+        .order("id", { ascending: false });
+
     const contTestimonios = document.getElementById("listaTestimoniosAdmin");
     if (contTestimonios) {
         if (testimonios && testimonios.length > 0) {
@@ -128,11 +140,11 @@ async function cargarPanelAdmin() {
         }
     }
 
-    // --- D. Cargar Multimedia (Fotos y Videos) ---
+    // --- D. Cargar Multimedia (Fotos y Videos) del usuario ---
     const contMedia = document.getElementById("listaMediaAdmin");
     if (contMedia) {
-        const { data: fotos } = await supabase.from("fotos").select("*").order("id", { ascending: false });
-        const { data: videos } = await supabase.from("videos").select("*").order("id", { ascending: false });
+        const { data: fotos } = await supabase.from("fotos").select("*").eq("user_id", userId).order("id", { ascending: false });
+        const { data: videos } = await supabase.from("videos").select("*").eq("user_id", userId).order("id", { ascending: false });
 
         let mediaHTML = "";
 
@@ -164,7 +176,7 @@ async function cargarPanelAdmin() {
     }
 }
 
-// 5. Funciones de Recibos (WhatsApp y Comprobante Exacto con Logo de Index)
+// 5. Funciones de Recibos (WhatsApp y Comprobante Exacto con Logo)
 window.enviarWhatsApp = function(cliente, monto, detalle) {
     const mensaje = `🎧 *LEITMIX PRODUCCIONES* \n\nEstimado/a *${cliente}*, le confirmamos la recepción de su pago.\n\n💰 *Monto:* $${Number(monto).toLocaleString()}\n📝 *Concepto:* ${detalle}\n\n¡Muchas gracias por confiar en nosotros! 🚀`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
@@ -336,9 +348,12 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
     ventanaImpresion.document.close();
 };
 
-// 6. Manejar Creación de Recibos
+// 6. Manejar Creación de Recibos (Asignando el ID del usuario actual)
 document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return alert("Debe iniciar sesión");
+
     const cliente = document.getElementById("reciboCliente").value;
     const monto = parseFloat(document.getElementById("reciboMonto").value);
     const detalle = document.getElementById("reciboDetalle").value;
@@ -347,7 +362,7 @@ document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
         cliente,
         monto,
         detalle,
-        user_id: USER_ID
+        user_id: session.user.id
     }]);
 
     if (error) {
@@ -355,13 +370,16 @@ document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     } else {
         alert("¡Recibo creado con éxito!");
         document.getElementById("reciboForm").reset();
-        cargarPanelAdmin();
+        cargarPanelAdmin(session.user.id);
     }
 });
 
-// 7. Manejar Subida de Multimedia (Cloudinary) con el preset correcto
+// 7. Manejar Subida de Multimedia (Cloudinary) asignando el ID de usuario
 document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return alert("Debe iniciar sesión");
+
     const fileInput = document.getElementById("mediaFile");
     const file = fileInput.files[0];
     if (!file) return;
@@ -387,7 +405,7 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
 
             const { error } = await supabase.from(tabla).insert([{
                 url: url,
-                user_id: USER_ID
+                user_id: session.user.id
             }]);
 
             if (error) {
@@ -395,7 +413,7 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
             } else {
                 alert("¡Archivo subido con éxito!");
                 fileInput.value = "";
-                cargarPanelAdmin();
+                cargarPanelAdmin(session.user.id);
             }
         } else {
             console.error("Respuesta de Cloudinary:", data);
@@ -410,39 +428,44 @@ document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
 // 8. Funciones globales de Acciones (Eliminar / Modificar)
 window.eliminarReserva = async function(id) {
     if (confirm("¿Estás seguro de eliminar esta reserva?")) {
+        const { data: { session } } = await supabase.auth.getSession();
         const { error } = await supabase.from("reservas").delete().eq("id", id);
         if (error) alert("Error: " + error.message);
-        else cargarPanelAdmin();
+        else cargarPanelAdmin(session.user.id);
     }
 };
 
 window.eliminarRecibo = async function(id) {
     if (confirm("¿Estás seguro de eliminar este recibo?")) {
+        const { data: { session } } = await supabase.auth.getSession();
         const { error } = await supabase.from("recibos").delete().eq("id", id);
         if (error) alert("Error: " + error.message);
-        else cargarPanelAdmin();
+        else cargarPanelAdmin(session.user.id);
     }
 };
 
 window.toggleTestimonio = async function(id, nuevoEstado) {
+    const { data: { session } } = await supabase.auth.getSession();
     const { error } = await supabase.from("testimonios").update({ activo: nuevoEstado }).eq("id", id);
     if (error) alert("Error: " + error.message);
-    else cargarPanelAdmin();
+    else cargarPanelAdmin(session.user.id);
 };
 
 window.eliminarTestimonio = async function(id) {
     if (confirm("¿Estás seguro de eliminar este testimonio?")) {
+        const { data: { session } } = await supabase.auth.getSession();
         const { error } = await supabase.from("testimonios").delete().eq("id", id);
         if (error) alert("Error: " + error.message);
-        else cargarPanelAdmin();
+        else cargarPanelAdmin(session.user.id);
     }
 };
 
 window.eliminarMedia = async function(tabla, id) {
     if (confirm("¿Estás seguro de eliminar este archivo?")) {
+        const { data: { session } } = await supabase.auth.getSession();
         const { error } = await supabase.from(tabla).delete().eq("id", id);
         if (error) alert("Error: " + error.message);
-        else cargarPanelAdmin();
+        else cargarPanelAdmin(session.user.id);
     }
 };
 
