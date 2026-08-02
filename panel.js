@@ -10,53 +10,80 @@ document.addEventListener('DOMContentLoaded', async () => {
     const adminSection = document.getElementById('adminSection');
     const btnLogout = document.getElementById('btnLogout');
     
-    // Elementos del Modal de Configuración (Engranaje)
     const btnConfig = document.getElementById('btnConfig');
     const modalConfig = document.getElementById('modalConfig');
     const cerrarModal = document.getElementById('cerrarModal');
     const perfilForm = document.getElementById('perfilForm');
 
     // Verificar si ya hay una sesión activa real en Supabase
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-        abrirPanel(loginSection, adminSection);
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            abrirPanel(loginSection, adminSection);
+        } else {
+            if (loginSection) loginSection.style.display = 'flex';
+            if (adminSection) adminSection.style.display = 'none';
+        }
+    } catch (err) {
+        console.error("Error al verificar sesión:", err);
+        if (loginSection) loginSection.style.display = 'flex';
     }
 
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const emailInput = document.getElementById('loginEmail') || document.getElementById('email');
-            const passwordInput = document.getElementById('loginPassword') || document.getElementById('password');
+            const emailInput = document.getElementById('loginEmail');
+            const passwordInput = document.getElementById('loginPassword');
 
             if (!emailInput || !passwordInput) {
-                alert("Faltan los campos de correo o contraseña en el HTML.");
+                alert("Error crítico: No se encuentran los campos de email o contraseña en el HTML.");
                 return;
             }
 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: emailInput.value,
-                password: passwordInput.value,
-            });
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
 
-            if (error) {
-                alert("Error al iniciar sesión: " + error.message);
+            if (!email || !password) {
+                alert("Por favor, completá ambos campos.");
                 return;
             }
 
-            abrirPanel(loginSection, adminSection);
+            // Deshabilitar botón para evitar doble clic
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) {
+                    alert("Error al iniciar sesión: " + error.message);
+                    if (submitBtn) submitBtn.disabled = false;
+                    return;
+                }
+
+                if (data && data.session) {
+                    abrirPanel(loginSection, adminSection);
+                }
+            } catch (err) {
+                console.error("Excepción en login:", err);
+                alert("Ocurrió un error inesperado al intentar conectar con Supabase.");
+                if (submitBtn) submitBtn.disabled = false;
+            }
         });
     }
 
     if (btnLogout) {
         btnLogout.addEventListener('click', async () => {
             await supabase.auth.signOut();
-            if (adminSection) adminSection.classList.add('hidden');
-            if (loginSection) loginSection.classList.remove('hidden');
+            if (adminSection) adminSection.style.display = 'none';
+            if (loginSection) loginSection.style.display = 'flex';
         });
     }
 
-    // Lógica para abrir/cerrar el modal de configuración con el engranaje
     if (btnConfig && modalConfig) {
         btnConfig.addEventListener('click', async () => {
             modalConfig.style.display = 'flex';
@@ -70,7 +97,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Guardar cambios del perfil en la tabla 'perfiles'
     if (perfilForm) {
         perfilForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -96,8 +122,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function abrirPanel(loginSec, adminSec) {
-    if (loginSec) loginSec.classList.add('hidden');
-    if (adminSec) adminSec.classList.remove('hidden');
+    if (loginSec) loginSec.style.display = 'none';
+    if (adminSec) adminSec.style.display = 'block';
     cargarDatosAdmin();
 }
 
@@ -127,7 +153,7 @@ async function cargarDatosAdmin() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Cargar reservas filtradas por el DJ actual
+        // Cargar reservas
         const { data: reservas } = await supabase
             .from('reservas')
             .select('*')
@@ -143,10 +169,10 @@ async function cargarDatosAdmin() {
             if (reservas && reservas.length > 0) {
                 contReservas.innerHTML = reservas.map(r => `
                     <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107; font-size: 0.9rem; margin-bottom: 8px;">
-                        <p><b>Cliente:</b> ${r.nombre}</p>
-                        <p><b>Evento:</b> ${r.evento || 'No especificado'} - <b>Fecha:</b> ${r.fecha || ''}</p>
-                        <p><b>Teléfono:</b> ${r.telefono || '-'}</p>
-                        ${r.comentarios ? `<p style="color: #aaa; font-style: italic;">Comentarios: ${r.comentarios}</p>` : ''}
+                        <p style="margin:4px 0;"><b>Cliente:</b> ${r.nombre}</p>
+                        <p style="margin:4px 0;"><b>Evento:</b> ${r.evento || 'No especificado'} - <b>Fecha:</b> ${r.fecha || ''}</p>
+                        <p style="margin:4px 0;"><b>Teléfono:</b> ${r.telefono || '-'}</p>
+                        ${r.comentarios ? `<p style="color: #aaa; font-style: italic; margin:4px 0;">Comentarios: ${r.comentarios}</p>` : ''}
                     </div>
                 `).join('');
             } else {
@@ -154,7 +180,7 @@ async function cargarDatosAdmin() {
             }
         }
 
-        // Cargar recibos filtrados por el DJ actual
+        // Cargar recibos
         const { data: recibos } = await supabase
             .from('recibos')
             .select('*')
@@ -174,11 +200,11 @@ async function cargarDatosAdmin() {
                     return `
                         <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; margin-bottom: 8px;">
                             <div>
-                                <p><b>Cliente:</b> ${rec.cliente}</p>
-                                <p><b>Monto:</b> $${Number(rec.monto).toLocaleString('es-AR')} - <b>Concepto:</b> ${rec.detalle}</p>
-                                <p style="font-size: 0.8rem; color: #aaa;"><b>Fecha:</b> ${fechaRecibo}</p>
+                                <p style="margin:4px 0;"><b>Cliente:</b> ${rec.cliente}</p>
+                                <p style="margin:4px 0;"><b>Monto:</b> $${Number(rec.monto).toLocaleString('es-AR')} - <b>Concepto:</b> ${rec.detalle}</p>
+                                <p style="font-size: 0.8rem; color: #aaa; margin:4px 0;"><b>Fecha:</b> ${fechaRecibo}</p>
                             </div>
-                            <button type="button" onclick="verRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}', '${rec.id}', '${fechaRecibo}')" style="background:#ffc107; color:#121212; border:none; padding:8px 10px; border-radius:6px; font-weight:bold; cursor:pointer; width:auto; margin-bottom:0;">Ver</button>
+                            <button type="button" onclick="verRecibo('${rec.cliente}', '${rec.monto}', '${rec.detalle}', '${rec.id}', '${fechaRecibo}')" style="background:#ffc107; color:#121212; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.85rem;">Ver</button>
                         </div>
                     `;
                 }).join('');
@@ -190,7 +216,7 @@ async function cargarDatosAdmin() {
 
         await cargarMultimediaAdmin(user.id);
 
-        // Cargar testimonios filtrados por el DJ actual
+        // Cargar testimonios
         const { data: testimonios } = await supabase
             .from('testimonios')
             .select('*')
@@ -203,10 +229,10 @@ async function cargarDatosAdmin() {
                 contTest.innerHTML = testimonios.map(t => `
                     <div style="background: #2a2a2a; padding: 10px; border-radius: 8px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div>
-                            <p><b>${t.nombre}</b> (${t.estrellas} ⭐) - Estado: ${t.activo ? '🟢 Aprobado' : '🟡 Pendiente'}</p>
-                            <p style="color: #bbb; font-style: italic;">"${t.mensaje}"</p>
+                            <p style="margin:4px 0;"><b>${t.nombre}</b> (${t.estrellas} ⭐) - Estado: ${t.activo ? '🟢 Aprobado' : '🟡 Pendiente'}</p>
+                            <p style="color: #bbb; font-style: italic; margin:4px 0;">"${t.mensaje}"</p>
                         </div>
-                        <button type="button" onclick="cambiarEstadoTestimonio('${t.id}', ${!t.activo})" style="background:${t.activo ? '#dc3545' : '#28a745'}; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; width:auto; margin-bottom:0; font-size:0.8rem;">
+                        <button type="button" onclick="cambiarEstadoTestimonio('${t.id}', ${!t.activo})" style="background:${t.activo ? '#dc3545' : '#28a745'}; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.8rem;">
                             ${t.activo ? 'Desactivar' : 'Aprobar'}
                         </button>
                     </div>
@@ -239,9 +265,9 @@ async function cargarMultimediaAdmin(userId) {
     if (fotos && fotos.length > 0) {
         htmlContenido += `<h4 style="color: #ffc107; font-size: 0.9rem; margin-bottom: 5px;">📷 Fotos Cargadas</h4>`;
         htmlContenido += fotos.map(f => `
-            <div style="background: #2a2a2a; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <img src="${f.url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" alt="Foto">
-                <button type="button" onclick="eliminarMedia('${f.id}', 'fotos')" style="background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; width: auto; margin-bottom: 0; font-size: 0.8rem;">Eliminar</button>
+            <div style="background: #2a2a2a; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <img src="${f.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;" alt="Foto">
+                <button type="button" onclick="eliminarMedia('${f.id}', 'fotos')" style="background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Eliminar</button>
             </div>
         `).join('');
     }
@@ -249,9 +275,9 @@ async function cargarMultimediaAdmin(userId) {
     if (videos && videos.length > 0) {
         htmlContenido += `<h4 style="color: #ffc107; font-size: 0.9rem; margin: 10px 0 5px 0;">🎥 Videos Cargados</h4>`;
         htmlContenido += videos.map(v => `
-            <div style="background: #2a2a2a; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <video src="${v.url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #000;" preload="metadata"></video>
-                <button type="button" onclick="eliminarMedia('${v.id}', 'videos')" style="background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; width: auto; margin-bottom: 0; font-size: 0.8rem;">Eliminar</button>
+            <div style="background: #2a2a2a; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <video src="${v.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; background: #000;" preload="metadata"></video>
+                <button type="button" onclick="eliminarMedia('${v.id}', 'videos')" style="background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Eliminar</button>
             </div>
         `).join('');
     }
