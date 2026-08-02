@@ -40,7 +40,7 @@ async function verificarSesion() {
     if (session) {
         if (loginSection) loginSection.style.display = "none";
         if (adminSection) adminSection.style.display = "block";
-        cargarPanelAdmin(session.user.id); // Pasamos el ID del usuario actual
+        cargarPanelAdmin(session.user.id);
     } else {
         if (loginSection) loginSection.style.display = "flex";
         if (adminSection) adminSection.style.display = "none";
@@ -348,7 +348,7 @@ window.imprimirRecibo = function(idRecibo, fecha, cliente, monto, detalle) {
     ventanaImpresion.document.close();
 };
 
-// 6. Manejar Creación de Recibos (Asignando el ID del usuario actual)
+// 6. Manejar Creación de Recibos
 document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
@@ -374,7 +374,7 @@ document.getElementById("reciboForm")?.addEventListener("submit", async (e) => {
     }
 });
 
-// 7. Manejar Subida de Multimedia (Cloudinary) asignando el ID de usuario
+// 7. Manejar Subida de Multimedia (Cloudinary)
 document.getElementById("mediaForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
@@ -478,7 +478,7 @@ document.getElementById("cerrarModal")?.addEventListener("click", () => {
     if (modalConfig) modalConfig.style.display = "none";
 });
 
-// 10. FUNCIONES DE REGISTRO Y RECUPERACIÓN DE CONTRASEÑA
+// 10. FUNCIONES DE REGISTRO Y RECUPERACIÓN DE CONTRASEÑA (Con solución de error 404)
 const btnRegistrar = document.getElementById('btnRegistrar');
 if (btnRegistrar) {
     btnRegistrar.addEventListener('click', async (e) => {
@@ -515,12 +515,14 @@ if (btnOlvido) {
             return;
         }
 
-        const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + window.location.pathname,
+        });
 
         if (error) {
             alert("Error: " + error.message);
         } else {
-            alert("Se ha enviado un enlace de recuperación a tu correo.");
+            alert("¡Listo! Se ha enviado un enlace de recuperación a tu correo electrónico.");
         }
     });
 }
