@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loginSection = document.getElementById('loginSection');
     const adminSection = document.getElementById('adminSection');
     const btnLogout = document.getElementById('btnLogout');
+    
+    // Elementos del Modal de Configuración (Engranaje)
+    const btnConfig = document.getElementById('btnConfig');
+    const modalConfig = document.getElementById('modalConfig');
+    const cerrarModal = document.getElementById('cerrarModal');
+    const perfilForm = document.getElementById('perfilForm');
 
     // Verificar si ya hay una sesión activa real en Supabase
     const { data: { session } } = await supabase.auth.getSession();
@@ -20,7 +26,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Buscamos los campos de email y contraseña en el formulario de login
             const emailInput = document.getElementById('loginEmail') || document.getElementById('email');
             const passwordInput = document.getElementById('loginPassword') || document.getElementById('password');
 
@@ -29,12 +34,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const email = emailInput.value;
-            const password = passwordInput.value;
-
             const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
+                email: emailInput.value,
+                password: passwordInput.value,
             });
 
             if (error) {
@@ -53,6 +55,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (loginSection) loginSection.classList.remove('hidden');
         });
     }
+
+    // Lógica para abrir/cerrar el modal de configuración con el engranaje
+    if (btnConfig && modalConfig) {
+        btnConfig.addEventListener('click', async () => {
+            modalConfig.style.display = 'flex';
+            await cargarDatosPerfil();
+        });
+    }
+
+    if (cerrarModal && modalConfig) {
+        cerrarModal.addEventListener('click', () => {
+            modalConfig.style.display = 'none';
+        });
+    }
+
+    // Guardar cambios del perfil en la tabla 'perfiles'
+    if (perfilForm) {
+        perfilForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const nombre = document.getElementById('perfilNombre').value;
+            const telefono = document.getElementById('perfilTelefono').value;
+            const instagram = document.getElementById('perfilInstagram').value;
+
+            const { error } = await supabase
+                .from('perfiles')
+                .upsert({ id: user.id, nombre, telefono, instagram });
+
+            if (error) {
+                alert("Error al guardar perfil: " + error.message);
+            } else {
+                alert("¡Perfil actualizado con éxito!");
+                modalConfig.style.display = 'none';
+            }
+        });
+    }
 });
 
 function abrirPanel(loginSec, adminSec) {
@@ -61,13 +101,33 @@ function abrirPanel(loginSec, adminSec) {
     cargarDatosAdmin();
 }
 
-async function cargarDatosAdmin() {
+async function cargarDatosPerfil() {
     try {
-        // Obtenemos el usuario autenticado actual para filtrar sus datos
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Cargar reservas del DJ actual
+        const { data: perfil } = await supabase
+            .from('perfiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (perfil) {
+            document.getElementById('perfilNombre').value = perfil.nombre || '';
+            document.getElementById('perfilTelefono').value = perfil.telefono || '';
+            document.getElementById('perfilInstagram').value = perfil.instagram || '';
+        }
+    } catch (e) {
+        console.error("Error al cargar perfil:", e);
+    }
+}
+
+async function cargarDatosAdmin() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Cargar reservas filtradas por el DJ actual
         const { data: reservas } = await supabase
             .from('reservas')
             .select('*')
@@ -82,7 +142,7 @@ async function cargarDatosAdmin() {
         if (contReservas) {
             if (reservas && reservas.length > 0) {
                 contReservas.innerHTML = reservas.map(r => `
-                    <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107; font-size: 0.9rem;">
+                    <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107; font-size: 0.9rem; margin-bottom: 8px;">
                         <p><b>Cliente:</b> ${r.nombre}</p>
                         <p><b>Evento:</b> ${r.evento || 'No especificado'} - <b>Fecha:</b> ${r.fecha || ''}</p>
                         <p><b>Teléfono:</b> ${r.telefono || '-'}</p>
@@ -94,7 +154,7 @@ async function cargarDatosAdmin() {
             }
         }
 
-        // Cargar recibos del DJ actual
+        // Cargar recibos filtrados por el DJ actual
         const { data: recibos } = await supabase
             .from('recibos')
             .select('*')
@@ -112,7 +172,7 @@ async function cargarDatosAdmin() {
                 contRecibos.innerHTML = recibos.map(rec => {
                     const fechaRecibo = rec.fecha || new Date().toLocaleDateString('es-AR');
                     return `
-                        <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                        <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; margin-bottom: 8px;">
                             <div>
                                 <p><b>Cliente:</b> ${rec.cliente}</p>
                                 <p><b>Monto:</b> $${Number(rec.monto).toLocaleString('es-AR')} - <b>Concepto:</b> ${rec.detalle}</p>
@@ -130,7 +190,7 @@ async function cargarDatosAdmin() {
 
         await cargarMultimediaAdmin(user.id);
 
-        // Cargar testimonios del DJ actual
+        // Cargar testimonios filtrados por el DJ actual
         const { data: testimonios } = await supabase
             .from('testimonios')
             .select('*')
@@ -141,7 +201,7 @@ async function cargarDatosAdmin() {
         if (contTest) {
             if (testimonios && testimonios.length > 0) {
                 contTest.innerHTML = testimonios.map(t => `
-                    <div style="background: #2a2a2a; padding: 10px; border-radius: 8px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="background: #2a2a2a; padding: 10px; border-radius: 8px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div>
                             <p><b>${t.nombre}</b> (${t.estrellas} ⭐) - Estado: ${t.activo ? '🟢 Aprobado' : '🟡 Pendiente'}</p>
                             <p style="color: #bbb; font-style: italic;">"${t.mensaje}"</p>
